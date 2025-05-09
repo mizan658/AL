@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Private Student Server</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .hero {
+      background: rgba(17, 17, 17, 0.85);
+      padding: 3rem 2rem;
+      border: 2px solid #00ffff;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ffffaa, 0 0 40px #00ffff55;
+      animation: pulse 2s infinite;
+      text-align: center;
+      max-width: 800px;
+      width: 90%;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33;
+      }
+      50% {
+        box-shadow: 0 0 30px #00ffffcc, 0 0 60px #00ffff88;
+      }
+      100% {
+        box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33;
+      }
+    }
+
+    .buttons {
+      margin-top: 2rem;
+    }
+
+    .buttons a {
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      display: inline-block;
+      transition: 0.3s ease;
+    }
+
+    .notice-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .login-btn {
+      background-color: #f4c430;
+      color: black;
+    }
+
+    .signup-btn {
+      background-color: #00bfff;
+      color: black;
+    }
+
+    .rules-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .buttons a:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    .password-section {
+      display: block;
+      text-align: center;
+      margin-top: 10%;
+    }
+
+    .password-input {
+      padding: 10px;
+      font-size: 1.2rem;
+      margin: 10px 0;
+      border: 2px solid #00ffff;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .submit-btn {
+      padding: 10px 20px;
+      background-color: #00bfff;
+      border: none;
+      color: black;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .submit-btn:hover {
+      background-color: #007bff;
+    }
+  </style>
+  <script>
+    // Function to handle password check
+    function checkPassword() {
+      const validPasswords = ['3050', '4050', '1050']; // List of valid passwords
+      const enteredPassword = document.getElementById('passwordInput').value;
+
+      // Check if the entered password is valid
+      if (validPasswords.includes(enteredPassword)) {
+        document.getElementById('password-section').style.display = 'none'; // Hide the password form
+        document.getElementById('page-content').style.display = 'block'; // Show the content
+      } else {
+        alert("Incorrect password. Please try again.");
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Password Section -->
+  <div id="password-section" class="password-section">
+    <h1>Please Enter Password to Access</h1>
+    <input type="text" id="passwordInput" class="password-input" placeholder="Enter password">
+    <button class="submit-btn" onclick="checkPassword()">Submit</button>
+  </div>
+
+  <!-- Main Content Section (Hidden until password is correct) -->
+  <div id="page-content" style="display: none;">
+    <div class="hero">
+      <h1>Welcome to Private Student Server</h1>
+      <p>This platform is for anonymous student voting and messaging.</p>
+      
+      <div class="buttons">
+        <a href="#" class="notice-btn">Notice</a>
+        <a href="#" class="rules-btn">Rules and Regulations</a>
+        <a href="#" class="login-btn">Login</a>
+        <a href="#" class="signup-btn">Sign Up</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
