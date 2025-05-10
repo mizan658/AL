@@ -89,72 +89,27 @@
       line-height: 1.5;
     }
 
-    .password-section {
-      display: block;
-      text-align: center;
-      margin-top: 10%;
-    }
-
-    .password-input {
-      padding: 10px;
-      font-size: 1.2rem;
-      margin: 10px 0;
-      border: 2px solid #00ffff;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-    }
-
-    .submit-btn {
-      padding: 10px 20px;
-      background-color: #00bfff;
-      border: none;
-      color: black;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .submit-btn:hover {
-      background-color: #007bff;
+    .admin-note {
+      font-size: 0.75rem;
+      color: yellow;
+      margin-top: 1rem;
     }
   </style>
-  <script>
-    // Function to handle password check
-    function checkPassword() {
-      const validPasswords = ['3050', '4050', '1050']; // List of valid passwords
-      const enteredPassword = document.getElementById('passwordInput').value;
-
-      // Check if the entered password is valid
-      if (validPasswords.includes(enteredPassword)) {
-        document.getElementById('password-section').style.display = 'none'; // Hide the password form
-        document.getElementById('page-content').style.display = 'block'; // Show the content
-      } else {
-        alert("Incorrect password. Please try again.");
-      }
-    }
-  </script>
 </head>
 <body>
-  <!-- Password Section -->
-  <div id="password-section" class="password-section">
-    <h1>Please Enter Password to Access</h1>
-    <input type="text" id="passwordInput" class="password-input" placeholder="Enter password">
-    <button class="submit-btn" onclick="checkPassword()">Submit</button>
-  </div>
-
-  <!-- Main Content Section (Hidden until password is correct) -->
-  <div id="page-content" style="display: none;">
-    <div class="hero">
-      <h1>Welcome to Private Student Server</h1>
-      <p>This platform is for anonymous student voting and messaging.</p>
-      
-      <div class="buttons">
-        <a href="#" class="notice-btn">Notice</a>
-        <a href="#" class="rules-btn">Rules and Regulations</a>
-        <a href="#" class="login-btn">Login</a>
-        <a href="#" class="signup-btn">Sign Up</a>
-      </div>
+  <!-- Main Content Section -->
+  <div class="hero">
+    <h1>Welcome to Private Student Server</h1>
+    <p>This platform is for anonymous student voting and messaging.</p>
+    
+    <div class="buttons">
+      <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
+      <a href="#" class="rules-btn">Rules and Regulations</a>
+      <a href="#" class="login-btn">Login</a>
+      <a href="#" class="signup-btn">Sign Up</a>
     </div>
+
+    <div class="admin-note">Only admin can edit and delete notices</div>
   </div>
 </body>
 </html>
