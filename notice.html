@@ -53,8 +53,9 @@
   <div id="noticeList">Loading notices...</div>
 
   <div class="admin-panel" id="adminPanel">
-    <h2>🔐 Admin Login (Google Sign-In)</h2>
-    <button id="googleLoginBtn">Sign in with Google</button>
+    <h2>🔐 Admin Login</h2>
+    <input type="email" id="adminEmail" placeholder="Enter admin email" /><br>
+    <button id="sendVerification">Send Verification</button>
   </div>
 
   <div class="admin-panel" id="editorPanel" style="display: none;">
@@ -83,12 +84,19 @@
     const db = firebase.firestore();
 
     const noticeList = document.getElementById('noticeList');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const adminEmailInput = document.getElementById('adminEmail');
+    const sendVerificationBtn = document.getElementById('sendVerification');
     const adminPanel = document.getElementById('adminPanel');
     const editorPanel = document.getElementById('editorPanel');
     const newNotice = document.getElementById('newNotice');
     const addNotice = document.getElementById('addNotice');
     const noticeControls = document.getElementById('noticeControls');
+
+    // List of allowed admin emails (removed the unwanted email)
+    const allowedAdmins = [
+      "252-35-007@diu.edu.bd",
+      "ahamed.to.tipak@gmail.com"
+    ];
 
     // Display public notices
     function loadNotices() {
@@ -106,33 +114,45 @@
 
     loadNotices();
 
-    // Google sign-in
-    googleLoginBtn.addEventListener('click', async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
+    // Send sign-in link to email
+    sendVerificationBtn.addEventListener('click', async () => {
+      const email = adminEmailInput.value;
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+
       try {
-        const result = await auth.signInWithPopup(provider);
-        const userEmail = result.user.email;
-        console.log("Signed in as:", userEmail); // Log the signed-in user's email
-        
-        // Fetch admin emails from Firestore
-        const adminSnapshot = await db.collection("admins").get();
-        const allowedAdmins = adminSnapshot.docs.map(doc => doc.data().email);
-        
-        if (allowedAdmins.includes(userEmail)) {
-          console.log("Admin verified: " + userEmail);
-          adminPanel.style.display = "none";
-          editorPanel.style.display = "block";
-          enableAdminFeatures();
-        } else {
-          console.log("Access denied for: " + userEmail);
-          alert("⛔ Access denied.");
-          auth.signOut();
-        }
+        await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+        window.localStorage.setItem('emailForSignIn', email);
+        alert('✅ Verification link sent to your email.');
       } catch (error) {
-        console.log("Login failed:", error.message);
-        alert("❌ Login failed: " + error.message);
+        alert("❌ Error: " + error.message);
       }
     });
+
+    // Sign in with email link
+    window.onload = async () => {
+      if (auth.isSignInWithEmailLink(window.location.href)) {
+        let email = window.localStorage.getItem('emailForSignIn');
+        if (!email) {
+          email = window.prompt('Enter your email to confirm login:');
+        }
+        try {
+          const result = await auth.signInWithEmailLink(email, window.location.href);
+          if (allowedAdmins.includes(result.user.email)) {
+            adminPanel.style.display = "none";
+            editorPanel.style.display = "block";
+            enableAdminFeatures();
+          } else {
+            alert("⛔ Access denied.");
+            auth.signOut();
+          }
+        } catch (error) {
+          alert("❌ Login failed: " + error.message);
+        }
+      }
+    };
 
     function enableAdminFeatures() {
       // Add new notice
