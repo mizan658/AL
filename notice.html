@@ -63,40 +63,13 @@
 </head>
 <body>
 
-  <div id="loginForm">
-    <h2>Please log in with Google to manage notices</h2>
-    <button onclick="login()">Login with Google</button>
-  </div>
-
-  <div id="adminPanel" style="display:none;">
+  <div class="notice-container">
     <h2>📢 Latest Announcements</h2>
     <div id="notices"></div>
-    <button onclick="addNotice()">Add Notice</button>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
   <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-      authDomain: "notice-8edc7.firebaseapp.com",
-      projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.appspot.com",
-      messagingSenderId: "948590141987",
-      appId: "1:948590141987:web:a9af8252e98f2933f40796",
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Admin emails
-    const allowedAdmins = ['252-35-007@diu.edu.bd', 'mizanhiki@gmail.com', 'ahamed.to.tipak@gmail.com'];
-
-    // Date and Time function
+    // Function to generate the current date and time
     function getCurrentDateTime() {
       const now = new Date();
       const date = now.toLocaleDateString();
@@ -104,58 +77,30 @@
       return `${date} ${time}`;
     }
 
-    // Display notices with date and time
+    // Sample notices (Replace with actual notices from Firebase or other sources)
+    const notices = [
+      { title: "Notice 1", description: "This is the first notice." },
+      { title: "Notice 2", description: "This is the second notice." },
+    ];
+
+    // Function to display notices with date and time
     function displayNotices() {
       const noticesContainer = document.getElementById("notices");
-      db.collection("notices").get().then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          const notice = doc.data();
-          const noticeElement = document.createElement("div");
-          noticeElement.classList.add("notice");
-          noticeElement.innerHTML = `
-            <h4>${notice.title}</h4>
-            <p>${notice.description}</p>
-            <div class="date-time">${getCurrentDateTime()}</div>
-          `;
-          noticesContainer.appendChild(noticeElement);
-        });
+      notices.forEach(notice => {
+        const noticeElement = document.createElement("div");
+        noticeElement.classList.add("notice");
+        noticeElement.innerHTML = `
+          <h4>${notice.title}</h4>
+          <p>${notice.description}</p>
+          <div class="date-time">${getCurrentDateTime()}</div>
+        `;
+        noticesContainer.appendChild(noticeElement);
       });
     }
 
-    // Google Login function
-    function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then(result => {
-        const user = result.user;
-        const userEmail = user.email;
-
-        if (allowedAdmins.includes(userEmail)) {
-          document.getElementById('loginForm').style.display = "none";
-          document.getElementById('adminPanel').style.display = "block";
-          displayNotices();
-        } else {
-          alert("⛔ Access denied.");
-        }
-      }).catch(error => {
-        alert("❌ Login failed: " + error.message);
-      });
-    }
-
-    // Add new notice
-    function addNotice() {
-      const title = prompt("Enter notice title:");
-      const description = prompt("Enter notice description:");
-      const dateTime = getCurrentDateTime();
-      db.collection("notices").add({
-        title,
-        description,
-        dateTime
-      }).then(() => {
-        displayNotices();
-      }).catch(error => {
-        alert("❌ Failed to add notice: " + error.message);
-      });
-    }
+    // Initial display of notices
+    displayNotices();
   </script>
+
 </body>
 </html>
