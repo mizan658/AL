@@ -158,21 +158,31 @@
     }
 
     window.deleteNotice = async (id) => {
-      await deleteDoc(doc(db, "notices", id));
-      loadNotices();
+      const user = auth.currentUser;
+      if (user && allowedAdmins.includes(user.email)) {
+        await deleteDoc(doc(db, "notices", id));
+        loadNotices();
+      } else {
+        alert("Only admin can delete. Contact email: ahamed.to.tipak@gmail.com");
+      }
     };
 
     window.editNotice = (id, btn) => {
-      const notice = btn.parentElement;
-      const h3 = notice.querySelector("h3");
-      const p = notice.querySelector("p");
-      if (btn.textContent === "Edit") {
-        h3.contentEditable = p.contentEditable = true;
-        btn.textContent = "Save";
+      const user = auth.currentUser;
+      if (user && allowedAdmins.includes(user.email)) {
+        const notice = btn.parentElement;
+        const h3 = notice.querySelector("h3");
+        const p = notice.querySelector("p");
+        if (btn.textContent === "Edit") {
+          h3.contentEditable = p.contentEditable = true;
+          btn.textContent = "Save";
+        } else {
+          h3.contentEditable = p.contentEditable = false;
+          updateDoc(doc(db, "notices", id), { title: h3.textContent, body: p.textContent });
+          btn.textContent = "Edit";
+        }
       } else {
-        h3.contentEditable = p.contentEditable = false;
-        updateDoc(doc(db, "notices", id), { title: h3.textContent, body: p.textContent });
-        btn.textContent = "Edit";
+        alert("Only admin can edit. Contact email: ahamed.to.tipak@gmail.com");
       }
     };
 
