@@ -166,12 +166,14 @@
         const div = document.createElement("div");
         div.className = "notice";
         const date = new Date(data.timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
-        div.innerHTML = ` 
-          <h3 contenteditable="false">${data.title}</h3>
+        div.innerHTML =  
+          `<h3 contenteditable="false">${data.title}</h3>
           <p contenteditable="false">${data.body}</p>
           <p class="timestamp">Published on: ${date}</p>
-          <button onclick="deleteNotice('${docSnap.id}')">Delete</button>
-          <button onclick="editNotice('${docSnap.id}', this)">Edit</button>
+          ${allowedAdmins.includes(auth.currentUser?.email) ? 
+            `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
+             <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` : 
+             `<p>Only admin can edit and delete notices.</p>`}
         `;
         noticesDiv.appendChild(div);
       });
@@ -242,5 +244,8 @@
       <button type="submit">Add Notice</button>
     </form>
   </div>
+  <footer>
+    <p>Contact: ahamed.to.tipak@gmail.com</p>
+  </footer>
 </body>
 </html>
