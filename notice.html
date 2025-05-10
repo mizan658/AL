@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notice Board</title>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
+      padding: 20px;
+    }
+    h1, h2 { text-align: center; }
+    .container { max-width: 600px; margin: auto; }
+    button, input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+    }
+    button { background-color: #1e90ff; color: white; cursor: pointer; }
+    button:hover { background-color: #006ad1; }
+    .notice { background: #111; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    .actions button { margin-right: 5px; width: auto; }
+    #adminPanel { display: none; }
+    .home-link { text-align: center; margin-bottom: 20px; }
+    .home-link a { color: #1e90ff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="home-link">
+    <a href="https://mizan658.github.io/AL/#">⬅ Home</a>
+  </div>
+  <h1>📝 Public Notice Board</h1>
+  <div class="container">
+    <div id="loginSection">
+      <h2>Admin Login</h2>
+      <input type="email" id="email" placeholder="Enter admin email" />
+      <button onclick="sendLoginLink()">Send Verification Code</button>
+    </div>
+
+    <div id="adminPanel">
+      <h2>Admin Panel</h2>
+      <input type="text" id="noticeTitle" placeholder="Notice title" />
+      <textarea id="noticeText" placeholder="Notice details"></textarea>
+      <button onclick="addNotice()">Upload Notice</button>
+    </div>
+
+    <div id="noticeList"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
+      authDomain: "notice-8edc7.firebaseapp.com",
+      projectId: "notice-8edc7",
+      storageBucket: "notice-8edc7.appspot.com",
+      messagingSenderId: "948590141987",
+      appId: "1:948590141987:web:a505eddb3dacaaa1f40796",
+      measurementId: "G-BGXC3J55RD"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const adminEmail = "252-35-007@diu.edu.bd";
+
+    function sendLoginLink() {
+      const email = document.getElementById("email").value;
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true,
+      };
+      auth.sendSignInLinkToEmail(email, actionCodeSettings).then(() => {
+        alert("Verification link sent to " + email);
+        window.localStorage.setItem("emailForSignIn", email);
+      }).catch(console.error);
+    }
+
+    window.onload = function () {
+      if (auth.isSignInWithEmailLink(window.location.href)) {
+        let email = window.localStorage.getItem("emailForSignIn");
+        if (!email) {
+          email = window.prompt("Please provide your email for confirmation");
+        }
+        auth.signInWithEmailLink(email, window.location.href)
+          .then(result => {
+            if (result.user.email === adminEmail) {
+              document.getElementById("adminPanel").style.display = "block";
+              document.getElementById("loginSection").style.display = "none";
+            }
+          }).catch(console.error);
+      }
+      loadNotices();
+    };
+
+    function addNotice() {
+      const title = document.getElementById("noticeTitle").value;
+      const text = document.getElementById("noticeText").value;
+      if (!title || !text) return alert("Please fill in all fields.");
+      db.collection("notices").add({ title, text, timestamp: Date.now() })
+        .then(() => {
+          alert("Notice uploaded!");
+          document.getElementById("noticeTitle").value = "";
+          document.getElementById("noticeText").value = "";
+          loadNotices();
+        });
+    }
+
+    function loadNotices() {
+      const container = document.getElementById("noticeList");
+      container.innerHTML = "";
+      db.collection("notices").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        container.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "notice";
+          div.innerHTML = `
+            <strong>${data.title}</strong><br>
+            <p>${data.text}</p>
+            <div class="actions" id="actions-${doc.id}"></div>
+          `;
+          if (auth.currentUser && auth.currentUser.email === adminEmail) {
+            const actions = div.querySelector(`#actions-${doc.id}`);
+            actions.innerHTML = `
+              <button onclick="editNotice('${doc.id}', '${data.title}', \`${data.text}\`)">Edit</button>
+              <button onclick="deleteNotice('${doc.id}')">Delete</button>
+            `;
+          }
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function deleteNotice(id) {
+      if (confirm("Delete this notice?")) {
+        db.collection("notices").doc(id).delete();
+      }
+    }
+
+    function editNotice(id, title, text) {
+      const newTitle = prompt("Edit Title", title);
+      const newText = prompt("Edit Text", text);
+      if (newTitle && newText) {
+        db.collection("notices").doc(id).update({ title: newTitle, text: newText });
+      }
+    }
+  </script>
+</body>
+</html>
