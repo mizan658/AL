@@ -4,162 +4,197 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Notice Board</title>
-  <script type="module">
-    // Firebase CDN modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, deleteDoc, doc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-      authDomain: "notice-8edc7.firebaseapp.com",
-      projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.appspot.com",
-      messagingSenderId: "948590141987",
-      appId: "1:948590141987:web:a505eddb3dacaaa1f40796",
-      measurementId: "G-BGXC3J55RD"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getFirestore();
-
-    const adminEmail = "252-35-007@diu.edu.bd";
-
-    // DOM references
-    const noticeList = document.getElementById("notice-list");
-    const noticeInput = document.getElementById("notice-input");
-    const addNoticeBtn = document.getElementById("add-notice-btn");
-    const adminEmailInput = document.getElementById("admin-email");
-    const sendVerificationBtn = document.getElementById("send-verification");
-    const adminSection = document.getElementById("admin-section");
-
-    // Display all notices
-    onSnapshot(collection(db, "notices"), (snapshot) => {
-      noticeList.innerHTML = "";
-      snapshot.forEach((docItem) => {
-        const notice = docItem.data().text;
-        const div = document.createElement("div");
-        div.className = "notice";
-        div.innerHTML = `<span>${notice}</span>`;
-        if (auth.currentUser?.email === adminEmail) {
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "❌";
-          delBtn.onclick = async () => {
-            await deleteDoc(doc(db, "notices", docItem.id));
-          };
-          div.appendChild(delBtn);
-        }
-        noticeList.appendChild(div);
-      });
-    });
-
-    // Send sign-in link
-    sendVerificationBtn.addEventListener("click", async () => {
-      const email = adminEmailInput.value;
-      const actionCodeSettings = {
-        url: "https://mizan658.github.io/AL/notice.html",
-        handleCodeInApp: true,
-      };
-      try {
-        await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-        window.localStorage.setItem("emailForSignIn", email);
-        alert("✅ Verification link sent! Check your inbox.");
-      } catch (error) {
-        alert("❌ Error: " + error.message);
-      }
-    });
-
-    // Handle login after clicking email link
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-      let email = window.localStorage.getItem("emailForSignIn");
-      if (!email) {
-        email = window.prompt("Enter your admin email:");
-      }
-
-      signInWithEmailLink(auth, email, window.location.href)
-        .then((result) => {
-          alert("✅ Logged in as admin!");
-          if (result.user.email === adminEmail) {
-            adminSection.style.display = "block";
-          }
-        })
-        .catch((error) => {
-          alert("❌ Login failed: " + error.message);
-        });
-    }
-
-    // Add new notice
-    addNoticeBtn.addEventListener("click", async () => {
-      const text = noticeInput.value.trim();
-      if (text) {
-        await addDoc(collection(db, "notices"), { text });
-        noticeInput.value = "";
-      }
-    });
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
   <style>
     body {
-      background-color: #000;
+      background: #000;
       color: #fff;
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
     }
     h1 {
-      color: #00ffcc;
+      color: #0f0;
     }
     .notice {
-      margin: 10px;
-      padding: 10px;
       background: #111;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
+      border: 1px solid #444;
+      margin: 10px auto;
+      padding: 15px;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #0f0;
     }
-    input, button {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      margin: 5px;
-    }
-    #admin-section {
-      display: none;
+    .admin-panel {
       margin-top: 30px;
     }
+    input, textarea, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+      width: 80%;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      cursor: pointer;
+    }
     a {
-      color: #00ffcc;
-      text-decoration: none;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: #111;
-      padding: 8px 12px;
-      border-radius: 6px;
+      color: #0f0;
     }
   </style>
 </head>
 <body>
 
-<a href="https://mizan658.github.io/AL/#">🏠 Home</a>
+  <h1>📢 Public Notice Board</h1>
+  <div id="noticeList">Loading notices...</div>
 
-<h1>📢 Public Notice Board</h1>
-<div id="notice-list"></div>
+  <div class="admin-panel" id="adminPanel">
+    <h2>🔐 Admin Login</h2>
+    <input type="email" id="adminEmail" placeholder="Enter admin email" /><br>
+    <button id="sendVerification">Send Verification</button>
+  </div>
 
-<h2>🔐 Admin Login</h2>
-<input type="email" id="admin-email" placeholder="Enter admin email" />
-<button id="send-verification">Send Verification</button>
+  <div class="admin-panel" id="editorPanel" style="display: none;">
+    <h2>✏️ Manage Notices</h2>
+    <textarea id="newNotice" placeholder="Write a new notice here..."></textarea><br>
+    <button id="addNotice">Add Notice</button>
+    <div id="noticeControls"></div>
+  </div>
 
-<div id="admin-section">
-  <h3>Add a New Notice</h3>
-  <input type="text" id="notice-input" placeholder="Type new notice" />
-  <button id="add-notice-btn">Add Notice</button>
-</div>
+  <a href="https://mizan658.github.io/AL/#">🏠 Home</a>
 
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
+      authDomain: "notice-8edc7.firebaseapp.com",
+      projectId: "notice-8edc7",
+      storageBucket: "notice-8edc7.firebasestorage.app",
+      messagingSenderId: "948590141987",
+      appId: "1:948590141987:web:a505eddb3dacaaa1f40796",
+      measurementId: "G-BGXC3J55RD"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const noticeList = document.getElementById('noticeList');
+    const adminEmailInput = document.getElementById('adminEmail');
+    const sendVerificationBtn = document.getElementById('sendVerification');
+    const adminPanel = document.getElementById('adminPanel');
+    const editorPanel = document.getElementById('editorPanel');
+    const newNotice = document.getElementById('newNotice');
+    const addNotice = document.getElementById('addNotice');
+    const noticeControls = document.getElementById('noticeControls');
+
+    const allowedAdmins = [
+      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ=="),
+      atob("bWl6YW5oaWtpNkBnbWFpbC5jb20="),
+      atob("MjUyLTM1LTAwN0BkaXUuZWR1LmJk")
+    ];
+
+    // Display public notices
+    function loadNotices() {
+      db.collection("notices").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        noticeList.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "notice";
+          div.textContent = data.text;
+          noticeList.appendChild(div);
+        });
+      });
+    }
+
+    loadNotices();
+
+    // Send sign-in link to email
+    sendVerificationBtn.addEventListener('click', async () => {
+      const email = adminEmailInput.value;
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+
+      try {
+        await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+        window.localStorage.setItem('emailForSignIn', email);
+        alert('✅ Verification link sent to your email.');
+      } catch (error) {
+        alert("❌ Error: " + error.message);
+      }
+    });
+
+    // Sign in with email link
+    window.onload = async () => {
+      if (auth.isSignInWithEmailLink(window.location.href)) {
+        let email = window.localStorage.getItem('emailForSignIn');
+        if (!email) {
+          email = window.prompt('Enter your email to confirm login:');
+        }
+        try {
+          const result = await auth.signInWithEmailLink(email, window.location.href);
+          if (allowedAdmins.includes(result.user.email)) {
+            adminPanel.style.display = "none";
+            editorPanel.style.display = "block";
+            enableAdminFeatures();
+          } else {
+            alert("⛔ Access denied.");
+            auth.signOut();
+          }
+        } catch (error) {
+          alert("❌ Login failed: " + error.message);
+        }
+      }
+    };
+
+    function enableAdminFeatures() {
+      // Add new notice
+      addNotice.onclick = async () => {
+        const text = newNotice.value.trim();
+        if (!text) return alert("Notice cannot be empty.");
+        await db.collection("notices").add({
+          text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        newNotice.value = "";
+      };
+
+      // Edit/delete options
+      db.collection("notices").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        noticeControls.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "notice";
+          div.innerHTML = `
+            <textarea style="width:90%;">${data.text}</textarea><br>
+            <button onclick="updateNotice('${doc.id}', this)">Update</button>
+            <button onclick="deleteNotice('${doc.id}')">Delete</button>
+          `;
+          noticeControls.appendChild(div);
+        });
+      });
+    }
+
+    async function updateNotice(id, btn) {
+      const textarea = btn.parentElement.querySelector("textarea");
+      const text = textarea.value.trim();
+      if (!text) return alert("Notice cannot be empty.");
+      await db.collection("notices").doc(id).update({ text });
+    }
+
+    async function deleteNotice(id) {
+      if (confirm("Are you sure you want to delete this notice?")) {
+        await db.collection("notices").doc(id).delete();
+      }
+    }
+  </script>
 </body>
 </html>
