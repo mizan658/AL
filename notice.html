@@ -4,84 +4,94 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notice Board</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
-    body {
-      background-color: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 20px;
+    body { 
+      background-color: black; 
+      color: white; 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      margin: 0; 
+      padding: 20px; 
+      animation: fadeIn 1s ease-in-out; 
     }
-    h1 {
-      font-size: 2rem;
-      text-align: center;
-      margin-bottom: 20px;
+
+    #notices { 
+      margin-top: 30px; 
+      animation: fadeIn 2s ease-in-out; 
+    }
+
+    .notice { 
+      border: 1px solid #444; 
+      padding: 10px; 
+      margin: 10px auto; 
+      width: 90%; 
+      max-width: 600px; 
+      background-color: #222; 
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .notice:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    button { 
+      margin: 5px; 
+      padding: 5px 10px; 
+      border: none; 
+      background-color: #333; 
+      color: white; 
+      cursor: pointer; 
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover { 
+      background-color: #555; 
+    }
+
+    input, textarea { 
+      width: 90%; 
+      padding: 10px; 
+      margin: 5px 0; 
+      background: #111; 
+      border: 1px solid #444; 
+      color: white; 
+      transition: background-color 0.3s ease;
+    }
+
+    input:focus, textarea:focus {
+      background-color: #333;
+    }
+
+    #editorPanel { 
+      display: none; 
+      animation: slideIn 1s ease-out;
+    }
+
+    #adminPanel { 
       animation: fadeIn 1.5s ease-in-out;
     }
-    .notice {
-      background-color: #111;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-      transition: transform 0.3s ease;
-      animation: slideIn 0.5s ease-in-out;
-    }
-    .notice:hover {
-      transform: scale(1.02);
-    }
-    #adminPanel, #editorPanel {
-      display: none;
-      animation: fadeIn 1s ease-in-out;
-    }
-    input, textarea {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      background-color: #222;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      animation: fadeIn 1s ease-in-out;
-    }
-    button {
-      background-color: #444;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #666;
-    }
+
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
+
     @keyframes slideIn {
-      from { transform: translateY(10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      0% { transform: translateY(-50px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .timestamp {
+      font-size: 12px;
+      color: #bbb;
     }
   </style>
-</head>
-<body>
-  <h1>📢 Latest Announcements</h1>
-  <div id="noticeContainer"></div>
-  <div id="adminPanel">
-    <button onclick="sendSignInLink()">Login as Admin</button>
-  </div>
-  <div id="editorPanel">
-    <input type="text" id="title" placeholder="Notice Title">
-    <textarea id="body" placeholder="Notice Body"></textarea>
-    <button onclick="addNotice()">Add Notice</button>
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
@@ -91,77 +101,124 @@
       appId: "1:948590141987:web:a9af8252e98f2933f40796",
       measurementId: "G-DSM883VQPT"
     };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
 
-    const allowedAdmins = ["252-35-007@diu.edu.bd", "ahamed.to.tipak@gmail.com"];
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    function sendSignInLink() {
-      const email = prompt("Enter your admin email:");
-      const actionCodeSettings = {
-        url: window.location.href,
-        handleCodeInApp: true
-      };
-      auth.sendSignInLinkToEmail(email, actionCodeSettings)
-        .then(() => {
-          window.localStorage.setItem("emailForSignIn", email);
-          alert("Login link sent to your email.");
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    const allowedAdmins = [
+      atob("MjUyLTM1LTAwN0BkaXUuZWR1LmJk"),
+      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ==")
+    ];
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const editorPanel = document.getElementById("editorPanel");
+    const adminPanel = document.getElementById("adminPanel");
+
+    loginBtn.onclick = async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const userEmail = result.user.email;
+        if (allowedAdmins.includes(userEmail)) {
+          editorPanel.style.display = "block";
+          adminPanel.style.display = "none";
+        } else {
+          alert("⛔ Access denied.");
+          signOut(auth);
+        }
+      } catch (error) {
+        alert("❌ Login failed: " + error.message);
+      }
+    };
+
+    logoutBtn.onclick = () => signOut(auth);
+
+    const noticeForm = document.getElementById("noticeForm");
+    const noticesDiv = document.getElementById("notices");
+
+    async function loadNotices() {
+      noticesDiv.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "notices"));
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "notice";
+        const date = new Date(data.timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
+        div.innerHTML = ` 
+          <h3 contenteditable="false">${data.title}</h3>
+          <p contenteditable="false">${data.body}</p>
+          <p class="timestamp">Published on: ${date}</p>
+          <button onclick="deleteNotice('${docSnap.id}')">Delete</button>
+          <button onclick="editNotice('${docSnap.id}', this)">Edit</button>
+        `;
+        noticesDiv.appendChild(div);
+      });
     }
 
-    window.onload = async () => {
-      if (auth.isSignInWithEmailLink(window.location.href)) {
-        let email = window.localStorage.getItem("emailForSignIn");
-        if (!email) {
-          email = window.prompt("Enter your email to confirm login:");
-        }
-        try {
-          const result = await auth.signInWithEmailLink(email, window.location.href);
-          if (allowedAdmins.includes(result.user.email)) {
-            document.getElementById("adminPanel").style.display = "none";
-            document.getElementById("editorPanel").style.display = "block";
-          } else {
-            alert("⛔ Access denied.");
-            auth.signOut();
-          }
-        } catch (error) {
-          alert("❌ Login failed: " + error.message);
-        }
-      }
-
+    window.deleteNotice = async (id) => {
+      await deleteDoc(doc(db, "notices", id));
       loadNotices();
     };
 
-    function loadNotices() {
-      db.collection("notices").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-        const container = document.getElementById("noticeContainer");
-        container.innerHTML = "";
-        snapshot.forEach(doc => {
-          const notice = doc.data();
-          const div = document.createElement("div");
-          div.className = "notice";
-          div.innerHTML = `<strong>${notice.title}</strong><p>${notice.body}</p>`;
-          container.appendChild(div);
-        });
-      });
-    }
+    window.editNotice = (id, btn) => {
+      const notice = btn.parentElement;
+      const h3 = notice.querySelector("h3");
+      const p = notice.querySelector("p");
+      if (btn.textContent === "Edit") {
+        h3.contentEditable = p.contentEditable = true;
+        btn.textContent = "Save";
+      } else {
+        h3.contentEditable = p.contentEditable = false;
+        updateDoc(doc(db, "notices", id), { title: h3.textContent, body: p.textContent });
+        btn.textContent = "Edit";
+      }
+    };
 
-    function addNotice() {
-      const title = document.getElementById("title").value;
-      const body = document.getElementById("body").value;
-      db.collection("notices").add({
-        title,
+    noticeForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const title = e.target.title.value.trim();
+      const body = e.target.body.value.trim();
+      if (!title || !body) return alert("Please fill out both fields.");
+      
+      // Get current timestamp for the notice
+      const timestamp = new Date();
+      await addDoc(collection(db, "notices"), { 
+        title, 
         body,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        document.getElementById("title").value = "";
-        document.getElementById("body").value = "";
+        timestamp: timestamp // Save timestamp
       });
-    }
+      e.target.reset();
+      loadNotices();
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && allowedAdmins.includes(user.email)) {
+        editorPanel.style.display = "block";
+        adminPanel.style.display = "none";
+      } else {
+        editorPanel.style.display = "none";
+        adminPanel.style.display = "block";
+      }
+      loadNotices();
+    });
   </script>
+</head>
+<body>
+  <h1>📢 Notices</h1>
+  <div id="notices"></div>
+  <div id="adminPanel">
+    <p>Admin login required</p>
+    <button id="loginBtn">Login with Google</button>
+  </div>
+  <div id="editorPanel">
+    <button id="logoutBtn">Logout</button>
+    <form id="noticeForm">
+      <input type="text" name="title" placeholder="Notice Title" required><br>
+      <textarea name="body" placeholder="Notice Body" required></textarea><br>
+      <button type="submit">Add Notice</button>
+    </form>
+  </div>
 </body>
 </html>
