@@ -44,7 +44,7 @@
       margin-top: 2rem;
     }
 
-    .buttons a {
+    .buttons a, .buttons button {
       text-decoration: none;
       padding: 0.8rem 1.5rem;
       margin: 0.5rem;
@@ -52,6 +52,8 @@
       font-weight: bold;
       display: inline-block;
       transition: 0.3s ease;
+      cursor: pointer;
+      border: none;
     }
 
     .notice-btn {
@@ -74,7 +76,7 @@
       color: white;
     }
 
-    .buttons a:hover {
+    .buttons a:hover, .buttons button:hover {
       transform: scale(1.05);
       opacity: 0.9;
     }
@@ -94,22 +96,71 @@
       color: yellow;
       margin-top: 1rem;
     }
+
+    #rules-section {
+      display: none;
+      text-align: left;
+      background: rgba(20, 20, 20, 0.9);
+      padding: 2rem;
+      border-radius: 10px;
+      border: 2px solid #00ffff;
+      max-width: 800px;
+      width: 90%;
+    }
+
+    #rules-section ul {
+      list-style-type: square;
+      padding-left: 1.5rem;
+    }
+
+    .back-btn {
+      margin-top: 2rem;
+      background-color: #007bff;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <!-- Main Content Section -->
-  <div class="hero">
+  <div class="hero" id="main-section">
     <h1>Welcome to Private Student Server</h1>
     <p>This platform is for anonymous student voting and messaging.</p>
-    
+
     <div class="buttons">
       <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
-      <a href="#" class="rules-btn">Rules and Regulations</a>
+      <button onclick="showRules()" class="rules-btn">Rules and Regulations</button>
       <a href="#" class="login-btn">Login</a>
       <a href="#" class="signup-btn">Sign Up</a>
+      <a href="#" class="signup-btn">Voting</a>
+      <a href="#" class="login-btn">Chat Group</a>
     </div>
 
     <div class="admin-note">Only admin can edit and delete notices</div>
   </div>
+
+  <!-- Rules Section -->
+  <div id="rules-section">
+    <h2>Rules and Regulations</h2>
+    <ul>
+      <li>Respect all members and their privacy.</li>
+      <li>Do not post inappropriate or offensive content.</li>
+      <li>Only admin can edit or delete notices.</li>
+      <li>Use voting responsibly — one vote per topic.</li>
+      <li>Do not spam in the chat group.</li>
+    </ul>
+    <button class="back-btn" onclick="hideRules()">Back</button>
+  </div>
+
+  <script>
+    function showRules() {
+      document.getElementById('main-section').style.display = 'none';
+      document.getElementById('rules-section').style.display = 'block';
+    }
+
+    function hideRules() {
+      document.getElementById('rules-section').style.display = 'none';
+      document.getElementById('main-section').style.display = 'block';
+    }
+  </script>
 </body>
 </html>
