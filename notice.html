@@ -5,137 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notice Board</title>
   <style>
-    body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; }
-    #notices { margin-top: 30px; }
-    .notice { border: 1px solid #444; padding: 10px; margin: 10px auto; width: 90%; max-width: 600px; background-color: #222; }
-    button { margin: 5px; padding: 5px 10px; border: none; background-color: #333; color: white; cursor: pointer; }
-    button:hover { background-color: #555; }
-    input, textarea { width: 90%; padding: 10px; margin: 5px 0; background: #111; border: 1px solid #444; color: white; }
-    #editorPanel { display: none; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .notice-container {
+      width: 80%;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      font-size: 2em;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    .notice {
+      background-color: #e6f7ff;
+      border-left: 5px solid #00bcd4;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      animation: glow 1.5s ease-out infinite alternate;
+    }
+    .notice h4 {
+      font-size: 1.5em;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .notice p {
+      font-size: 1.1em;
+      color: #666;
+    }
+    .date-time {
+      font-size: 0.9em;
+      color: #999;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 5px #00bcd4, 0 0 10px #00bcd4, 0 0 15px #00bcd4;
+      }
+      100% {
+        box-shadow: 0 0 10px #00bcd4, 0 0 20px #00bcd4, 0 0 30px #00bcd4;
+      }
+    }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+</head>
+<body>
 
+  <div id="loginForm">
+    <h2>Please log in with Google to manage notices</h2>
+    <button onclick="login()">Login with Google</button>
+  </div>
+
+  <div id="adminPanel" style="display:none;">
+    <h2>📢 Latest Announcements</h2>
+    <div id="notices"></div>
+    <button onclick="addNotice()">Add Notice</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
+  <script>
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
       projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.firebasestorage.app",
+      storageBucket: "notice-8edc7.appspot.com",
       messagingSenderId: "948590141987",
       appId: "1:948590141987:web:a9af8252e98f2933f40796",
-      measurementId: "G-DSM883VQPT"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    const allowedAdmins = [
-      atob("MjUyLTM1LTAwN0BkaXUuZWR1LmJk"),
-      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ==")
-    ];
+    // Admin emails
+    const allowedAdmins = ['252-35-007@diu.edu.bd', 'mizanhiki@gmail.com', 'ahamed.to.tipak@gmail.com'];
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const editorPanel = document.getElementById("editorPanel");
-    const adminPanel = document.getElementById("adminPanel");
+    // Date and Time function
+    function getCurrentDateTime() {
+      const now = new Date();
+      const date = now.toLocaleDateString();
+      const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `${date} ${time}`;
+    }
 
-    loginBtn.onclick = async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const userEmail = result.user.email;
-        if (allowedAdmins.includes(userEmail)) {
-          editorPanel.style.display = "block";
-          adminPanel.style.display = "none";
-        } else {
-          alert("⛔ Access denied.");
-          signOut(auth);
-        }
-      } catch (error) {
-        alert("❌ Login failed: " + error.message);
-      }
-    };
-
-    logoutBtn.onclick = () => signOut(auth);
-
-    const noticeForm = document.getElementById("noticeForm");
-    const noticesDiv = document.getElementById("notices");
-
-    async function loadNotices() {
-      noticesDiv.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "notices"));
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "notice";
-        div.innerHTML = `
-          <h3 contenteditable="false">${data.title}</h3>
-          <p contenteditable="false">${data.body}</p>
-          <button onclick="deleteNotice('${docSnap.id}')">Delete</button>
-          <button onclick="editNotice('${docSnap.id}', this)">Edit</button>
-        `;
-        noticesDiv.appendChild(div);
+    // Display notices with date and time
+    function displayNotices() {
+      const noticesContainer = document.getElementById("notices");
+      db.collection("notices").get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          const notice = doc.data();
+          const noticeElement = document.createElement("div");
+          noticeElement.classList.add("notice");
+          noticeElement.innerHTML = `
+            <h4>${notice.title}</h4>
+            <p>${notice.description}</p>
+            <div class="date-time">${getCurrentDateTime()}</div>
+          `;
+          noticesContainer.appendChild(noticeElement);
+        });
       });
     }
 
-    window.deleteNotice = async (id) => {
-      await deleteDoc(doc(db, "notices", id));
-      loadNotices();
-    };
+    // Google Login function
+    function login() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(result => {
+        const user = result.user;
+        const userEmail = user.email;
 
-    window.editNotice = (id, btn) => {
-      const notice = btn.parentElement;
-      const h3 = notice.querySelector("h3");
-      const p = notice.querySelector("p");
-      if (btn.textContent === "Edit") {
-        h3.contentEditable = p.contentEditable = true;
-        btn.textContent = "Save";
-      } else {
-        h3.contentEditable = p.contentEditable = false;
-        updateDoc(doc(db, "notices", id), { title: h3.textContent, body: p.textContent });
-        btn.textContent = "Edit";
-      }
-    };
+        if (allowedAdmins.includes(userEmail)) {
+          document.getElementById('loginForm').style.display = "none";
+          document.getElementById('adminPanel').style.display = "block";
+          displayNotices();
+        } else {
+          alert("⛔ Access denied.");
+        }
+      }).catch(error => {
+        alert("❌ Login failed: " + error.message);
+      });
+    }
 
-    noticeForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const title = e.target.title.value.trim();
-      const body = e.target.body.value.trim();
-      if (!title || !body) return alert("Please fill out both fields.");
-      await addDoc(collection(db, "notices"), { title, body });
-      e.target.reset();
-      loadNotices();
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && allowedAdmins.includes(user.email)) {
-        editorPanel.style.display = "block";
-        adminPanel.style.display = "none";
-      } else {
-        editorPanel.style.display = "none";
-        adminPanel.style.display = "block";
-      }
-      loadNotices();
-    });
+    // Add new notice
+    function addNotice() {
+      const title = prompt("Enter notice title:");
+      const description = prompt("Enter notice description:");
+      const dateTime = getCurrentDateTime();
+      db.collection("notices").add({
+        title,
+        description,
+        dateTime
+      }).then(() => {
+        displayNotices();
+      }).catch(error => {
+        alert("❌ Failed to add notice: " + error.message);
+      });
+    }
   </script>
-</head>
-<body>
-  <h1>📢 Notices</h1>
-  <div id="notices"></div>
-  <div id="adminPanel">
-    <p>Admin login required</p>
-    <button id="loginBtn">Login with Google</button>
-  </div>
-  <div id="editorPanel">
-    <button id="logoutBtn">Logout</button>
-    <form id="noticeForm">
-      <input type="text" name="title" placeholder="Notice Title" required><br>
-      <textarea name="body" placeholder="Notice Body" required></textarea><br>
-      <button type="submit">Add Notice</button>
-    </form>
-  </div>
 </body>
 </html>
