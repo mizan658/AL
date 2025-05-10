@@ -53,9 +53,8 @@
   <div id="noticeList">Loading notices...</div>
 
   <div class="admin-panel" id="adminPanel">
-    <h2>🔐 Admin Login</h2>
-    <input type="email" id="adminEmail" placeholder="Enter admin email" /><br>
-    <button id="sendVerification">Send Verification</button>
+    <h2>🔐 Admin Login (Google Sign-In)</h2>
+    <button id="googleLoginBtn">Sign in with Google</button>
   </div>
 
   <div class="admin-panel" id="editorPanel" style="display: none;">
@@ -84,19 +83,12 @@
     const db = firebase.firestore();
 
     const noticeList = document.getElementById('noticeList');
-    const adminEmailInput = document.getElementById('adminEmail');
-    const sendVerificationBtn = document.getElementById('sendVerification');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
     const adminPanel = document.getElementById('adminPanel');
     const editorPanel = document.getElementById('editorPanel');
     const newNotice = document.getElementById('newNotice');
     const addNotice = document.getElementById('addNotice');
     const noticeControls = document.getElementById('noticeControls');
-
-    const allowedAdmins = [
-      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ=="),
-      atob("bWl6YW5oaWtpNkBnbWFpbC5jb20="),
-      atob("MjUyLTM1LTAwN0BkaXUuZWR1LmJk")
-    ];
 
     // Display public notices
     function loadNotices() {
@@ -114,49 +106,33 @@
 
     loadNotices();
 
-    // Send sign-in link to email
-    sendVerificationBtn.addEventListener('click', async () => {
-      const email = adminEmailInput.value;
-      const actionCodeSettings = {
-        url: window.location.href,
-        handleCodeInApp: true
-      };
-
+    // Google sign-in
+    googleLoginBtn.addEventListener('click', async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        await auth.sendSignInLinkToEmail(email, actionCodeSettings);
-        window.localStorage.setItem('emailForSignIn', email);
-        alert('✅ Verification link sent to your email.');
+        const result = await auth.signInWithPopup(provider);
+        const userEmail = result.user.email;
+        console.log("Signed in as:", userEmail); // Log the signed-in user's email
+        
+        // Fetch admin emails from Firestore
+        const adminSnapshot = await db.collection("admins").get();
+        const allowedAdmins = adminSnapshot.docs.map(doc => doc.data().email);
+        
+        if (allowedAdmins.includes(userEmail)) {
+          console.log("Admin verified: " + userEmail);
+          adminPanel.style.display = "none";
+          editorPanel.style.display = "block";
+          enableAdminFeatures();
+        } else {
+          console.log("Access denied for: " + userEmail);
+          alert("⛔ Access denied.");
+          auth.signOut();
+        }
       } catch (error) {
-        alert("❌ Error: " + error.message);
+        console.log("Login failed:", error.message);
+        alert("❌ Login failed: " + error.message);
       }
     });
-
-    // Sign in with email link
-    window.onload = async () => {
-      if (auth.isSignInWithEmailLink(window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn');
-        if (!email) {
-          email = window.prompt('Enter your email to confirm login:');
-        }
-        try {
-          const result = await auth.signInWithEmailLink(email, window.location.href);
-          console.log(result.user.email); // Log the email to verify the correct login
-          if (allowedAdmins.includes(result.user.email)) {
-            console.log("Admin verified: " + result.user.email);
-            adminPanel.style.display = "none";
-            editorPanel.style.display = "block";
-            enableAdminFeatures();
-          } else {
-            console.log("Access denied for: " + result.user.email);
-            alert("⛔ Access denied.");
-            auth.signOut();
-          }
-        } catch (error) {
-          console.log("Login failed:", error.message); // Log any login errors
-          alert("❌ Login failed: " + error.message);
-        }
-      }
-    };
 
     function enableAdminFeatures() {
       // Add new notice
@@ -177,11 +153,10 @@
           const data = doc.data();
           const div = document.createElement("div");
           div.className = "notice";
-          div.innerHTML = `
-            <textarea style="width:90%;">${data.text}</textarea><br>
+          div.innerHTML = 
+            `<textarea style="width:90%;">${data.text}</textarea><br>
             <button onclick="updateNotice('${doc.id}', this)">Update</button>
-            <button onclick="deleteNotice('${doc.id}')">Delete</button>
-          `;
+            <button onclick="deleteNotice('${doc.id}')">Delete</button>`;
           noticeControls.appendChild(div);
         });
       });
