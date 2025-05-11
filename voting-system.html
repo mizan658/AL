@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Voting</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 { text-align: center; color: cyan; }
+    .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .candidate-card {
+      background: #111;
+      border: 2px solid cyan;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .candidate-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .vote-btn {
+      padding: 10px 20px;
+      background: cyan;
+      color: black;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+    .vote-btn:hover { background: #00cccc; }
+    #admin-panel {
+      margin-top: 40px;
+      border-top: 2px solid cyan;
+      padding-top: 20px;
+      display: none;
+    }
+    input, button {
+      margin: 5px;
+      padding: 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vote for Your Candidate</h1>
+
+  <div class="candidate-grid" id="candidateList">
+    <!-- Dynamically inserted candidates -->
+  </div>
+
+  <!-- Admin Panel (Only visible to admin) -->
+  <div id="admin-panel">
+    <h2>Admin Panel (ahamed.to.tipak@gmail.com)</h2>
+    <input type="text" id="candidateName" placeholder="Candidate Name">
+    <input type="file" id="candidatePhoto">
+    <button onclick="addCandidate()">Add Candidate</button>
+    <button onclick="publishVotes()">Publish Vote Count</button>
+    <button onclick="setVotingTime()">Set Voting Deadline</button>
+    <div id="voteResults"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
+      authDomain: "notice-8edc7.firebaseapp.com",
+      projectId: "notice-8edc7",
+      storageBucket: "notice-8edc7.appspot.com",
+      messagingSenderId: "948590141987",
+      appId: "1:948590141987:web:a505eddb3dacaaa1f40796",
+      measurementId: "G-BGXC3J55RD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUserEmail = null;
+    let votingDeadline = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        await signInWithPopup(auth, provider);
+      } else {
+        currentUserEmail = user.email;
+        if (currentUserEmail === "ahamed.to.tipak@gmail.com") {
+          document.getElementById("admin-panel").style.display = "block";
+        }
+        loadCandidates();
+        loadVotingDeadline();
+      }
+    });
+
+    async function loadCandidates() {
+      const list = document.getElementById("candidateList");
+      list.innerHTML = "";
+      const snap = await getDocs(collection(db, "candidates"));
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "candidate-card";
+        div.innerHTML = `
+          <img src="${data.photoURL}" alt="${data.name}">
+          <h3>${data.name}</h3>
+          <button class="vote-btn" onclick="confirmVote('${docSnap.id}', '${data.name}')">Vote</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function confirmVote(id, name) {
+      if (currentUserEmail === "ahamed.to.tipak@gmail.com") {
+        alert("Admin can't vote.");
+        return;
+      }
+
+      const now = Date.now();
+      if (votingDeadline && now > votingDeadline) {
+        alert("Voting has ended.");
+        return;
+      }
+
+      const confirmIt = confirm(`Are you sure you want to vote for "${name}"?`);
+      if (!confirmIt) return;
+
+      await addDoc(collection(db, "votes"), {
+        candidateId: id,
+        votedBy: currentUserEmail,
+        timestamp: Date.now()
+      });
+
+      alert("Your vote has been submitted!");
+    }
+
+    async function addCandidate() {
+      const name = document.getElementById("candidateName").value;
+      const photo = document.getElementById("candidatePhoto").files[0];
+      if (!name || !photo) return alert("Fill all fields.");
+
+      const photoRef = ref(storage, "candidate_photos/" + Date.now() + "_" + photo.name);
+      await uploadBytes(photoRef, photo);
+      const photoURL = await getDownloadURL(photoRef);
+
+      await addDoc(collection(db, "candidates"), { name, photoURL });
+      document.getElementById("candidateName").value = "";
+      document.getElementById("candidatePhoto").value = "";
+      loadCandidates();
+    }
+
+    async function publishVotes() {
+      const snap = await getDocs(collection(db, "votes"));
+      const counts = {};
+      const voters = {};
+      snap.forEach(doc => {
+        const { candidateId, votedBy } = doc.data();
+        counts[candidateId] = (counts[candidateId] || 0) + 1;
+        if (!voters[candidateId]) voters[candidateId] = [];
+        voters[candidateId].push(votedBy);
+      });
+
+      let resultHtml = "<h3>Results:</h3><ul>";
+      const candidatesSnap = await getDocs(collection(db, "candidates"));
+      candidatesSnap.forEach(doc => {
+        const name = doc.data().name;
+        const count = counts[doc.id] || 0;
+        resultHtml += `<li>${name}: ${count} vote(s) — Voters: ${voters[doc.id] || []}</li>`;
+      });
+      resultHtml += "</ul>";
+      document.getElementById("voteResults").innerHTML = resultHtml;
+    }
+
+    async function setVotingTime() {
+      const time = prompt("Enter deadline in minutes from now:");
+      if (!time || isNaN(time)) return;
+
+      const deadline = Date.now() + parseInt(time) * 60 * 1000;
+      await setDoc(doc(db, "settings", "deadline"), { timestamp: deadline });
+      votingDeadline = deadline;
+      alert("Voting deadline set!");
+    }
+
+    async function loadVotingDeadline() {
+      const snap = await getDoc(doc(db, "settings", "deadline"));
+      if (snap.exists()) {
+        votingDeadline = snap.data().timestamp;
+      }
+    }
+  </script>
+</body>
+</html>
