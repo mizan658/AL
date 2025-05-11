@@ -16,16 +16,19 @@
     .candidate-info h3 { margin: 0; font-size: 1.2em; }
     .candidate-info p { margin: 5px 0; color: #bbb; }
     .candidate-info button { background-color: #4CAF50; }
-    h2 { color: #00FF00; text-align: center; font-size: 2em; }
+    h1 { text-align: center; color: #00ff00; text-shadow: 0 0 10px green, 0 0 20px green; font-size: 3em; }
+    .button-container { text-align: center; margin-top: 20px; }
   </style>
 </head>
 <body>
 
   <h1>Welcome to Private Voting System</h1>
 
-  <div>
+  <div class="button-container">
     <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
     <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
+    <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
+    <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
   </div>
 
   <div id="adminPanel" style="display:none;">
@@ -175,7 +178,7 @@
       await updateDoc(cRef, { votes: newVotes });
 
       alert("Vote submitted");
-      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting! The result will be published on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>";
+      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting! The result will publish on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>";
     };
 
     window.loadVotesAdmin = async () => {
