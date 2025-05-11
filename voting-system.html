@@ -16,12 +16,7 @@
     .candidate-info h3 { margin: 0; font-size: 1.2em; }
     .candidate-info p { margin: 5px 0; color: #bbb; }
     .candidate-info button { background-color: #4CAF50; }
-    h1 {
-      text-align: center;
-      font-size: 3em;
-      color: lightgreen;
-      text-shadow: 0 0 15px green, 0 0 30px green, 0 0 45px green;
-    }
+    h2 { color: #00FF00; text-align: center; font-size: 2em; }
   </style>
 </head>
 <body>
@@ -55,8 +50,6 @@
   <div id="voteSection" style="display:none;">
     <h2>Vote for Your Candidate</h2>
     <ul id="voteList"></ul>
-    <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
-    <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
   </div>
 
   <!-- Firebase SDK -->
@@ -182,7 +175,7 @@
       await updateDoc(cRef, { votes: newVotes });
 
       alert("Vote submitted");
-      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting! The result will publish on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>";
+      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting! The result will be published on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>";
     };
 
     window.loadVotesAdmin = async () => {
