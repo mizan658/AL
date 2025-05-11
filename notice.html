@@ -1,254 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notice Board</title>
+  <title>Admin Login - Notice Web</title>
   <style>
-    body { 
-      background-color: black; 
-      color: white; 
-      font-family: Arial, sans-serif; 
-      text-align: center; 
-      margin: 0; 
-      padding: 20px; 
-      animation: fadeIn 1s ease-in-out; 
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
 
-    #notices { 
-      margin-top: 30px; 
-      animation: fadeIn 2s ease-in-out; 
-    }
-
-    .notice { 
-      border: 1px solid #444; 
-      padding: 10px; 
-      margin: 10px auto; 
-      width: 90%; 
-      max-width: 600px; 
-      background-color: #222; 
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .notice:hover {
-      transform: scale(1.05);
-      box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.3);
-    }
-
-    button { 
-      margin: 5px; 
-      padding: 5px 10px; 
-      border: none; 
-      background-color: #333; 
-      color: white; 
-      cursor: pointer; 
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover { 
-      background-color: #555; 
-    }
-
-    input, textarea { 
-      width: 90%; 
-      padding: 10px; 
-      margin: 5px 0; 
-      background: #111; 
-      border: 1px solid #444; 
-      color: white; 
-      transition: background-color 0.3s ease;
-    }
-
-    input:focus, textarea:focus {
+    #login-panel,
+    #editor-panel {
       background-color: #333;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     }
 
-    #editorPanel { 
-      display: none; 
-      animation: slideIn 1s ease-out;
+    input,
+    button {
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
     }
 
-    #adminPanel { 
-      animation: fadeIn 1.5s ease-in-out;
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
     }
 
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+    button:hover {
+      background-color: #45a049;
     }
 
-    @keyframes slideIn {
-      0% { transform: translateY(-50px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-
-    .timestamp {
-      font-size: 12px;
-      color: #bbb;
-    }
-
-    /* Spinner styles */
-    #loadingSpinner {
+    .hidden {
       display: none;
-      border: 4px solid #f3f3f3; /* Light grey */
-      border-top: 4px solid #3498db; /* Blue */
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 2s linear infinite;
-      margin: 20px auto;
     }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+</head>
 
+<body>
+
+  <!-- Admin Login Panel -->
+  <div id="login-panel">
+    <h2>Admin Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="login-btn">Login</button>
+  </div>
+
+  <!-- Admin Notice Management Panel -->
+  <div id="editor-panel" class="hidden">
+    <h2>Notice Management</h2>
+    <button id="add-notice-btn">Add Notice</button>
+    <button id="edit-notice-btn">Edit Notice</button>
+    <button id="delete-notice-btn">Delete Notice</button>
+    <button id="sign-out-btn">Sign Out</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
+  <!-- Your Firebase configuration -->
+  <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-      authDomain: "notice-8edc7.firebaseapp.com",
-      projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.firebasestorage.app",
-      messagingSenderId: "948590141987",
-      appId: "1:948590141987:web:a9af8252e98f2933f40796",
-      measurementId: "G-DSM883VQPT"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+  <!-- Admin Login Logic -->
+  <script>
+    document.getElementById("login-btn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    const allowedAdmins = [
-      atob("MjUyLTM1LTAwN0BkaXUuZWR1LmJk"),
-      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ==")
-    ];
-
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const editorPanel = document.getElementById("editorPanel");
-    const adminPanel = document.getElementById("adminPanel");
-    const loadingSpinner = document.getElementById("loadingSpinner"); // Spinner element
-
-    loginBtn.onclick = async () => {
-      const provider = new GoogleAuthProvider();
+      // Sign in user
       try {
-        const result = await signInWithPopup(auth, provider);
-        const userEmail = result.user.email;
-        if (allowedAdmins.includes(userEmail)) {
-          editorPanel.style.display = "block";
-          adminPanel.style.display = "none";
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+
+        // Check if the user is an admin
+        const isAdmin = await checkIfAdmin(email);
+        
+        if (isAdmin) {
+          // Show admin features (notice management)
+          document.getElementById("editor-panel").classList.remove("hidden");
+          document.getElementById("login-panel").classList.add("hidden");
         } else {
-          alert("⛔ Access denied. only admin can login.");
-          signOut(auth);
+          alert("You are not authorized as an admin.");
+          firebase.auth().signOut();
         }
       } catch (error) {
-        alert("❌ Login failed: " + error.message);
+        console.error("Error logging in:", error);
       }
-    };
+    });
 
-    logoutBtn.onclick = () => signOut(auth);
-
-    const noticeForm = document.getElementById("noticeForm");
-    const noticesDiv = document.getElementById("notices");
-
-    async function loadNotices() {
-      loadingSpinner.style.display = "block"; // Show the spinner
-      noticesDiv.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "notices"));
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "notice";
-        const date = new Date(data.timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
-        div.innerHTML =  
-          `<h3 contenteditable="false">${data.title}</h3>
-          <p contenteditable="false">${data.body}</p>
-          <p class="timestamp">Published on: ${date}</p>
-          ${allowedAdmins.includes(auth.currentUser?.email) ? 
-            `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
-             <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` : 
-             <p>Only admin can edit and delete notices.</p>}
-        `;
-        noticesDiv.appendChild(div);
-      });
-      loadingSpinner.style.display = "none"; // Hide the spinner once data is loaded
+    // Function to check if the user is an admin
+    async function checkIfAdmin(userEmail) {
+      const docRef = db.collection("users").doc(userEmail);
+      const docSnap = await docRef.get();
+      
+      if (docSnap.exists) {
+        const userData = docSnap.data();
+        return userData.isAdmin === true; // Return true if user is an admin
+      } else {
+        return false; // Return false if no user data exists or the user is not an admin
+      }
     }
 
-    window.deleteNotice = async (id) => {
-      await deleteDoc(doc(db, "notices", id));
-      loadNotices();
-    };
-
-    window.editNotice = (id, btn) => {
-      const notice = btn.parentElement;
-      const h3 = notice.querySelector("h3");
-      const p = notice.querySelector("p");
-      if (btn.textContent === "Edit") {
-        h3.contentEditable = p.contentEditable = true;
-        btn.textContent = "Save";
-      } else {
-        h3.contentEditable = p.contentEditable = false;
-        updateDoc(doc(db, "notices", id), { title: h3.textContent, body: p.textContent });
-        btn.textContent = "Edit";
-      }
-    };
-
-    noticeForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const title = e.target.title.value.trim();
-      const body = e.target.body.value.trim();
-      if (!title || !body) return alert("Please fill out both fields.");
-      
-      // Get current timestamp for the notice
-      const timestamp = new Date();
-      await addDoc(collection(db, "notices"), { 
-        title, 
-        body,
-        timestamp: timestamp // Save timestamp
+    // Sign out logic
+    document.getElementById("sign-out-btn").addEventListener("click", () => {
+      firebase.auth().signOut().then(() => {
+        alert("You have logged out.");
+        document.getElementById("login-panel").classList.remove("hidden");
+        document.getElementById("editor-panel").classList.add("hidden");
+      }).catch((error) => {
+        console.error("Error signing out:", error);
       });
-      e.target.reset();
-      loadNotices();
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && allowedAdmins.includes(user.email)) {
-        editorPanel.style.display = "block";
-        adminPanel.style.display = "none";
-      } else {
-        editorPanel.style.display = "none";
-        adminPanel.style.display = "block";
-      }
-      loadNotices();
     });
   </script>
-</head>
-<body>
-  <h1>📢 Notices</h1>
-  <div id="notices"></div>
-  <div id="loadingSpinner"></div> <!-- Loading Spinner -->
-  <div id="adminPanel">
-    <p>Admin login required</p>
-    <button id="loginBtn">Login with Google</button>
-  </div>
-  <div id="editorPanel">
-    <button id="logoutBtn">Logout</button>
-    <form id="noticeForm">
-      <input type="text" name="title" placeholder="Notice Title" required><br>
-      <textarea name="body" placeholder="Notice Body" required></textarea><br>
-      <button type="submit">Add Notice</button>
-    </form>
-  </div>
-  <footer>
-    <p>Contact: ahamed.to.tipak@gmail.com</p>
-<a href="https://mizan658.github.io/AL/index.html" style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: black; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-  Home
-</a>
-  </footer>
 </body>
+
 </html>
