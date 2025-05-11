@@ -1,97 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
+  <style>
+    body {
+      background-color: #18191a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #e4e6eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .profile-box {
+      background-color: #242526;
+      padding: 30px;
+      border-radius: 12px;
+      width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .profile-header {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .blurred-email {
+      filter: blur(5px);
+      margin-bottom: 10px;
+    }
+    textarea {
+      width: 100%;
+      height: 80px;
+      background-color: #3a3b3c;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      color: white;
+      resize: none;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #3a3b3c;
+      color: #e4e6eb;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn:hover {
+      background-color: #4e4f50;
+    }
+    .nav-links {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .nav-links a {
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-    <!-- Google Sign-In Button -->
-    <button id="signUpBtn" onclick="signInWithGoogle()">Sign Up with Google</button>
-
-    <!-- Password Setup Form -->
-    <div id="passwordSetup" style="display:none;">
-        <h3>Set up your password</h3>
-        <form id="passwordForm">
-            <label for="password">Create Password:</label>
-            <input type="password" id="password" placeholder="Enter your password" required /><br><br>
-            <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" placeholder="Confirm your password" required /><br><br>
-            <button type="submit">Submit</button>
-        </form>
+  <div class="profile-box">
+    <div class="profile-header">User Profile</div>
+    <div class="blurred-email" id="userEmail">Loading email...</div>
+    <div><strong>User ID:</strong> <span id="userID"></span></div>
+    <div style="margin-top: 10px;"><strong>Your Bio:</strong></div>
+    <textarea id="bioInput" placeholder="Write about yourself..."></textarea>
+    <button class="btn" id="saveBioBtn">Save Bio</button>
+    <div class="nav-links">
+      <a href="#"><button class="btn">Chat Group</button></a>
+      <a href="#"><button class="btn">Voting</button></a>
+      <a href="https://mizan658.github.io/AL/notice.html"><button class="btn">Notice</button></a>
+      <button class="btn" id="logoutBtn">Logout</button>
     </div>
+  </div>
 
-    <!-- Firebase Configuration -->
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-            authDomain: "notice-8edc7.firebaseapp.com",
-            projectId: "notice-8edc7",
-            storageBucket: "notice-8edc7.firebasestorage.app",
-            messagingSenderId: "948590141987",
-            appId: "1:948590141987:web:a9af8252e98f2933f40796",
-            measurementId: "G-DSM883VQPT"
-        };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const provider = new firebase.auth.GoogleAuthProvider();
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
+      authDomain: "notice-8edc7.firebaseapp.com",
+      projectId: "notice-8edc7",
+      storageBucket: "notice-8edc7.appspot.com",
+      messagingSenderId: "948590141987",
+      appId: "1:948590141987:web:a9af8252e98f2933f40796",
+      measurementId: "G-DSM883VQPT"
+    };
 
-        // Function to handle Google Sign-In
-        function signInWithGoogle() {
-            firebase.auth().signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    console.log("User signed in: ", user);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-                    // After Google Sign-In, show password setup
-                    document.getElementById('signUpBtn').style.display = 'none'; // Hide Google Sign-In button
-                    document.getElementById('passwordSetup').style.display = 'block'; // Show password setup form
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("userEmail").textContent = user.email;
+        document.getElementById("userID").textContent = user.uid;
 
-                    // Store Google user info
-                    const email = user.email;
-                    localStorage.setItem('email', email);
-                })
-                .catch((error) => {
-                    console.error("Error during sign-in: ", error.message);
-                });
-        }
-
-        // Function to handle password form submission
-        document.getElementById('passwordForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-                return;
-            }
-
-            const email = localStorage.getItem('email');
-            
-            // Create user with email and password
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("User created: ", user);
-
-                    // Redirect to profile page or show profile details
-                    window.location.href = '/profile.html'; // Replace with your profile page URL
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    alert(errorMessage); // Show error message
-                    console.error("Error creating user: ", errorCode, errorMessage);
-                });
+        const userRef = ref(db, 'users/' + user.uid);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists() && snapshot.val().bio) {
+            document.getElementById("bioInput").value = snapshot.val().bio;
+          }
         });
-    </script>
+      } else {
+        window.location.href = "signup.html";
+      }
+    });
+
+    document.getElementById("saveBioBtn").addEventListener("click", () => {
+      const user = auth.currentUser;
+      const bio = document.getElementById("bioInput").value.trim();
+      if (user && bio.length <= 250) {
+        set(ref(db, 'users/' + user.uid), {
+          email: user.email,
+          bio: bio
+        });
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "signup.html";
+      });
+    });
+  </script>
 </body>
 </html>
