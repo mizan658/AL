@@ -5,43 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Voting System</title>
   <style>
-    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; }
-    .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
-    #adminPanel, #voteSection { margin-top: 20px; padding: 15px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
-    input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
-    img { border-radius: 10px; }
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #1f1f1f;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #333;
+    }
+    h1 {
+      margin: 0;
+      color: #00bfff;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      background-color: #00bfff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #009acd;
+    }
+    #adminPanel, #voteSection {
+      background-color: #1e1e1e;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    input {
+      padding: 10px;
+      margin: 10px 5px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background-color: #2a2a2a;
+      color: #fff;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #2a2a2a;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    li img {
+      border-radius: 8px;
+      width: 50px;
+      margin-right: 10px;
+    }
+    .candidate-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
+  <header>
+    <h1>DIU Voting System</h1>
+  </header>
+  <div class="container">
+    <button onclick="signInUser()">Sign in with DIU Mail to Vote</button>
+    <button onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
 
-  <h1>Welcome to DIU Voting</h1>
+    <div id="adminPanel" style="display:none;">
+      <h2>Admin Panel</h2>
+      <input type="text" id="candidateName" placeholder="Candidate Name">
+      <input type="text" id="candidatePhoto" placeholder="Photo URL">
+      <button onclick="addCandidate()">Add Candidate</button>
+      <h3>Manage Candidates</h3>
+      <ul id="candidateList"></ul>
+    </div>
 
-  <div>
-    <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
-    <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
+    <div id="voteSection" style="display:none;">
+      <h2>Vote for Your Candidate</h2>
+      <ul id="voteList"></ul>
+    </div>
   </div>
-
-  <div id="adminPanel" style="display:none;">
-    <h2>Admin Panel</h2>
-    <input type="text" id="candidateName" placeholder="Candidate Name">
-    <input type="text" id="candidatePhoto" placeholder="Photo URL">
-    <button onclick="addCandidate()">Add Candidate</button>
-    <h3>Manage Candidates</h3>
-    <ul id="candidateList"></ul>
-    <h3>Vote Count</h3>
-    <ul id="voteCountList"></ul>
-  </div>
-
-  <div id="voteSection" style="display:none;">
-    <h2>Vote for Your Candidate</h2>
-    <ul id="voteList"></ul>
-  </div>
-
-  <!-- Firebase SDK -->
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -58,14 +123,18 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    let currentUser = null;
+
+    let currentUser;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) currentUser = user;
+    });
 
     window.signInAdmin = async () => {
       const result = await signInWithPopup(auth, provider);
       if (result.user.email === "252-35-007@diu.edu.bd") {
         document.getElementById("adminPanel").style.display = "block";
         loadCandidates();
-        loadVoteCounts();
       } else {
         alert("Access denied: Not an admin");
       }
@@ -73,14 +142,13 @@
 
     window.signInUser = async () => {
       const result = await signInWithPopup(auth, provider);
-      const email = result.user.email;
-      if (!email || !email.endsWith("@diu.edu.bd")) {
+      if (!result.user.email.endsWith("@diu.edu.bd")) {
         alert("Only DIU emails are allowed to vote");
         return;
       }
       currentUser = result.user;
       document.getElementById("voteSection").style.display = "block";
-      loadVotes(currentUser.uid);
+      loadVotes(result.user.uid);
     };
 
     window.addCandidate = async () => {
@@ -89,7 +157,6 @@
       if (!name) return alert("Enter a name");
       await addDoc(collection(db, "candidates"), { name, photoURL: photo, votes: 0 });
       loadCandidates();
-      loadVoteCounts();
     };
 
     window.loadCandidates = async () => {
@@ -99,35 +166,18 @@
       snap.forEach(docSnap => {
         const c = docSnap.data();
         list.innerHTML += `<li>
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
+          <div class="candidate-info">
+            <img src="${c.photoURL}" alt="${c.name}">
+            <b>${c.name}</b>
+          </div>
           <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
         </li>`;
       });
     };
 
-    window.loadVoteCounts = async () => {
-      const list = document.getElementById("voteCountList");
-      list.innerHTML = "";
-      const snap = await getDocs(collection(db, "candidates"));
-      let maxVotes = 0;
-      let winner = "";
-      snap.forEach(docSnap => {
-        const c = docSnap.data();
-        list.innerHTML += `<li><b>${c.name}</b>: ${c.votes} votes</li>`;
-        if (c.votes > maxVotes) {
-          maxVotes = c.votes;
-          winner = c.name;
-        }
-      });
-      if (maxVotes > 0) {
-        list.innerHTML += `<p><b>Winner:</b> ${winner}</p>`;
-      }
-    };
-
     window.removeCandidate = async (id) => {
       await deleteDoc(doc(db, "candidates", id));
       loadCandidates();
-      loadVoteCounts();
     };
 
     window.loadVotes = async (uid) => {
@@ -143,26 +193,20 @@
       snap.forEach(docSnap => {
         const c = docSnap.data();
         list.innerHTML += `<li>
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
-          <button onclick="vote('${docSnap.id}')">Vote</button>
+          <div class="candidate-info">
+            <img src="${c.photoURL}" alt="${c.name}">
+            <b>${c.name}</b>
+          </div>
+          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
         </li>`;
       });
     };
 
-    window.vote = async (candidateId) => {
-      if (!currentUser) return alert("Please sign in first");
-      const uid = currentUser.uid;
-      const email = currentUser.email || "undefined";
-      const votedRef = doc(db, "votes", uid);
-      const votedSnap = await getDoc(votedRef);
-      if (votedSnap.exists()) {
-        alert("You have already voted.");
-        return;
-      }
-      await setDoc(votedRef, { uid, email, candidateId });
+    window.vote = async (candidateId, uid) => {
+      await addDoc(collection(db, "votes"), { uid, candidateId });
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
-      const newVotes = (cSnap.data().votes || 0) + 1;
+      const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
       alert("Vote submitted");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
