@@ -1,97 +1,143 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voting System</title>
+  <title>DIU Voting System</title>
+  <style>
+    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; }
+    .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
+    #adminPanel, #voteSection { margin-top: 20px; padding: 15px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
+    input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
+    img { border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to DIU Voting</h1>
+
+  <div>
+    <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
+    <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
+  </div>
+
+  <div id="adminPanel" style="display:none;">
+    <h2>Admin Panel</h2>
+    <input type="text" id="candidateName" placeholder="Candidate Name">
+    <input type="text" id="candidatePhoto" placeholder="Photo URL">
+    <button onclick="addCandidate()">Add Candidate</button>
+
+```
+<h3>Manage Candidates</h3>
+<ul id="candidateList"></ul>
+```
+
+  </div>
+
+  <div id="voteSection" style="display:none;">
+    <h2>Vote for Your Candidate</h2>
+    <ul id="voteList"></ul>
+  </div>
+
+  <!-- Firebase SDK -->
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
       authDomain: "voting-app-2b276.firebaseapp.com",
       projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.firebasestorage.app",
+      storageBucket: "voting-app-2b276.appspot.com",
       messagingSenderId: "699531517654",
       appId: "1:699531517654:web:785702f843d21a85c17377",
       measurementId: "G-309D0KG6KL"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
+    const db = getFirestore(app);
+    const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    window.signInAsVoter = () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const user = result.user;
-          if (user.email.endsWith("@diu.edu.bd")) {
-            alert("Welcome voter: " + user.email);
-            // Continue to voting logic
-          } else {
-            alert("Only @diu.edu.bd emails are allowed.");
-            signOut(auth);
-          }
-        })
-        .catch((error) => {
-          alert("Google Sign-In failed.");
-          console.error(error);
-        });
+    window.signInAdmin = async () => {
+      const result = await signInWithPopup(auth, provider);
+      if (result.user.email === "252-35-007@diu.edu.bd") {
+        document.getElementById("adminPanel").style.display = "block";
+        loadCandidates();
+      } else {
+        alert("Access denied: Not an admin");
+      }
     };
 
-    window.signInAsAdmin = () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const user = result.user;
-          if (user.email === "252-35-007@diu.edu.bd") {
-            alert("Welcome admin: " + user.email);
-            // Continue to admin panel
-          } else {
-            alert("You are not authorized as an admin.");
-            signOut(auth);
-          }
-        })
-        .catch((error) => {
-          alert("Admin Sign-In failed.");
-          console.error(error);
-        });
+    window.signInUser = async () => {
+      const result = await signInWithPopup(auth, provider);
+      if (!result.user.email.endsWith("@diu.edu.bd")) {
+        alert("Only DIU emails are allowed to vote");
+        return;
+      }
+      document.getElementById("voteSection").style.display = "block";
+      loadVotes(result.user.uid);
+    };
+
+    window.addCandidate = async () => {
+      const name = document.getElementById("candidateName").value;
+      const photo = document.getElementById("candidatePhoto").value;
+      if (!name) return alert("Enter a name");
+      await addDoc(collection(db, "candidates"), { name, photoURL: photo, votes: 0 });
+      loadCandidates();
+    };
+
+    window.loadCandidates = async () => {
+      const list = document.getElementById("candidateList");
+      list.innerHTML = "";
+      const snap = await getDocs(collection(db, "candidates"));
+      snap.forEach(docSnap => {
+        const c = docSnap.data();
+        list.innerHTML += `<li>
+          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
+          <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
+        </li>`;
+      });
+    };
+
+    window.removeCandidate = async (id) => {
+      await deleteDoc(doc(db, "candidates", id));
+      loadCandidates();
+    };
+
+    window.loadVotes = async (uid) => {
+      const list = document.getElementById("voteList");
+      list.innerHTML = "";
+      const votedRef = doc(db, "votes", uid);
+      const votedSnap = await getDoc(votedRef);
+      if (votedSnap.exists()) {
+        list.innerHTML = "<p>You have already voted.</p>";
+        return;
+      }
+      const snap = await getDocs(collection(db, "candidates"));
+      snap.forEach(docSnap => {
+        const c = docSnap.data();
+        list.innerHTML += `<li>
+          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
+          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
+        </li>`;
+      });
+    };
+
+    window.vote = async (candidateId, uid) => {
+      const votedRef = doc(db, "votes", uid);
+      await addDoc(collection(db, "votes"), { uid, candidateId });
+      const cRef = doc(db, "candidates", candidateId);
+      const cSnap = await getDoc(cRef);
+      const newVotes = cSnap.data().votes + 1;
+      await updateDoc(cRef, { votes: newVotes });
+      alert("Vote submitted");
+      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
     };
   </script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #121212;
-      color: #ffffff;
-    }
-    .btn {
-      background: #6200ea;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      margin: 10px;
-      cursor: pointer;
-      border-radius: 5px;
-      font-size: 16px;
-      transition: transform 0.2s;
-    }
-    .btn:hover {
-      transform: scale(1.05);
-    }
-    .top-right {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div class="top-right">
-    <button class="btn" onclick="signInAsAdmin()">Admin Login</button>
-  </div>
-  <h1>Vote for Your Candidate</h1>
-  <button class="btn" onclick="signInAsVoter()">Login with DIU Mail to Vote</button>
+
 </body>
 </html>
