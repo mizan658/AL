@@ -173,7 +173,7 @@
           ${allowedAdmins.includes(auth.currentUser?.email) ? 
             `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
              <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` : 
-             <p>Only admin can edit and delete notices.</p>}
+             `<p>Only admin can edit and delete notices.</p>`}
         `;
         noticesDiv.appendChild(div);
       });
