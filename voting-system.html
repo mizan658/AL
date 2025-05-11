@@ -41,6 +41,9 @@
     <button onclick="loadVotesAdmin()">Load Votes</button>
     <ul id="voteListAdmin"></ul>
     <button onclick="resetVotes()">Reset Votes</button>
+
+    <h3>Publish Winner</h3>
+    <button onclick="publishWinner()">Publish Winner</button>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -52,7 +55,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -86,6 +89,23 @@
         alert("Only DIU emails are allowed to vote");
         return;
       }
+      const email = result.user.email;
+
+      // Check if the user has already voted
+      const votesRef = collection(db, "votes");
+      const snapshot = await getDocs(votesRef);
+      let alreadyVoted = false;
+      snapshot.forEach(docSnap => {
+        if (docSnap.data().email === email) {
+          alreadyVoted = true;
+        }
+      });
+
+      if (alreadyVoted) {
+        alert("You have already voted!");
+        return;
+      }
+
       document.getElementById("voteSection").style.display = "block";
       loadVotes(result.user.uid);
     };
@@ -126,12 +146,6 @@
     window.loadVotes = async (uid) => {
       const list = document.getElementById("voteList");
       list.innerHTML = "";
-      const votedRef = doc(db, "votes", uid);
-      const votedSnap = await getDoc(votedRef);
-      if (votedSnap.exists()) {
-        list.innerHTML = "<p>You have already voted.</p>";
-        return;
-      }
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
@@ -151,7 +165,21 @@
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user.email;
 
-      const votedRef = doc(db, "votes", uid);
+      const votedRef = collection(db, "votes");
+      const snapshot = await getDocs(votedRef);
+      let alreadyVoted = false;
+      snapshot.forEach(docSnap => {
+        if (docSnap.data().email === userEmail) {
+          alreadyVoted = true;
+        }
+      });
+
+      if (alreadyVoted) {
+        alert("You have already voted!");
+        return;
+      }
+
+      // Record the vote
       await addDoc(collection(db, "votes"), { 
         uid, 
         candidateId,
@@ -189,6 +217,24 @@
       });
       loadCandidates();  // Reload candidate list after resetting votes
       alert("Votes reset.");
+    };
+
+    window.publishWinner = async () => {
+      const candidatesSnap = await getDocs(collection(db, "candidates"));
+      let winner = { name: '', votes: -1 };
+
+      candidatesSnap.forEach(docSnap => {
+        const c = docSnap.data();
+        if (c.votes > winner.votes) {
+          winner = { name: c.name, votes: c.votes };
+        }
+      });
+
+      // Save winner to the "Notice" document
+      await setDoc(doc(db, "notice", "winner"), { winnerName: winner.name });
+
+      // Update notice board link with the winner's name
+      window.location.href = "https://mizan658.github.io/AL/notice.html";
     };
   </script>
 
