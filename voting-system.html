@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Private Voting System</title>
+  <title>DIU Voting System</title>
   <style>
     body { background: #0f0f0f; color: white; font-family: Arial, sans-serif; padding: 20px; }
     .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
@@ -16,6 +16,7 @@
     .candidate-info h3 { margin: 0; font-size: 1.2em; }
     .candidate-info p { margin: 5px 0; color: #bbb; }
     .candidate-info button { background-color: #4CAF50; }
+    h1 { text-align: center; color: lightgreen; text-shadow: 0px 0px 15px green; }
   </style>
 </head>
 <body>
@@ -25,11 +26,6 @@
   <div>
     <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
     <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
-  </div>
-
-  <div>
-    <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
-    <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
   </div>
 
   <div id="adminPanel" style="display:none;">
@@ -54,6 +50,8 @@
   <div id="voteSection" style="display:none;">
     <h2>Vote for Your Candidate</h2>
     <ul id="voteList"></ul>
+    <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
+    <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
   </div>
 
   <!-- Firebase SDK -->
