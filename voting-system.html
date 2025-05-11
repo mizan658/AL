@@ -1,3 +1,4 @@
+<!-- Full updated HTML with Firebase (keep the structure you had) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,12 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Voting System</title>
   <style>
-    body {
-      background: #0f0f0f;
-      color: white;
-      font-family: Arial;
-      padding: 20px;
-    }
+    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; }
     .admin-btn, .user-btn, button {
       padding: 10px 15px;
       background: #1e90ff;
@@ -19,47 +15,40 @@
       color: white;
       cursor: pointer;
       margin: 5px;
-      transition: box-shadow 0.3s ease;
+      box-shadow: 0 0 10px #1e90ff;
+      animation: glow 1.5s infinite alternate;
     }
-    .admin-btn:hover, .user-btn:hover, button:hover {
-      box-shadow: 0 0 10px #1e90ff, 0 0 20px #1e90ff;
-    }
-    #adminPanel, #voteSection {
+    #adminPanel, #voteSection, #winnerSection {
       margin-top: 20px;
       padding: 15px;
       border: 1px solid #444;
       border-radius: 15px;
       background: #1a1a1a;
-    }
-    input {
-      padding: 8px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    img {
-      border-radius: 10px;
-    }
-    .glow {
+      box-shadow: 0 0 15px #444;
       animation: glow 2s infinite alternate;
     }
+    input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
+    img { border-radius: 10px; }
     @keyframes glow {
-      from {
-        text-shadow: 0 0 5px #1e90ff;
-      }
-      to {
-        text-shadow: 0 0 20px #1e90ff, 0 0 30px #1e90ff;
-      }
+      from { box-shadow: 0 0 5px #1e90ff; }
+      to { box-shadow: 0 0 20px #00bfff, 0 0 30px #1e90ff; }
     }
   </style>
 </head>
 <body>
 
-  <h1 class="glow">Welcome to DIU Voting</h1>
+  <h1>Welcome to DIU Voting</h1>
 
   <div>
     <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
     <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
+  </div>
+
+  <p style="color:#00ffcc;">First you have to login with your DIU mail to see candidates and vote. If winner is published, it will be shown.</p>
+
+  <div id="winnerSection" style="display:none;">
+    <h2>🏆 Winner</h2>
+    <p id="winnerDisplay"></p>
   </div>
 
   <div id="adminPanel" style="display:none;">
@@ -67,6 +56,8 @@
     <input type="text" id="candidateName" placeholder="Candidate Name">
     <input type="text" id="candidatePhoto" placeholder="Photo URL">
     <button onclick="addCandidate()">Add Candidate</button>
+    <button onclick="resetVotes()">Reset All Votes</button>
+    <button onclick="publishWinner()">Publish Winner</button>
 
     <h3>Manage Candidates</h3>
     <ul id="candidateList"></ul>
@@ -74,13 +65,6 @@
     <h3>Manage Votes</h3>
     <button onclick="loadVotesAdmin()">Load Votes</button>
     <ul id="voteListAdmin"></ul>
-
-    <h3>Publish Winner</h3>
-    <button onclick="publishWinner()">Publish Winner</button>
-
-    <h3>Set Voting Time</h3>
-    <input type="datetime-local" id="endTime">
-    <button onclick="setVotingEndTime()">Set End Time</button>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -88,11 +72,9 @@
     <ul id="voteList"></ul>
   </div>
 
-  <!-- Firebase SDK -->
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -109,8 +91,6 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    const winnerDocRef = doc(db, "meta", "winner");
-    const settingsDocRef = doc(db, "meta", "settings");
 
     window.signInAdmin = async () => {
       const result = await signInWithPopup(auth, provider);
@@ -124,11 +104,24 @@
 
     window.signInUser = async () => {
       const result = await signInWithPopup(auth, provider);
-      if (!result.user.email.endsWith("@diu.edu.bd")) {
+      const uid = result.user.uid;
+      const email = result.user.email;
+
+      const winnerDoc = await getDoc(doc(db, "winner", "published"));
+      if (winnerDoc.exists()) {
+        document.getElementById("voteSection").style.display = "none";
+        document.getElementById("winnerSection").style.display = "block";
+        const winner = winnerDoc.data().name;
+        document.getElementById("winnerDisplay").innerText = `🎉 ${winner}`;
+        return;
+      }
+
+      if (!email.endsWith("@diu.edu.bd")) {
         alert("Only DIU emails are allowed to vote");
         return;
       }
-      checkWinnerAndShow(result.user.uid);
+      document.getElementById("voteSection").style.display = "block";
+      loadVotes(uid);
     };
 
     window.addCandidate = async () => {
@@ -157,17 +150,39 @@
       loadCandidates();
     };
 
-    window.vote = async (candidateId, uid) => {
+    window.loadVotes = async (uid) => {
+      const list = document.getElementById("voteList");
+      list.innerHTML = "";
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
-      if (votedSnap.exists()) return;
+      const candidatesSnap = await getDocs(collection(db, "candidates"));
+
+      candidatesSnap.forEach(docSnap => {
+        const c = docSnap.data();
+        const id = docSnap.id;
+        if (votedSnap.exists() && votedSnap.data().candidateId === id) {
+          list.innerHTML += `<li><img src="${c.photoURL}" width="50"> <b>${c.name}</b> ✅ You voted</li>`;
+        } else if (!votedSnap.exists()) {
+          list.innerHTML += `<li><img src="${c.photoURL}" width="50"> <b>${c.name}</b> <button onclick="vote('${id}', '${uid}')">Vote</button></li>`;
+        }
+      });
+
+      if (votedSnap.exists()) {
+        list.innerHTML += "<p>You have already voted.</p>";
+      }
+    };
+
+    window.vote = async (candidateId, uid) => {
+      const votedRef = doc(db, "votes", uid);
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user.email;
       await setDoc(votedRef, { uid, candidateId, email: userEmail });
+
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
       const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
+
       alert("Vote submitted");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
     };
@@ -180,50 +195,8 @@
         const v = docSnap.data();
         list.innerHTML += `<li>
           <b>UID:</b> ${v.uid} <br>
-          <b>Email:</b> [hidden] <br>
+          <b>Email:</b> ${v.email} <br>
           <b>Candidate ID:</b> ${v.candidateId}
-        </li>`;
-      });
-    };
-
-    window.checkWinnerAndShow = async (uid) => {
-      const winnerSnap = await getDoc(winnerDocRef);
-      const now = new Date();
-      const configSnap = await getDoc(settingsDocRef);
-      const voteSection = document.getElementById("voteSection");
-      voteSection.innerHTML = "";
-
-      if (winnerSnap.exists()) {
-        const winner = winnerSnap.data();
-        voteSection.innerHTML = `
-          <h2>🏆 Voting Result</h2>
-          <p>Winner: <strong>${winner.name}</strong></p>
-          <img src="${winner.photoURL}" width="100">`;
-        voteSection.style.display = "block";
-      } else if (configSnap.exists() && new Date(configSnap.data().endTime) < now) {
-        voteSection.innerHTML = `<p>⏳ Voting period has ended. Please wait for result.</p>`;
-        voteSection.style.display = "block";
-      } else {
-        loadVotes(uid);
-        voteSection.style.display = "block";
-      }
-    };
-
-    window.loadVotes = async (uid) => {
-      const list = document.getElementById("voteList");
-      list.innerHTML = "";
-      const votedRef = doc(db, "votes", uid);
-      const votedSnap = await getDoc(votedRef);
-      if (votedSnap.exists()) {
-        list.innerHTML = "<p>You have already voted.</p>";
-        return;
-      }
-      const snap = await getDocs(collection(db, "candidates"));
-      snap.forEach(docSnap => {
-        const c = docSnap.data();
-        list.innerHTML += `<li>
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
-          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
         </li>`;
       });
     };
@@ -231,27 +204,31 @@
     window.publishWinner = async () => {
       const snap = await getDocs(collection(db, "candidates"));
       let maxVotes = -1;
-      let winner = null;
+      let winner = "";
       snap.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.votes > maxVotes) {
-          maxVotes = data.votes;
-          winner = { name: data.name, photoURL: data.photoURL };
+        const c = docSnap.data();
+        if (c.votes > maxVotes) {
+          maxVotes = c.votes;
+          winner = c.name;
         }
       });
-      if (winner) {
-        await setDoc(winnerDocRef, winner);
-        alert(`Winner published: ${winner.name}`);
-      } else {
-        alert("No candidates found.");
-      }
+      await setDoc(doc(db, "winner", "published"), { name: winner });
+      alert(`Winner published: ${winner}`);
     };
 
-    window.setVotingEndTime = async () => {
-      const time = document.getElementById("endTime").value;
-      if (!time) return alert("Please select a valid time");
-      await setDoc(settingsDocRef, { endTime: time });
-      alert("Voting end time set");
+    window.resetVotes = async () => {
+      const votesSnap = await getDocs(collection(db, "votes"));
+      for (let v of votesSnap.docs) {
+        await deleteDoc(doc(db, "votes", v.id));
+      }
+
+      const cSnap = await getDocs(collection(db, "candidates"));
+      for (let c of cSnap.docs) {
+        await updateDoc(doc(db, "candidates", c.id), { votes: 0 });
+      }
+
+      await setDoc(doc(db, "winner", "published"), { name: "" });
+      alert("Votes reset.");
     };
   </script>
 </body>
