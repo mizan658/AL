@@ -130,38 +130,37 @@
 
     let currentUser;
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) currentUser = user;
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+
+        if (user.email === "252-35-007@diu.edu.bd") {
+          document.getElementById("adminPanel").style.display = "block";
+          loadCandidates();
+        } else if (user.email.endsWith("@diu.edu.bd")) {
+          const deadlineSnap = await getDoc(doc(db, "settings", "votingDeadline"));
+          const now = new Date();
+          if (deadlineSnap.exists()) {
+            const deadline = new Date(deadlineSnap.data().endTime);
+            if (now > deadline) {
+              alert("Voting time has ended.");
+              return;
+            }
+          }
+          document.getElementById("voteSection").style.display = "block";
+          loadVotes(user.uid);
+        } else {
+          alert("Only DIU emails are allowed");
+        }
+      }
     });
 
     window.signInAdmin = async () => {
-      const result = await signInWithPopup(auth, provider);
-      if (result.user.email === "252-35-007@diu.edu.bd") {
-        document.getElementById("adminPanel").style.display = "block";
-        loadCandidates();
-      } else {
-        alert("Access denied: Not an admin");
-      }
+      await signInWithPopup(auth, provider);
     };
 
     window.signInUser = async () => {
-      const result = await signInWithPopup(auth, provider);
-      if (!result.user.email.endsWith("@diu.edu.bd")) {
-        alert("Only DIU emails are allowed to vote");
-        return;
-      }
-      currentUser = result.user;
-      const deadlineSnap = await getDoc(doc(db, "settings", "votingDeadline"));
-      const now = new Date();
-      if (deadlineSnap.exists()) {
-        const deadline = new Date(deadlineSnap.data().endTime);
-        if (now > deadline) {
-          alert("Voting time has ended.");
-          return;
-        }
-      }
-      document.getElementById("voteSection").style.display = "block";
-      loadVotes(result.user.uid);
+      await signInWithPopup(auth, provider);
     };
 
     window.addCandidate = async () => {
