@@ -5,11 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Voting System</title>
   <style>
-    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; }
+    body { background: #0f0f0f; color: white; font-family: Arial, sans-serif; padding: 20px; }
     .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
     #adminPanel, #voteSection { margin-top: 20px; padding: 15px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
     input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
-    img { border-radius: 10px; }
+    img { border-radius: 10px; max-width: 100px; }
+    .candidate-item { display: flex; align-items: center; margin: 10px 0; }
+    .candidate-item img { margin-right: 15px; }
+    .candidate-info { flex: 1; }
+    .candidate-info h3 { margin: 0; font-size: 1.2em; }
+    .candidate-info p { margin: 5px 0; color: #bbb; }
+    .candidate-info button { background-color: #4CAF50; }
   </style>
 </head>
 <body>
@@ -25,6 +31,7 @@
     <h2>Admin Panel</h2>
     <input type="text" id="candidateName" placeholder="Candidate Name">
     <input type="text" id="candidatePhoto" placeholder="Photo URL">
+    <textarea id="candidateBio" placeholder="Candidate Bio" rows="4" style="width:100%"></textarea>
     <button onclick="addCandidate()">Add Candidate</button>
 
     <h3>Manage Candidates</h3>
@@ -32,8 +39,8 @@
 
     <h3>Manage Votes</h3>
     <button onclick="loadVotesAdmin()">Load Votes</button>
-    <button onclick="resetVotes()">Reset Votes</button> <!-- Reset Votes Button -->
     <ul id="voteListAdmin"></ul>
+    <button onclick="resetVotes()">Reset Votes</button>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -45,7 +52,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -86,8 +93,9 @@
     window.addCandidate = async () => {
       const name = document.getElementById("candidateName").value;
       const photo = document.getElementById("candidatePhoto").value;
-      if (!name) return alert("Enter a name");
-      await addDoc(collection(db, "candidates"), { name, photoURL: photo, votes: 0 });
+      const bio = document.getElementById("candidateBio").value;
+      if (!name || !bio) return alert("Enter a name and bio");
+      await addDoc(collection(db, "candidates"), { name, photoURL: photo, bio, votes: 0 });
       loadCandidates();
     };
 
@@ -97,10 +105,16 @@
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        list.innerHTML += `<li>
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
-          <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
-        </li>`;
+        list.innerHTML += `
+          <li class="candidate-item">
+            <img src="${c.photoURL}" width="100">
+            <div class="candidate-info">
+              <h3>${c.name}</h3>
+              <p>${c.bio}</p>
+              <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
+            </div>
+          </li>
+        `;
       });
     };
 
@@ -121,22 +135,27 @@
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        list.innerHTML += `<li>
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
-          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
-        </li>`;
+        list.innerHTML += `
+          <li class="candidate-item">
+            <img src="${c.photoURL}" width="50">
+            <div class="candidate-info">
+              <h3>${c.name}</h3>
+              <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
+            </div>
+          </li>
+        `;
       });
     };
 
     window.vote = async (candidateId, uid) => {
       const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user.email;  // Get the user's email
+      const userEmail = result.user.email;
 
       const votedRef = doc(db, "votes", uid);
       await addDoc(collection(db, "votes"), { 
         uid, 
         candidateId,
-        email: userEmail  // Store the email with the vote
+        email: userEmail 
       });
 
       const cRef = doc(db, "candidates", candidateId);
@@ -158,24 +177,18 @@
           <b>UID:</b> ${v.uid} <br>
           <b>Email:</b> ${v.email} <br>
           <b>Candidate ID:</b> ${v.candidateId} <br>
-          <b>Voted Candidate:</b> ${v.candidateId} <!-- Show Candidate Name -->
+          <b>Voted for:</b> ${v.candidateId} <br>
         </li>`;
       });
     };
 
     window.resetVotes = async () => {
       const votesSnap = await getDocs(collection(db, "votes"));
-      votesSnap.forEach(docSnap => {
-        deleteDoc(doc(db, "votes", docSnap.id));
+      votesSnap.forEach(async (docSnap) => {
+        await deleteDoc(doc(db, "votes", docSnap.id));
       });
-
-      // Reset candidate votes
-      const candidatesSnap = await getDocs(collection(db, "candidates"));
-      candidatesSnap.forEach(async docSnap => {
-        await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
-      });
-
-      alert("Votes have been reset! You can now start a new voting round.");
+      loadCandidates();  // Reload candidate list after resetting votes
+      alert("Votes reset.");
     };
   </script>
 
