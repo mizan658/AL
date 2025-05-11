@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - DIU Private Portal</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .profile-container {
+      text-align: center;
+      padding: 20px;
+      border-radius: 8px;
+      background: #333;
+      width: 80%;
+      max-width: 600px;
+    }
+    button {
+      background: #00bfff;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background: #007bff;
+    }
+    .profile-info {
+      margin: 20px 0;
+    }
+    .bio {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      background: #444;
+    }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h1>Welcome to Your Profile</h1>
+    <div class="profile-info">
+      <p><strong>User ID:</strong> <span id="userId">Loading...</span></p>
+      <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+    </div>
+    
+    <div class="bio">
+      <h2>Bio:</h2>
+      <textarea id="bioText" rows="5" cols="50" placeholder="Write a little about yourself..."></textarea>
+    </div>
+    
+    <div class="profile-buttons">
+      <button id="voteBtn">Vote</button>
+      <button id="chatBtn">Join Chat Group</button>
+    </div>
+
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+    // Firebase config directly added here
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
+      authDomain: "notice-8edc7.firebaseapp.com",
+      projectId: "notice-8edc7",
+      storageBucket: "notice-8edc7.firebasestorage.app",
+      messagingSenderId: "948590141987",
+      appId: "1:948590141987:web:a9af8252e98f2933f40796",
+      measurementId: "G-DSM883VQPT"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Monitor Auth State
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        const userEmail = user.email;
+        const userId = user.uid;
+
+        // Display user information
+        document.getElementById('userEmail').textContent = userEmail;
+        document.getElementById('userId').textContent = userId;
+
+      } else {
+        // User is not signed in, redirect to login page
+        window.location.href = "signup.html";
+      }
+    });
+
+    // Logout Function
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = "signup.html";
+      }).catch((error) => {
+        console.error("Logout error: ", error);
+      });
+    });
+
+    // Vote Button
+    document.getElementById('voteBtn').addEventListener('click', () => {
+      alert('You voted!');
+      // Add actual voting logic here
+    });
+
+    // Chat Button
+    document.getElementById('chatBtn').addEventListener('click', () => {
+      alert('Join the chat group!');
+      // Add actual chat group logic here
+    });
+  </script>
+</body>
+</html>
