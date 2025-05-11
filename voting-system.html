@@ -3,60 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voting Platform</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
-    .fade-in { animation: fadeIn 1s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
-</head>
-<body class="p-4">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-4xl font-bold fade-in">Vote for Your Candidate</h1>
-    <button id="adminLogin" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600 fade-in">Admin Login</button>
-  </div>
-
-  <div id="userSection" class="mb-4 fade-in">
-    <button id="userLogin" class="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">Login with DIU Email</button>
-  </div>
-
-  <div id="voteTimer" class="text-lg font-semibold mb-4 fade-in hidden"></div>
-
-  <div id="candidatesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 fade-in">
-    <!-- Candidates will be dynamically loaded here -->
-  </div>
-
-  <div id="adminPanel" class="mt-8 hidden fade-in">
-    <h2 class="text-2xl font-bold mb-4">Admin Panel</h2>
-    <form id="addCandidateForm" class="bg-gray-800 p-4 rounded mb-4">
-      <input type="text" id="candidateName" placeholder="Candidate Name" class="p-2 mb-2 w-full rounded text-black" required>
-      <input type="file" id="candidatePhoto" accept="image/*" class="mb-2 w-full" required>
-      <button type="submit" class="bg-green-500 px-4 py-2 rounded hover:bg-green-600">Add Candidate</button>
-    </form>
-
-    <div class="mb-4">
-      <label for="voteEndTime" class="block mb-2">Set Voting End Time:</label>
-      <input type="datetime-local" id="voteEndTime" class="text-black p-2 rounded">
-      <button id="setTimer" class="ml-2 bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">Set Timer</button>
-    </div>
-
-    <div id="adminCandidateList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Admin candidate controls here -->
-    </div>
-  </div>
-
-  <!-- Firebase JS SDKs -->
+  <title>Voting System</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
       authDomain: "voting-app-2b276.firebaseapp.com",
       projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.appspot.com",
+      storageBucket: "voting-app-2b276.firebasestorage.app",
       messagingSenderId: "699531517654",
       appId: "1:699531517654:web:785702f843d21a85c17377",
       measurementId: "G-309D0KG6KL"
@@ -66,31 +22,76 @@
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
 
-    const adminEmail = "252-35-007@diu.edu.bd";
+    window.signInAsVoter = () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          if (user.email.endsWith("@diu.edu.bd")) {
+            alert("Welcome voter: " + user.email);
+            // Continue to voting logic
+          } else {
+            alert("Only @diu.edu.bd emails are allowed.");
+            signOut(auth);
+          }
+        })
+        .catch((error) => {
+          alert("Google Sign-In failed.");
+          console.error(error);
+        });
+    };
 
-    document.getElementById("userLogin").addEventListener("click", () => {
-      signInWithPopup(auth, provider).then((result) => {
-        const user = result.user;
-        if (user.email.endsWith("@diu.edu.bd") && user.email !== adminEmail) {
-          alert("Welcome, you can now vote.");
-          // Load voting section
-        } else {
-          alert("Only DIU users are allowed to vote.");
-        }
-      }).catch((error) => alert(error.message));
-    });
-
-    document.getElementById("adminLogin").addEventListener("click", () => {
-      signInWithPopup(auth, provider).then((result) => {
-        const user = result.user;
-        if (user.email === adminEmail) {
-          alert("Admin access granted.");
-          document.getElementById("adminPanel").classList.remove("hidden");
-        } else {
-          alert("Only the admin can access this panel.");
-        }
-      }).catch((error) => alert(error.message));
-    });
+    window.signInAsAdmin = () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          if (user.email === "252-35-007@diu.edu.bd") {
+            alert("Welcome admin: " + user.email);
+            // Continue to admin panel
+          } else {
+            alert("You are not authorized as an admin.");
+            signOut(auth);
+          }
+        })
+        .catch((error) => {
+          alert("Admin Sign-In failed.");
+          console.error(error);
+        });
+    };
   </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #121212;
+      color: #ffffff;
+    }
+    .btn {
+      background: #6200ea;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+    }
+    .top-right {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-right">
+    <button class="btn" onclick="signInAsAdmin()">Admin Login</button>
+  </div>
+  <h1>Vote for Your Candidate</h1>
+  <button class="btn" onclick="signInAsVoter()">Login with DIU Mail to Vote</button>
 </body>
 </html>
