@@ -126,7 +126,8 @@
     <h1>Welcome to Private Student Server</h1>
     <p id="user-id">Please login first.</p> <!-- This will show user id after login -->
 
-    <div class="buttons">
+    <div class="buttons" id="buttons-section">
+      <!-- These buttons will be hidden until the user is logged in -->
       <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
       <button onclick="showRules()" class="rules-btn">Rules and Regulations</button>
       <a href="https://mizan658.github.io/AL/signup.html" class="login-btn">Login/Sign Up</a>
@@ -177,11 +178,11 @@
       if (user) {
         // If the user is logged in, update the UI
         document.getElementById("user-id").innerText = `User ID: ${user.uid}`;
-        document.querySelector(".buttons").style.display = 'block';  // Show buttons if logged in
+        document.getElementById("buttons-section").style.display = 'block';  // Show buttons if logged in
       } else {
         // If no user is logged in, prompt to log in
         document.getElementById("user-id").innerText = 'Please login first.';
-        document.querySelector(".buttons").style.display = 'none'; // Hide buttons if not logged in
+        document.getElementById("buttons-section").style.display = 'none'; // Hide buttons if not logged in
       }
     });
 
