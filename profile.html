@@ -1,99 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>User Profile</title>
+  <meta charset="UTF-8" />
+  <title>My Profile - DIU Private Portal</title>
   <style>
     body {
-      background-color: #18191a;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #18191a;
       color: #e4e6eb;
+      font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .profile-box {
-      background-color: #242526;
       padding: 30px;
-      border-radius: 12px;
-      width: 400px;
+    }
+    .profile-card {
+      background: #242526;
+      border-radius: 10px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
-    .profile-header {
-      font-size: 24px;
-      font-weight: bold;
-      color: #ffffff;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .blurred-email {
-      filter: blur(5px);
+    h1 {
       margin-bottom: 10px;
+    }
+    .blurred {
+      filter: blur(6px);
     }
     textarea {
       width: 100%;
       height: 80px;
-      background-color: #3a3b3c;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 10px;
-      color: white;
-      resize: none;
-    }
-    .btn {
-      display: block;
-      width: 100%;
+      font-size: 14px;
       margin-top: 10px;
-      padding: 10px;
-      background-color: #3a3b3c;
-      color: #e4e6eb;
+    }
+    button {
+      background: #3a86ff;
+      color: white;
       border: none;
-      border-radius: 8px;
+      padding: 10px 16px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 16px;
+      margin-top: 10px;
     }
-    .btn:hover {
-      background-color: #4e4f50;
+    button:hover {
+      background: #265dd8;
     }
-    .nav-links {
+    .links {
       margin-top: 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    .nav-links a {
+    .links a {
+      background: #3a3b3c;
+      padding: 10px;
+      border-radius: 6px;
       text-decoration: none;
+      color: #e4e6eb;
+      text-align: center;
+    }
+    .links a:hover {
+      background: #4e4f50;
     }
   </style>
 </head>
 <body>
-  <div class="profile-box">
-    <div class="profile-header">User Profile</div>
-    <div class="blurred-email" id="userEmail">Loading email...</div>
-    <div><strong>User ID:</strong> <span id="userID"></span></div>
-    <div style="margin-top: 10px;"><strong>Your Bio:</strong></div>
-    <textarea id="bioInput" placeholder="Write about yourself..."></textarea>
-    <button class="btn" id="saveBioBtn">Save Bio</button>
-    <div class="nav-links">
-      <a href="#"><button class="btn">Chat Group</button></a>
-      <a href="#"><button class="btn">Voting</button></a>
-      <a href="https://mizan658.github.io/AL/notice.html"><button class="btn">Notice</button></a>
-      <button class="btn" id="logoutBtn">Logout</button>
+  <div class="profile-card">
+    <h1>Welcome to Your Profile</h1>
+    <p><strong>User ID:</strong> <span id="uid"></span></p>
+    <p><strong>Email:</strong> <span class="blurred" id="email"></span></p>
+    
+    <label for="bio">Your Bio (no name, number, code, or email):</label>
+    <textarea id="bio" placeholder="Write about yourself..."></textarea>
+    <button id="saveBio">Save Bio</button>
+
+    <div class="links">
+      <a href="#" id="chatLink">Join Chat Group</a>
+      <a href="#" id="voteLink">Vote Now</a>
+      <a href="https://mizan658.github.io/AL/notice.html" target="_blank">View Notices</a>
+      <button id="logoutBtn">Logout</button>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
       projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.appspot.com",
+      storageBucket: "notice-8edc7.firebasestorage.app",
       messagingSenderId: "948590141987",
       appId: "1:948590141987:web:a9af8252e98f2933f40796",
       measurementId: "G-DSM883VQPT"
@@ -101,32 +102,39 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
+    const db = getFirestore(app);
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("userEmail").textContent = user.email;
-        document.getElementById("userID").textContent = user.uid;
+    const uidSpan = document.getElementById("uid");
+    const emailSpan = document.getElementById("email");
+    const bioInput = document.getElementById("bio");
+    const saveBtn = document.getElementById("saveBio");
 
-        const userRef = ref(db, 'users/' + user.uid);
-        get(userRef).then((snapshot) => {
-          if (snapshot.exists() && snapshot.val().bio) {
-            document.getElementById("bioInput").value = snapshot.val().bio;
+    onAuthStateChanged(auth, async (user) => {
+      if (user && user.email.endsWith("@diu.edu.bd")) {
+        uidSpan.textContent = user.uid;
+        emailSpan.textContent = user.email;
+
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.bio) bioInput.value = data.bio;
+        }
+
+        saveBtn.onclick = async () => {
+          const bio = bioInput.value.trim();
+          const invalid = /(\d{3,}|@|code|name|email)/i;
+          if (invalid.test(bio)) {
+            alert("Do not include name, number, code, or email.");
+            return;
           }
-        });
+          await setDoc(docRef, { bio }, { merge: true });
+          alert("Bio saved!");
+        };
+
       } else {
         window.location.href = "signup.html";
-      }
-    });
-
-    document.getElementById("saveBioBtn").addEventListener("click", () => {
-      const user = auth.currentUser;
-      const bio = document.getElementById("bioInput").value.trim();
-      if (user && bio.length <= 250) {
-        set(ref(db, 'users/' + user.uid), {
-          email: user.email,
-          bio: bio
-        });
       }
     });
 
