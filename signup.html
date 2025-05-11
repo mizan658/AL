@@ -37,10 +37,11 @@
   <p class="error" id="errorMsg"></p>
 
   <script type="module">
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
+    // Firebase config directly added here
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
@@ -51,34 +52,21 @@
       measurementId: "G-DSM883VQPT"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
 
+    // Google Sign-In Logic
     document.getElementById("googleSignInBtn").addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
           if (user.email.endsWith("@diu.edu.bd")) {
-            // Generate a unique user ID (e.g., user.uid or a custom unique ID)
-            const userId = user.uid;
-
-            // Store user info in Firestore
-            setDoc(doc(db, "users", userId), {
-              email: user.email,
-              userId: userId,
-              createdAt: new Date(),
-            })
-            .then(() => {
-              // Redirect to user profile page
-              window.location.href = `profile.html?uid=${userId}`;
-            })
-            .catch((error) => {
-              console.error(error);
-              document.getElementById("errorMsg").textContent = "Error saving user data.";
-            });
+            // Redirect to profile page
+            window.location.href = "profile.html";
           } else {
+            // Not a DIU email
             signOut(auth);
             document.getElementById("errorMsg").textContent = "Only @diu.edu.bd emails are allowed.";
           }
