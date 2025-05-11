@@ -89,6 +89,23 @@
         alert("Only DIU emails are allowed to vote");
         return;
       }
+      const email = result.user.email;
+
+      // Check if the user has already voted
+      const votesRef = collection(db, "votes");
+      const snapshot = await getDocs(votesRef);
+      let alreadyVoted = false;
+      snapshot.forEach(docSnap => {
+        if (docSnap.data().email === email) {
+          alreadyVoted = true;
+        }
+      });
+
+      if (alreadyVoted) {
+        alert("You have already voted!");
+        return;
+      }
+
       document.getElementById("voteSection").style.display = "block";
       loadVotes(result.user.uid);
     };
@@ -129,12 +146,6 @@
     window.loadVotes = async (uid) => {
       const list = document.getElementById("voteList");
       list.innerHTML = "";
-      const votedRef = doc(db, "votes", uid);
-      const votedSnap = await getDoc(votedRef);
-      if (votedSnap.exists()) {
-        list.innerHTML = "<p>You have already voted.</p>";
-        return;
-      }
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
@@ -154,7 +165,21 @@
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user.email;
 
-      const votedRef = doc(db, "votes", uid);
+      const votedRef = collection(db, "votes");
+      const snapshot = await getDocs(votedRef);
+      let alreadyVoted = false;
+      snapshot.forEach(docSnap => {
+        if (docSnap.data().email === userEmail) {
+          alreadyVoted = true;
+        }
+      });
+
+      if (alreadyVoted) {
+        alert("You have already voted!");
+        return;
+      }
+
+      // Record the vote
       await addDoc(collection(db, "votes"), { 
         uid, 
         candidateId,
