@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -28,11 +27,12 @@
     <input type="text" id="candidatePhoto" placeholder="Photo URL">
     <button onclick="addCandidate()">Add Candidate</button>
 
-```
-<h3>Manage Candidates</h3>
-<ul id="candidateList"></ul>
-```
+    <h3>Manage Candidates</h3>
+    <ul id="candidateList"></ul>
 
+    <h3>Manage Votes</h3>
+    <button onclick="loadVotesAdmin()">Load Votes</button>
+    <ul id="voteListAdmin"></ul>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -128,14 +128,37 @@
     };
 
     window.vote = async (candidateId, uid) => {
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user.email;  // Get the user's email
+
       const votedRef = doc(db, "votes", uid);
-      await addDoc(collection(db, "votes"), { uid, candidateId });
+      await addDoc(collection(db, "votes"), { 
+        uid, 
+        candidateId,
+        email: userEmail  // Store the email with the vote
+      });
+
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
       const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
+
       alert("Vote submitted");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
+    };
+
+    window.loadVotesAdmin = async () => {
+      const list = document.getElementById("voteListAdmin");
+      list.innerHTML = "";
+      const snap = await getDocs(collection(db, "votes"));
+      snap.forEach(docSnap => {
+        const v = docSnap.data();
+        list.innerHTML += `<li>
+          <b>UID:</b> ${v.uid} <br>
+          <b>Email:</b> ${v.email} <br>
+          <b>Candidate ID:</b> ${v.candidateId}
+        </li>`;
+      });
     };
   </script>
 
