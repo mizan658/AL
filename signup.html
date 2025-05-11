@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sign Up - DIU Private Portal</title>
+  <title>DIU Portal - Google Sign-In</title>
   <style>
     body {
       background: black;
@@ -32,16 +32,15 @@
   </style>
 </head>
 <body>
-  <h1>Sign Up with Google (DIU Email Only)</h1>
-  <button id="googleSignInBtn">Sign Up with Google</button>
+  <h1>DIU Private Portal</h1>
+  <button id="googleSignInBtn">Sign In with DIU Email</button>
   <p class="error" id="errorMsg"></p>
 
   <script type="module">
-    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
-    // Firebase config directly added here
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
@@ -52,21 +51,18 @@
       measurementId: "G-DSM883VQPT"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Google Sign-In Logic
     document.getElementById("googleSignInBtn").addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
           if (user.email.endsWith("@diu.edu.bd")) {
-            // Redirect to password setup page with email in URL
-            window.location.href = "password-setup.html?email=" + encodeURIComponent(user.email);
+            // Redirect to profile.html
+            window.location.href = "profile.html?uid=" + user.uid;
           } else {
-            // Not a DIU email
             signOut(auth);
             document.getElementById("errorMsg").textContent = "Only @diu.edu.bd emails are allowed.";
           }
