@@ -68,10 +68,6 @@
       animation: slideIn 1s ease-out;
     }
 
-    #loginPanel {
-      animation: fadeIn 1s ease-in-out;
-    }
-
     #adminPanel { 
       animation: fadeIn 1.5s ease-in-out;
     }
@@ -129,14 +125,13 @@
     const auth = getAuth(app);
 
     const allowedAdmins = [
-      atob("bWl6YW5oaWtpNmBAZ21haWwuY29t"), // mizanhiki6@gmail.com (Base64 encoded)
-      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ==") // ahamed.to.tipak@gmail.com (Base64 encoded)
+      atob("MjUyLTM1LTAwN0BkaXUuZWR1LmJk"),
+      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ==")
     ];
 
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const editorPanel = document.getElementById("editorPanel");
-    const loginPanel = document.getElementById("loginPanel");
     const adminPanel = document.getElementById("adminPanel");
     const loadingSpinner = document.getElementById("loadingSpinner"); // Spinner element
 
@@ -146,10 +141,10 @@
         const result = await signInWithPopup(auth, provider);
         const userEmail = result.user.email;
         if (allowedAdmins.includes(userEmail)) {
-          loginPanel.style.display = "none";
           editorPanel.style.display = "block";
+          adminPanel.style.display = "none";
         } else {
-          alert("⛔ Access denied. Only admins can log in.");
+          alert("⛔ Access denied. only admin can login.");
           signOut(auth);
         }
       } catch (error) {
@@ -157,11 +152,7 @@
       }
     };
 
-    logoutBtn.onclick = () => {
-      signOut(auth);
-      loginPanel.style.display = "block";
-      editorPanel.style.display = "none";
-    };
+    logoutBtn.onclick = () => signOut(auth);
 
     const noticeForm = document.getElementById("noticeForm");
     const noticesDiv = document.getElementById("notices");
@@ -182,7 +173,7 @@
           ${allowedAdmins.includes(auth.currentUser?.email) ? 
             `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
              <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` : 
-             `<p>Only admin can edit and delete notices.</p>`}
+             <p>Only admin can edit and delete notices.</p>}
         `;
         noticesDiv.appendChild(div);
       });
@@ -227,11 +218,11 @@
 
     onAuthStateChanged(auth, (user) => {
       if (user && allowedAdmins.includes(user.email)) {
-        loginPanel.style.display = "none";
         editorPanel.style.display = "block";
+        adminPanel.style.display = "none";
       } else {
-        loginPanel.style.display = "block";
         editorPanel.style.display = "none";
+        adminPanel.style.display = "block";
       }
       loadNotices();
     });
@@ -241,16 +232,11 @@
   <h1>📢 Notices</h1>
   <div id="notices"></div>
   <div id="loadingSpinner"></div> <!-- Loading Spinner -->
-
-  <!-- Separate Login Panel -->
-  <div id="loginPanel">
-    <h2>Admin Login</h2>
-    <p>Please log in to manage notices:</p>
+  <div id="adminPanel">
+    <p>Admin login required</p>
     <button id="loginBtn">Login with Google</button>
   </div>
-
-  <!-- Editor Panel (Visible after login) -->
-  <div id="editorPanel" style="display: none;">
+  <div id="editorPanel">
     <button id="logoutBtn">Logout</button>
     <form id="noticeForm">
       <input type="text" name="title" placeholder="Notice Title" required><br>
@@ -258,10 +244,11 @@
       <button type="submit">Add Notice</button>
     </form>
   </div>
-
   <footer>
     <p>Contact: ahamed.to.tipak@gmail.com</p>
-    <a href="https://mizan658.github.io/AL/index.html" style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: white; padding: 10px; text-decoration: none;">Home</a>
+<a href="https://mizan658.github.io/AL/index.html" style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: black; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+  Home
+</a>
   </footer>
 </body>
 </html>
