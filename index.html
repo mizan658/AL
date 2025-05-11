@@ -173,16 +173,18 @@
     const db = firebase.firestore();
 
     // Check if the user is logged in
-    auth.onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        // If user is logged in, display user ID
+        // If the user is logged in, update the UI
         document.getElementById("user-id").innerText = `User ID: ${user.uid}`;
+        document.querySelector(".buttons").style.display = 'block';  // Show buttons if logged in
       } else {
-        // If user is not logged in, prompt to log in
+        // If no user is logged in, prompt to log in
         document.getElementById("user-id").innerText = 'Please login first.';
+        document.querySelector(".buttons").style.display = 'none'; // Hide buttons if not logged in
       }
     });
-    
+
     function showRules() {
       document.getElementById('main-section').style.display = 'none';
       document.getElementById('rules-section').style.display = 'block';
