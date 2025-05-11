@@ -21,13 +21,16 @@
 </head>
 <body>
 
-  <h3 style="text-align: center; color: #00ff00; text-shadow: 0 0 10px #00ff00;">
+  <h4 style="text-align: center; color: #00ff00; text-shadow: 0 0 10px #00ff00;">
   Welcome to Private Voting System
-</h3>
+</h4>
+
+<button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
+<button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
 
 
   <div>
-    <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
+    <button class="user-btn" onclick="signInUser()">Sign in with<br><span>DIU Mail to Vote</span></button>
     <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
   </div>
 
@@ -138,7 +141,7 @@
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
       if (votedSnap.exists()) {
-        list.innerHTML = "<p>You have already voted.</p>";
+        list.innerHTML = "<p>You have already voted.Wait for result.</p>";
         return;
       }
       const snap = await getDocs(collection(db, "candidates"));
@@ -165,7 +168,7 @@
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
       if (votedSnap.exists()) {
-        alert("You have already voted.");
+        alert("You have already voted.Wait for result.");
         return;
       }
 
@@ -178,7 +181,8 @@
       await updateDoc(cRef, { votes: newVotes });
 
       alert("Vote submitted");
-      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
+      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a>
+</p>";
     };
 
     window.loadVotesAdmin = async () => {
