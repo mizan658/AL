@@ -68,6 +68,10 @@
       animation: slideIn 1s ease-out;
     }
 
+    #loginPanel {
+      animation: fadeIn 1s ease-in-out;
+    }
+
     #adminPanel { 
       animation: fadeIn 1.5s ease-in-out;
     }
@@ -125,12 +129,14 @@
     const auth = getAuth(app);
 
     const allowedAdmins = [
-      atob("bWl6YW5oaWtpNmBAZ21haWwuY29t") // Mizanhiki6@gmail.com Base64 encoded
+      atob("bWl6YW5oaWtpNmBAZ21haWwuY29t"), // mizanhiki6@gmail.com (Base64 encoded)
+      atob("YWhhbWVkLnRvLnRpcGFrQGdtYWlsLmNvbQ==") // ahamed.to.tipak@gmail.com (Base64 encoded)
     ];
 
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const editorPanel = document.getElementById("editorPanel");
+    const loginPanel = document.getElementById("loginPanel");
     const adminPanel = document.getElementById("adminPanel");
     const loadingSpinner = document.getElementById("loadingSpinner"); // Spinner element
 
@@ -140,10 +146,10 @@
         const result = await signInWithPopup(auth, provider);
         const userEmail = result.user.email;
         if (allowedAdmins.includes(userEmail)) {
+          loginPanel.style.display = "none";
           editorPanel.style.display = "block";
-          adminPanel.style.display = "none";
         } else {
-          alert("⛔ Access denied. only admin can login.");
+          alert("⛔ Access denied. Only admins can log in.");
           signOut(auth);
         }
       } catch (error) {
@@ -151,7 +157,11 @@
       }
     };
 
-    logoutBtn.onclick = () => signOut(auth);
+    logoutBtn.onclick = () => {
+      signOut(auth);
+      loginPanel.style.display = "block";
+      editorPanel.style.display = "none";
+    };
 
     const noticeForm = document.getElementById("noticeForm");
     const noticesDiv = document.getElementById("notices");
@@ -217,11 +227,11 @@
 
     onAuthStateChanged(auth, (user) => {
       if (user && allowedAdmins.includes(user.email)) {
+        loginPanel.style.display = "none";
         editorPanel.style.display = "block";
-        adminPanel.style.display = "none";
       } else {
+        loginPanel.style.display = "block";
         editorPanel.style.display = "none";
-        adminPanel.style.display = "block";
       }
       loadNotices();
     });
@@ -231,11 +241,16 @@
   <h1>📢 Notices</h1>
   <div id="notices"></div>
   <div id="loadingSpinner"></div> <!-- Loading Spinner -->
-  <div id="adminPanel">
-    <p>Admin login required</p>
+
+  <!-- Separate Login Panel -->
+  <div id="loginPanel">
+    <h2>Admin Login</h2>
+    <p>Please log in to manage notices:</p>
     <button id="loginBtn">Login with Google</button>
   </div>
-  <div id="editorPanel">
+
+  <!-- Editor Panel (Visible after login) -->
+  <div id="editorPanel" style="display: none;">
     <button id="logoutBtn">Logout</button>
     <form id="noticeForm">
       <input type="text" name="title" placeholder="Notice Title" required><br>
@@ -243,6 +258,7 @@
       <button type="submit">Add Notice</button>
     </form>
   </div>
+
   <footer>
     <p>Contact: ahamed.to.tipak@gmail.com</p>
     <a href="https://mizan658.github.io/AL/index.html" style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: white; padding: 10px; text-decoration: none;">Home</a>
