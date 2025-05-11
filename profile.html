@@ -1,150 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>User Profile - DIU Private Portal</title>
-  <style>
-    body {
-      background: #1a1a1a;
-      color: white;
-      font-family: 'Arial', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .profile-container {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      width: 350px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      text-align: center;
-    }
-    .profile-container h1 {
-      margin-bottom: 20px;
-      font-size: 24px;
-      color: #00bfff;
-    }
-    .profile-container p {
-      margin-top: 10px;
-      font-size: 18px;
-    }
-    input, textarea {
-      background: #333;
-      border: 1px solid #444;
-      color: white;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      width: 100%;
-      font-size: 16px;
-    }
-    button {
-      background: #00bfff;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background: #007bff;
-    }
-    .logout-btn {
-      background: #ff4d4d;
-      margin-top: 20px;
-    }
-    .logout-btn:hover {
-      background: #ff1a1a;
-    }
-    .error {
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
 </head>
 <body>
-  <div class="profile-container">
-    <h1>User Profile</h1>
-    <div id="userInfo">
-      <p><strong>Email:</strong> <span id="userEmail"></span></p>
-      <p><strong>User ID:</strong> <span id="userID"></span></p>
-      <p><strong>Bio:</strong></p>
-      <textarea id="bioInput" placeholder="Write about yourself..." rows="4"></textarea>
-      <button id="saveBioBtn">Save Bio</button>
-      <p class="error" id="bioError"></p>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
+    <!-- Google Sign-In Button -->
+    <button id="signUpBtn" onclick="signInWithGoogle()">Sign Up with Google</button>
+
+    <!-- Password Setup Form -->
+    <div id="passwordSetup" style="display:none;">
+        <h3>Set up your password</h3>
+        <form id="passwordForm">
+            <label for="password">Create Password:</label>
+            <input type="password" id="password" placeholder="Enter your password" required /><br><br>
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm your password" required /><br><br>
+            <button type="submit">Submit</button>
+        </form>
     </div>
-  </div>
 
-  <script type="module">
-    // Import Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
+            authDomain: "notice-8edc7.firebaseapp.com",
+            projectId: "notice-8edc7",
+            storageBucket: "notice-8edc7.firebasestorage.app",
+            messagingSenderId: "948590141987",
+            appId: "1:948590141987:web:a9af8252e98f2933f40796",
+            measurementId: "G-DSM883VQPT"
+        };
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-      authDomain: "notice-8edc7.firebaseapp.com",
-      projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.firebasestorage.app",
-      messagingSenderId: "948590141987",
-      appId: "1:948590141987:web:a9af8252e98f2933f40796",
-      measurementId: "G-DSM883VQPT"
-    };
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+        // Function to handle Google Sign-In
+        function signInWithGoogle() {
+            firebase.auth().signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    console.log("User signed in: ", user);
 
-    // Get current user information
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Show the user email and ID
-        document.getElementById("userEmail").textContent = user.email;
-        document.getElementById("userID").textContent = user.uid;
+                    // After Google Sign-In, show password setup
+                    document.getElementById('signUpBtn').style.display = 'none'; // Hide Google Sign-In button
+                    document.getElementById('passwordSetup').style.display = 'block'; // Show password setup form
 
-        // Allow user to edit bio if they are logged in
-        document.getElementById("bioInput").value = user.bio || ''; // If bio exists, prefill it
-      } else {
-        // Redirect if no user is logged in
-        window.location.href = "signup.html";
-      }
-    });
+                    // Store Google user info
+                    const email = user.email;
+                    localStorage.setItem('email', email);
+                })
+                .catch((error) => {
+                    console.error("Error during sign-in: ", error.message);
+                });
+        }
 
-    // Save Bio
-    document.getElementById("saveBioBtn").addEventListener("click", () => {
-      const user = auth.currentUser;
-      const bio = document.getElementById("bioInput").value;
+        // Function to handle password form submission
+        document.getElementById('passwordForm').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-      if (bio.length > 0 && bio.length <= 250) {
-        // Save bio to Firebase
-        set(ref(db, 'users/' + user.uid), {
-          email: user.email,
-          bio: bio,
-        }).then(() => {
-          alert("Bio saved successfully!");
-        }).catch((error) => {
-          console.error("Error saving bio: ", error);
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            const email = localStorage.getItem('email');
+            
+            // Create user with email and password
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("User created: ", user);
+
+                    // Redirect to profile page or show profile details
+                    window.location.href = '/profile.html'; // Replace with your profile page URL
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(errorMessage); // Show error message
+                    console.error("Error creating user: ", errorCode, errorMessage);
+                });
         });
-      } else {
-        document.getElementById("bioError").textContent = "Bio must be between 1 and 250 characters.";
-      }
-    });
-
-    // Logout functionality
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      signOut(auth).then(() => {
-        window.location.href = "signup.html"; // Redirect to sign-up page
-      }).catch((error) => {
-        console.error("Error signing out: ", error);
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
