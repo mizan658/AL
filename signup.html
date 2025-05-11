@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up - DIU Private Portal</title>
+  <script type="module" src="./firebase-config.js"></script>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    button {
+      background: #00bfff;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #007bff;
+    }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sign Up with Google (DIU Email Only)</h1>
+  <button id="googleSignInBtn">Sign Up with Google</button>
+  <p class="error" id="errorMsg"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { firebaseConfig } from './firebase-config.js';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    document.getElementById("googleSignInBtn").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          if (user.email.endsWith("@diu.edu.bd")) {
+            // Allow to continue to password setup
+            window.location.href = "password-setup.html?email=" + user.email;
+          } else {
+            // Block non-DIU users
+            signOut(auth);
+            document.getElementById("errorMsg").textContent = "Only @diu.edu.bd emails are allowed.";
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          document.getElementById("errorMsg").textContent = "Error signing in. Try again.";
+        });
+    });
+  </script>
+</body>
+</html>
