@@ -65,7 +65,7 @@
     <h1>Welcome to Private Student Server</h1>
     <p>This platform is for anonymous student voting and messaging.</p>
     <div class="buttons">
-      <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
+      <a href="#" class="notice-btn" id="notice-btn">Notice</a>
       <button onclick="showRules()" class="rules-btn">Rules and Regulations</button>
       <a href="https://mizan658.github.io/AL/signup.html" class="login-btn">Login/Sign Up</a>
       <a href="https://mizan658.github.io/AL/profile.html" class="signup-btn">Profile</a>
@@ -90,8 +90,7 @@
   <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "firebase/app";
-    import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-    import { getAnalytics } from "firebase/analytics";
+    import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -106,27 +105,27 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth();
 
-    // Listen to authentication state
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is logged in, you can perform other tasks here if needed
-      } else {
-        // User is not logged in
-      }
+    // Function to handle logging out and redirecting to the notice website
+    document.getElementById('notice-btn').addEventListener('click', () => {
+      // Sign out the user
+      signOut(auth).then(() => {
+        // Sign-out successful, now redirect to the notice website
+        window.location.href = "https://mizan658.github.io/AL/notice.html"; // Update with your notice page URL
+      }).catch((error) => {
+        console.error("Error signing out:", error);
+      });
     });
 
-    // Handle sign out
-    function logout() {
-      signOut(auth).then(() => {
-        // Sign-out successful
-        window.location.reload(); // Reload the page to reflect changes
-      }).catch((error) => {
-        console.error(error);
-      });
-    }
+    // Listen for authentication state changes
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, do something if needed
+      } else {
+        // User is signed out, do something if needed
+      }
+    });
   </script>
 </body>
 </html>
