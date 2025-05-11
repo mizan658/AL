@@ -5,19 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Voting System</title>
   <style>
-    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; text-align: center; }
-    .admin-btn, .user-btn, button { padding: 12px 18px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; transition: background 0.3s; }
-    .admin-btn:hover, .user-btn:hover, button:hover { background: #4682b4; }
-    #adminPanel, #voteSection, #winnerSection { margin-top: 20px; padding: 20px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
+    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; }
+    .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
+    #adminPanel, #voteSection { margin-top: 20px; padding: 15px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
     input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
-    img { border-radius: 10px; margin-right: 10px; }
-    .candidate-card { display: flex; align-items: center; justify-content: center; margin: 10px 0; background: #333; border-radius: 10px; padding: 15px; transition: transform 0.3s; }
-    .candidate-card:hover { transform: scale(1.05); }
-    .candidate-name { font-size: 18px; font-weight: bold; }
-    .candidate-bio { font-size: 14px; color: #bbb; margin-top: 5px; }
-    .vote-button { margin-left: auto; background-color: #32cd32; }
-    #voteListAdmin, #voteList { text-align: left; }
-    #winnerSection { display: none; }
+    img { border-radius: 10px; }
   </style>
 </head>
 <body>
@@ -33,7 +25,6 @@
     <h2>Admin Panel</h2>
     <input type="text" id="candidateName" placeholder="Candidate Name">
     <input type="text" id="candidatePhoto" placeholder="Photo URL">
-    <textarea id="candidateBio" placeholder="Candidate Bio"></textarea>
     <button onclick="addCandidate()">Add Candidate</button>
 
     <h3>Manage Candidates</h3>
@@ -41,10 +32,8 @@
 
     <h3>Manage Votes</h3>
     <button onclick="loadVotesAdmin()">Load Votes</button>
+    <button onclick="resetVotes()">Reset Votes</button> <!-- Reset Votes Button -->
     <ul id="voteListAdmin"></ul>
-
-    <h3>Publish Winner</h3>
-    <button onclick="publishWinner()">Publish Winner</button>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -52,15 +41,11 @@
     <ul id="voteList"></ul>
   </div>
 
-  <div id="winnerSection">
-    <h2>Winner</h2>
-    <div id="winnerDetails"></div>
-  </div>
-
   <!-- Firebase SDK -->
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -78,14 +63,11 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    let isAdmin = false;
-
     window.signInAdmin = async () => {
       const result = await signInWithPopup(auth, provider);
       if (result.user.email === "252-35-007@diu.edu.bd") {
         document.getElementById("adminPanel").style.display = "block";
         loadCandidates();
-        isAdmin = true;
       } else {
         alert("Access denied: Not an admin");
       }
@@ -104,9 +86,8 @@
     window.addCandidate = async () => {
       const name = document.getElementById("candidateName").value;
       const photo = document.getElementById("candidatePhoto").value;
-      const bio = document.getElementById("candidateBio").value;
-      if (!name || !bio || !photo) return alert("Please fill all fields");
-      await addDoc(collection(db, "candidates"), { name, photoURL: photo, bio, votes: 0 });
+      if (!name) return alert("Enter a name");
+      await addDoc(collection(db, "candidates"), { name, photoURL: photo, votes: 0 });
       loadCandidates();
     };
 
@@ -116,17 +97,10 @@
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        list.innerHTML += `
-          <li class="candidate-card">
-            <img src="${c.photoURL}" width="50" height="50">
-            <div>
-              <div class="candidate-name">${c.name}</div>
-              <div class="candidate-bio">${c.bio}</div>
-            </div>
-            <button class="vote-button" onclick="vote('${docSnap.id}')">Vote</button>
-            <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
-          </li>
-        `;
+        list.innerHTML += `<li>
+          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
+          <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
+        </li>`;
       });
     };
 
@@ -147,23 +121,30 @@
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        list.innerHTML += `
-          <li>
-            <img src="${c.photoURL}" width="50" height="50">
-            <b>${c.name}</b>
-            <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
-          </li>
-        `;
+        list.innerHTML += `<li>
+          <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
+          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
+        </li>`;
       });
     };
 
     window.vote = async (candidateId, uid) => {
-      await addDoc(collection(db, "votes"), { uid, candidateId });
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user.email;  // Get the user's email
+
+      const votedRef = doc(db, "votes", uid);
+      await addDoc(collection(db, "votes"), { 
+        uid, 
+        candidateId,
+        email: userEmail  // Store the email with the vote
+      });
+
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
       const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
-      alert("Vote submitted!");
+
+      alert("Vote submitted");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
     };
 
@@ -173,44 +154,28 @@
       const snap = await getDocs(collection(db, "votes"));
       snap.forEach(docSnap => {
         const v = docSnap.data();
-        list.innerHTML += `
-          <li>
-            <b>UID:</b> ${v.uid} <br>
-            <b>Email:</b> ${v.email} <br>
-            <b>Candidate ID:</b> ${v.candidateId} <br>
-            <b>Voted for:</b> ${v.candidateId} <!-- This should link to candidate name -->
-          </li>
-        `;
+        list.innerHTML += `<li>
+          <b>UID:</b> ${v.uid} <br>
+          <b>Email:</b> ${v.email} <br>
+          <b>Candidate ID:</b> ${v.candidateId} <br>
+          <b>Voted Candidate:</b> ${v.candidateId} <!-- Show Candidate Name -->
+        </li>`;
       });
     };
 
-    window.publishWinner = async () => {
-      const candidateRef = collection(db, "candidates");
-      const snap = await getDocs(candidateRef);
-      let winner = null;
-      let maxVotes = 0;
-      snap.forEach(docSnap => {
-        const c = docSnap.data();
-        if (c.votes > maxVotes) {
-          maxVotes = c.votes;
-          winner = c;
-        }
+    window.resetVotes = async () => {
+      const votesSnap = await getDocs(collection(db, "votes"));
+      votesSnap.forEach(docSnap => {
+        deleteDoc(doc(db, "votes", docSnap.id));
       });
-      if (winner) {
-        document.getElementById("winnerDetails").innerHTML = `
-          <div class="candidate-card">
-            <img src="${winner.photoURL}" width="50" height="50">
-            <div>
-              <div class="candidate-name">${winner.name}</div>
-              <div class="candidate-bio">${winner.bio}</div>
-            </div>
-          </div>
-        `;
-        document.getElementById("winnerSection").style.display = "block";
-        document.getElementById("voteSection").style.display = "none";
-      } else {
-        alert("No winner yet.");
-      }
+
+      // Reset candidate votes
+      const candidatesSnap = await getDocs(collection(db, "candidates"));
+      candidatesSnap.forEach(async docSnap => {
+        await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
+      });
+
+      alert("Votes have been reset! You can now start a new voting round.");
     };
   </script>
 
