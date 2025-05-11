@@ -5,86 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Voting System</title>
   <style>
-    body {
-      background: #0f0f0f;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    .admin-btn, .user-btn, button {
-      padding: 12px 20px;
-      background: #1e90ff;
-      border: none;
-      border-radius: 12px;
-      color: white;
-      cursor: pointer;
-      margin: 5px;
-      transition: all 0.3s ease;
-    }
-    .admin-btn:hover, .user-btn:hover, button:hover {
-      background: #3b8dff;
-      transform: scale(1.1);
-    }
-    .admin-btn {
-      float: right;
-    }
-    #adminPanel, #voteSection, #winnerSection {
-      margin-top: 20px;
-      padding: 15px;
-      border: 1px solid #444;
-      border-radius: 15px;
-      background: #1a1a1a;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    }
-    input {
-      padding: 8px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    img {
-      border-radius: 10px;
-    }
-    .candidate {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-      background: #333;
-      padding: 10px;
-      border-radius: 10px;
-      transition: all 0.3s ease;
-    }
-    .candidate:hover {
-      background: #444;
-    }
-    .candidate img {
-      width: 50px;
-      margin-right: 10px;
-    }
-    .candidate b {
-      flex: 1;
-    }
-    .candidate button {
-      background: #28a745;
-      padding: 8px 15px;
-      border-radius: 5px;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-    .candidate button:hover {
-      background: #218838;
-    }
-    #winnerSection {
-      display: none;
-    }
-    .glow {
-      animation: glow 1.5s infinite alternate;
-    }
-    @keyframes glow {
-      0% { text-shadow: 0 0 5px #1e90ff, 0 0 10px #1e90ff, 0 0 15px #1e90ff; }
-      100% { text-shadow: 0 0 10px #1e90ff, 0 0 20px #1e90ff, 0 0 30px #1e90ff; }
-    }
+    body { background: #0f0f0f; color: white; font-family: Arial; padding: 20px; text-align: center; }
+    .admin-btn, .user-btn, button { padding: 12px 18px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; transition: background 0.3s; }
+    .admin-btn:hover, .user-btn:hover, button:hover { background: #4682b4; }
+    #adminPanel, #voteSection, #winnerSection { margin-top: 20px; padding: 20px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
+    input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
+    img { border-radius: 10px; margin-right: 10px; }
+    .candidate-card { display: flex; align-items: center; justify-content: center; margin: 10px 0; background: #333; border-radius: 10px; padding: 15px; transition: transform 0.3s; }
+    .candidate-card:hover { transform: scale(1.05); }
+    .candidate-name { font-size: 18px; font-weight: bold; }
+    .candidate-bio { font-size: 14px; color: #bbb; margin-top: 5px; }
+    .vote-button { margin-left: auto; background-color: #32cd32; }
+    #voteListAdmin, #voteList { text-align: left; }
+    #winnerSection { display: none; }
   </style>
 </head>
 <body>
@@ -93,13 +26,14 @@
 
   <div>
     <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
-    <button class="admin-btn" onclick="signInAdmin()">Admin Panel Login</button>
+    <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
   </div>
 
   <div id="adminPanel" style="display:none;">
     <h2>Admin Panel</h2>
     <input type="text" id="candidateName" placeholder="Candidate Name">
     <input type="text" id="candidatePhoto" placeholder="Photo URL">
+    <textarea id="candidateBio" placeholder="Candidate Bio"></textarea>
     <button onclick="addCandidate()">Add Candidate</button>
 
     <h3>Manage Candidates</h3>
@@ -118,16 +52,15 @@
     <ul id="voteList"></ul>
   </div>
 
-  <div id="winnerSection" style="display:none;">
-    <h2>Winner: <span id="winnerName"></span></h2>
-    <img id="winnerPhoto" src="" width="100" />
+  <div id="winnerSection">
+    <h2>Winner</h2>
+    <div id="winnerDetails"></div>
   </div>
 
   <!-- Firebase SDK -->
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -145,11 +78,14 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
+    let isAdmin = false;
+
     window.signInAdmin = async () => {
       const result = await signInWithPopup(auth, provider);
       if (result.user.email === "252-35-007@diu.edu.bd") {
         document.getElementById("adminPanel").style.display = "block";
         loadCandidates();
+        isAdmin = true;
       } else {
         alert("Access denied: Not an admin");
       }
@@ -168,8 +104,9 @@
     window.addCandidate = async () => {
       const name = document.getElementById("candidateName").value;
       const photo = document.getElementById("candidatePhoto").value;
-      if (!name) return alert("Enter a name");
-      await addDoc(collection(db, "candidates"), { name, photoURL: photo, votes: 0 });
+      const bio = document.getElementById("candidateBio").value;
+      if (!name || !bio || !photo) return alert("Please fill all fields");
+      await addDoc(collection(db, "candidates"), { name, photoURL: photo, bio, votes: 0 });
       loadCandidates();
     };
 
@@ -179,10 +116,17 @@
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        list.innerHTML += `<li class="candidate">
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b> <span>${c.bio}</span>
-          <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
-        </li>`;
+        list.innerHTML += `
+          <li class="candidate-card">
+            <img src="${c.photoURL}" width="50" height="50">
+            <div>
+              <div class="candidate-name">${c.name}</div>
+              <div class="candidate-bio">${c.bio}</div>
+            </div>
+            <button class="vote-button" onclick="vote('${docSnap.id}')">Vote</button>
+            <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
+          </li>
+        `;
       });
     };
 
@@ -203,26 +147,23 @@
       const snap = await getDocs(collection(db, "candidates"));
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        list.innerHTML += `<li class="candidate">
-          <img src="${c.photoURL}" width="50"> <b>${c.name}</b> <span>${c.bio}</span>
-          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
-        </li>`;
+        list.innerHTML += `
+          <li>
+            <img src="${c.photoURL}" width="50" height="50">
+            <b>${c.name}</b>
+            <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
+          </li>
+        `;
       });
     };
 
     window.vote = async (candidateId, uid) => {
-      const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user.email;
-
-      const votedRef = doc(db, "votes", uid);
-      await addDoc(collection(db, "votes"), { uid, candidateId, email: userEmail });
-
+      await addDoc(collection(db, "votes"), { uid, candidateId });
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
       const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
-
-      alert("Vote submitted");
+      alert("Vote submitted!");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
     };
 
@@ -232,34 +173,43 @@
       const snap = await getDocs(collection(db, "votes"));
       snap.forEach(docSnap => {
         const v = docSnap.data();
-        list.innerHTML += `<li>
-          <b>UID:</b> ${v.uid} <br>
-          <b>Email:</b> ${v.email} <br>
-          <b>Candidate ID:</b> ${v.candidateId}
-        </li>`;
+        list.innerHTML += `
+          <li>
+            <b>UID:</b> ${v.uid} <br>
+            <b>Email:</b> ${v.email} <br>
+            <b>Candidate ID:</b> ${v.candidateId} <br>
+            <b>Voted for:</b> ${v.candidateId} <!-- This should link to candidate name -->
+          </li>
+        `;
       });
     };
 
     window.publishWinner = async () => {
-      const candidatesSnap = await getDocs(collection(db, "candidates"));
+      const candidateRef = collection(db, "candidates");
+      const snap = await getDocs(candidateRef);
       let winner = null;
       let maxVotes = 0;
-      candidatesSnap.forEach(docSnap => {
-        const candidate = docSnap.data();
-        if (candidate.votes > maxVotes) {
-          maxVotes = candidate.votes;
-          winner = candidate;
+      snap.forEach(docSnap => {
+        const c = docSnap.data();
+        if (c.votes > maxVotes) {
+          maxVotes = c.votes;
+          winner = c;
         }
       });
-
       if (winner) {
-        await setDoc(doc(db, "winner", "current"), { name: winner.name, photoURL: winner.photoURL });
+        document.getElementById("winnerDetails").innerHTML = `
+          <div class="candidate-card">
+            <img src="${winner.photoURL}" width="50" height="50">
+            <div>
+              <div class="candidate-name">${winner.name}</div>
+              <div class="candidate-bio">${winner.bio}</div>
+            </div>
+          </div>
+        `;
         document.getElementById("winnerSection").style.display = "block";
-        document.getElementById("winnerName").textContent = winner.name;
-        document.getElementById("winnerPhoto").src = winner.photoURL;
-        alert("Winner Published!");
+        document.getElementById("voteSection").style.display = "none";
       } else {
-        alert("No candidates found.");
+        alert("No winner yet.");
       }
     };
   </script>
