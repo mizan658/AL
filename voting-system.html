@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DIU Voting System</title>
+  <title>Private Voting System</title>
   <style>
     body { background: #0f0f0f; color: white; font-family: Arial, sans-serif; padding: 20px; }
     .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
@@ -16,17 +16,19 @@
     .candidate-info h3 { margin: 0; font-size: 1.2em; }
     .candidate-info p { margin: 5px 0; color: #bbb; }
     .candidate-info button { background-color: #4CAF50; }
-    h1 { text-align: center; color: #00ff00; text-shadow: 0 0 10px green, 0 0 20px green; font-size: 3em; }
-    .button-container { text-align: center; margin-top: 20px; }
-    #loadingSpinner { display: none; width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; animation: spin 2s linear infinite; margin: 20px auto; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    h1 {
+      text-align: center;
+      color: #00ff00;
+      text-shadow: 0 0 10px green, 0 0 20px green;
+      font-size: 3em;
+    }
   </style>
 </head>
 <body>
 
   <h1>Welcome to Private Voting System</h1>
 
-  <div class="button-container">
+  <div>
     <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
     <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
     <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
@@ -47,9 +49,6 @@
     <button onclick="loadVotesAdmin()">Load Votes</button>
     <ul id="voteListAdmin"></ul>
     <button onclick="resetVotes()">Reset Votes</button>
-
-    <h3>Publish Winner</h3>
-    <button onclick="publishWinner()">Publish Winner</button>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -57,15 +56,10 @@
     <ul id="voteList"></ul>
   </div>
 
-  <!-- Loading Spinner -->
-  <div id="loadingSpinner"></div>
-
-  <!-- Firebase SDK -->
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -143,7 +137,7 @@
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
       if (votedSnap.exists()) {
-        list.innerHTML = "<p>You have already voted.</p>";
+        list.innerHTML = `<p>Thank you for voting! The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a></p>`;
         return;
       }
       const snap = await getDocs(collection(db, "candidates"));
@@ -163,35 +157,25 @@
     };
 
     window.vote = async (candidateId, uid) => {
-      // Show loading spinner
-      document.getElementById("loadingSpinner").style.display = "block";
-      
-      // Wait for 5 seconds before proceeding
-      setTimeout(async () => {
-        const result = await signInWithPopup(auth, provider);
-        const userEmail = result.user.email;
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user.email;
 
-        // Check if the user has already voted
-        const votedRef = doc(db, "votes", uid);
-        const votedSnap = await getDoc(votedRef);
-        if (votedSnap.exists()) {
-          alert("You have already voted.");
-          document.getElementById("loadingSpinner").style.display = "none";
-          return;
-        }
+      const votedRef = doc(db, "votes", uid);
+      const votedSnap = await getDoc(votedRef);
+      if (votedSnap.exists()) {
+        alert("You have already voted.");
+        return;
+      }
 
-        // Save the vote
-        await setDoc(doc(db, "votes", uid), { candidateId, email: userEmail });
+      await setDoc(doc(db, "votes", uid), { candidateId, email: userEmail });
 
-        const cRef = doc(db, "candidates", candidateId);
-        const cSnap = await getDoc(cRef);
-        const newVotes = cSnap.data().votes + 1;
-        await updateDoc(cRef, { votes: newVotes });
+      const cRef = doc(db, "candidates", candidateId);
+      const cSnap = await getDoc(cRef);
+      const newVotes = cSnap.data().votes + 1;
+      await updateDoc(cRef, { votes: newVotes });
 
-        // Hide the loading spinner and show thank you message
-        document.getElementById("loadingSpinner").style.display = "none";
-        document.getElementById("voteSection").innerHTML = "<p>Thank you for voting! The result will publish on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>";
-      }, 5000);  // Wait for 5 seconds before showing the message
+      alert("Vote submitted");
+      document.getElementById("voteSection").innerHTML = `<p>Thank you for voting! The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a></p>`;
     };
 
     window.loadVotesAdmin = async () => {
@@ -208,38 +192,18 @@
     };
 
     window.resetVotes = async () => {
-      // Reset votes count to 0 for all candidates
       const candidatesSnap = await getDocs(collection(db, "candidates"));
       candidatesSnap.forEach(async (docSnap) => {
         await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
       });
 
-      // Delete all votes
       const votesSnap = await getDocs(collection(db, "votes"));
       votesSnap.forEach(async (docSnap) => {
         await deleteDoc(doc(db, "votes", docSnap.id));
       });
 
       alert("Votes have been reset.");
-      loadCandidates();  // Reload candidate list after resetting votes
-    };
-
-    window.publishWinner = async () => {
-      const candidatesSnap = await getDocs(collection(db, "candidates"));
-      let winner = { name: '', votes: -1 };
-
-      candidatesSnap.forEach(docSnap => {
-        const c = docSnap.data();
-        if (c.votes > winner.votes) {
-          winner = { name: c.name, votes: c.votes };
-        }
-      });
-
-      // Save winner to the "Notice" document
-      await setDoc(doc(db, "notice", "winner"), { winnerName: winner.name });
-
-      // Update notice board link with the winner's name
-      window.location.href = "https://mizan658.github.io/AL/notice.html";
+      loadCandidates();
     };
   </script>
 
