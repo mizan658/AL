@@ -64,7 +64,6 @@
   <div class="hero" id="main-section">
     <h1>Welcome to Private Student Server</h1>
     <p>This platform is for anonymous student voting and messaging.</p>
-    <p id="user-id-status">Please login first</p> <!-- Where the user ID will appear -->
     <div class="buttons">
       <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
       <button onclick="showRules()" class="rules-btn">Rules and Regulations</button>
@@ -112,13 +111,10 @@
 
     // Listen to authentication state
     onAuthStateChanged(auth, (user) => {
-      const userIdStatus = document.getElementById("user-id-status");
       if (user) {
-        // User is logged in
-        userIdStatus.textContent = `Your User ID: ${user.uid}`;
+        // User is logged in, you can perform other tasks here if needed
       } else {
         // User is not logged in
-        userIdStatus.textContent = 'Please login first';
       }
     });
 
