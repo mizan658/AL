@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,9 +97,10 @@
       <button onclick="addCandidate()">Add Candidate</button>
       <h3>Manage Candidates</h3>
       <ul id="candidateList"></ul>
-      <h3>Voting Controls</h3>
+      <button onclick="clearVotes()">Reset All Votes</button>
+      <button onclick="resetCandidateVotes()">Reset Vote Counts</button>
       <input type="datetime-local" id="endTimeInput">
-      <button onclick="setVotingEndTimeFromInput()">Set Voting Deadline</button>
+      <button onclick="setVotingEndTime()">Set Voting End Time</button>
       <button onclick="publishWinner()">Publish Winner</button>
     </div>
 
@@ -130,37 +132,35 @@
 
     let currentUser;
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-
-        if (user.email === "252-35-007@diu.edu.bd") {
-          document.getElementById("adminPanel").style.display = "block";
-          loadCandidates();
-        } else if (user.email.endsWith("@diu.edu.bd")) {
-          const deadlineSnap = await getDoc(doc(db, "settings", "votingDeadline"));
-          const now = new Date();
-          if (deadlineSnap.exists()) {
-            const deadline = new Date(deadlineSnap.data().endTime);
-            if (now > deadline) {
-              alert("Voting time has ended.");
-              return;
-            }
-          }
-          document.getElementById("voteSection").style.display = "block";
-          loadVotes(user.uid);
-        } else {
-          alert("Only DIU emails are allowed");
-        }
-      }
+    onAuthStateChanged(auth, (user) => {
+      if (user) currentUser = user;
     });
 
     window.signInAdmin = async () => {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (result.user.email === "252-35-007@diu.edu.bd") {
+        document.getElementById("adminPanel").style.display = "block";
+        loadCandidates();
+      } else {
+        alert("Access denied: Not an admin");
+      }
     };
 
     window.signInUser = async () => {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (!result.user.email.endsWith("@diu.edu.bd")) {
+        alert("Only DIU emails are allowed to vote");
+        return;
+      }
+      currentUser = result.user;
+      const endSnap = await getDoc(doc(db, "settings", "voting"));
+      const now = new Date();
+      if (endSnap.exists() && now > new Date(endSnap.data().endTime)) {
+        alert("Voting time is over");
+        return;
+      }
+      document.getElementById("voteSection").style.display = "block";
+      loadVotes(result.user.uid);
     };
 
     window.addCandidate = async () => {
@@ -224,11 +224,27 @@
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
     };
 
-    window.setVotingEndTimeFromInput = () => {
-      const input = document.getElementById("endTimeInput").value;
-      if (!input) return alert("Please select a date and time.");
-      setDoc(doc(db, "settings", "votingDeadline"), { endTime: input });
-      alert("Voting end time set to " + input);
+    window.clearVotes = async () => {
+      const votesSnap = await getDocs(collection(db, "votes"));
+      for (const docSnap of votesSnap.docs) {
+        await deleteDoc(doc(db, "votes", docSnap.id));
+      }
+      alert("All previous votes have been cleared!");
+    };
+
+    window.resetCandidateVotes = async () => {
+      const snap = await getDocs(collection(db, "candidates"));
+      for (const docSnap of snap.docs) {
+        await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
+      }
+      alert("Candidate vote counts reset to 0");
+    };
+
+    window.setVotingEndTime = async () => {
+      const inputTime = document.getElementById("endTimeInput").value;
+      if (!inputTime) return alert("Set a valid time");
+      await setDoc(doc(db, "settings", "voting"), { endTime: inputTime });
+      alert("Voting end time set");
     };
 
     window.publishWinner = async () => {
@@ -236,16 +252,10 @@
       let winner = null;
       snap.forEach(docSnap => {
         const data = docSnap.data();
-        if (!winner || data.votes > winner.votes) {
-          winner = { name: data.name, votes: data.votes };
-        }
+        if (!winner || data.votes > winner.votes) winner = data;
       });
-      if (winner) {
-        await setDoc(doc(db, "settings", "winner"), winner);
-        alert(`Winner Published: ${winner.name} with ${winner.votes} votes`);
-      } else {
-        alert("No candidates found");
-      }
+      if (winner) alert(`Winner is ${winner.name} with ${winner.votes} votes!`);
+      else alert("No candidates found");
     };
   </script>
 </body>
