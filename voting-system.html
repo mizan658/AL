@@ -96,6 +96,11 @@
       <button onclick="addCandidate()">Add Candidate</button>
       <h3>Manage Candidates</h3>
       <ul id="candidateList"></ul>
+      <button onclick="clearVotes()">Reset All Votes</button>
+      <button onclick="resetCandidateVotes()">Reset Vote Counts</button>
+      <input type="datetime-local" id="endTimeInput">
+      <button onclick="setVotingEndTime()">Set Voting End Time</button>
+      <button onclick="publishWinner()">Publish Winner</button>
     </div>
 
     <div id="voteSection" style="display:none;">
@@ -106,7 +111,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -147,6 +152,12 @@
         return;
       }
       currentUser = result.user;
+      const endSnap = await getDoc(doc(db, "settings", "voting"));
+      const now = new Date();
+      if (endSnap.exists() && now > new Date(endSnap.data().endTime)) {
+        alert("Voting time is over");
+        return;
+      }
       document.getElementById("voteSection").style.display = "block";
       loadVotes(result.user.uid);
     };
@@ -203,13 +214,47 @@
     };
 
     window.vote = async (candidateId, uid) => {
-      await addDoc(collection(db, "votes"), { uid, candidateId });
+      await setDoc(doc(db, "votes", uid), { uid, candidateId });
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
       const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
       alert("Vote submitted");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
+    };
+
+    window.clearVotes = async () => {
+      const votesSnap = await getDocs(collection(db, "votes"));
+      for (const docSnap of votesSnap.docs) {
+        await deleteDoc(doc(db, "votes", docSnap.id));
+      }
+      alert("All previous votes have been cleared!");
+    };
+
+    window.resetCandidateVotes = async () => {
+      const snap = await getDocs(collection(db, "candidates"));
+      for (const docSnap of snap.docs) {
+        await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
+      }
+      alert("Candidate vote counts reset to 0");
+    };
+
+    window.setVotingEndTime = async () => {
+      const inputTime = document.getElementById("endTimeInput").value;
+      if (!inputTime) return alert("Set a valid time");
+      await setDoc(doc(db, "settings", "voting"), { endTime: inputTime });
+      alert("Voting end time set");
+    };
+
+    window.publishWinner = async () => {
+      const snap = await getDocs(collection(db, "candidates"));
+      let winner = null;
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        if (!winner || data.votes > winner.votes) winner = data;
+      });
+      if (winner) alert(`Winner is ${winner.name} with ${winner.votes} votes!`);
+      else alert("No candidates found");
     };
   </script>
 </body>
