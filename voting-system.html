@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voting System</title>
+  <title>Private Voting System</title>
   <style>
     body { background: #0f0f0f; color: white; font-family: Arial, sans-serif; padding: 20px; }
     .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
@@ -21,13 +20,16 @@
 </head>
 <body>
 
-  <h4 style="text-align: center; color: #00ff00; text-shadow: 0 0 10px #00ff00;">
-  Welcome to Private Voting System
-</h4>
+  <h1>Welcome to Private Voting System</h1>
 
   <div>
     <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
     <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
+  </div>
+
+  <div>
+    <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
+    <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
   </div>
 
   <div id="adminPanel" style="display:none;">
@@ -137,7 +139,7 @@
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
       if (votedSnap.exists()) {
-        list.innerHTML = "<p>You have already voted.Wait for result.</p>";
+        list.innerHTML = "<p>You have already voted.</p>";
         return;
       }
       const snap = await getDocs(collection(db, "candidates"));
@@ -164,7 +166,7 @@
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
       if (votedSnap.exists()) {
-        alert("You have already voted.Wait for result.");
+        alert("You have already voted.");
         return;
       }
 
@@ -177,8 +179,7 @@
       await updateDoc(cRef, { votes: newVotes });
 
       alert("Vote submitted");
-      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a>
-</p>";
+      document.getElementById("voteSection").innerHTML = "<p>Thank you for voting! The result will publish on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>";
     };
 
     window.loadVotesAdmin = async () => {
