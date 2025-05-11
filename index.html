@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Private Student Server</title>
   <style>
+    /* Same styles as before */
     body {
       margin: 0;
       background: black;
@@ -15,7 +16,6 @@
       justify-content: center;
       min-height: 100vh;
     }
-
     .hero {
       background: rgba(17, 17, 17, 0.85);
       padding: 3rem 2rem;
@@ -27,23 +27,12 @@
       max-width: 800px;
       width: 90%;
     }
-
     @keyframes pulse {
-      0% {
-        box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33;
-      }
-      50% {
-        box-shadow: 0 0 30px #00ffffcc, 0 0 60px #00ffff88;
-      }
-      100% {
-        box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33;
-      }
+      0% { box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33; }
+      50% { box-shadow: 0 0 30px #00ffffcc, 0 0 60px #00ffff88; }
+      100% { box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33; }
     }
-
-    .buttons {
-      margin-top: 2rem;
-    }
-
+    .buttons { margin-top: 2rem; }
     .buttons a, .buttons button {
       text-decoration: none;
       padding: 0.8rem 1.5rem;
@@ -55,79 +44,28 @@
       cursor: pointer;
       border: none;
     }
-
-    .notice-btn {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .login-btn {
-      background-color: #f4c430;
-      color: black;
-    }
-
-    .signup-btn {
-      background-color: #00bfff;
-      color: black;
-    }
-
-    .rules-btn {
-      background-color: #28a745;
-      color: white;
-    }
-
+    .notice-btn { background-color: #007bff; color: white; }
+    .login-btn { background-color: #f4c430; color: black; }
+    .signup-btn { background-color: #00bfff; color: black; }
+    .rules-btn { background-color: #28a745; color: white; }
     .buttons a:hover, .buttons button:hover {
       transform: scale(1.05);
       opacity: 0.9;
     }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      font-size: 1.1rem;
-      line-height: 1.5;
-    }
-
-    .admin-note {
-      font-size: 0.75rem;
-      color: yellow;
-      margin-top: 1rem;
-    }
-
-    #rules-section {
-      display: none;
-      text-align: left;
-      background: rgba(20, 20, 20, 0.9);
-      padding: 2rem;
-      border-radius: 10px;
-      border: 2px solid #00ffff;
-      max-width: 800px;
-      width: 90%;
-    }
-
-    #rules-section ul {
-      list-style-type: square;
-      padding-left: 1.5rem;
-    }
-
-    .back-btn {
-      margin-top: 2rem;
-      background-color: #007bff;
-      color: white;
-    }
+    h1 { font-size: 2rem; margin-bottom: 1rem; }
+    p { font-size: 1.1rem; line-height: 1.5; }
+    .admin-note { font-size: 0.75rem; color: yellow; margin-top: 1rem; }
+    #rules-section { display: none; text-align: left; background: rgba(20, 20, 20, 0.9); padding: 2rem; border-radius: 10px; border: 2px solid #00ffff; max-width: 800px; width: 90%; }
+    #rules-section ul { list-style-type: square; padding-left: 1.5rem; }
+    .back-btn { margin-top: 2rem; background-color: #007bff; color: white; }
   </style>
 </head>
 <body>
-  <!-- Main Content Section -->
   <div class="hero" id="main-section">
     <h1>Welcome to Private Student Server</h1>
-    <p id="user-id">Please login first.</p> <!-- This will show user id after login -->
-
-    <div class="buttons" id="buttons-section">
-      <!-- These buttons will be hidden until the user is logged in -->
+    <p>This platform is for anonymous student voting and messaging.</p>
+    <p id="user-id-status">Please login first</p> <!-- Where the user ID will appear -->
+    <div class="buttons">
       <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
       <button onclick="showRules()" class="rules-btn">Rules and Regulations</button>
       <a href="https://mizan658.github.io/AL/signup.html" class="login-btn">Login/Sign Up</a>
@@ -135,11 +73,9 @@
       <a href="#" class="signup-btn">Voting</a>
       <a href="#" class="login-btn">Chat Group</a>
     </div>
-
     <div class="admin-note">Only admin can edit and delete notices</div>
   </div>
 
-  <!-- Rules Section -->
   <div id="rules-section">
     <h2>Rules and Regulations</h2>
     <ul>
@@ -152,11 +88,12 @@
     <button class="back-btn" onclick="hideRules()">Back</button>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "firebase/app";
+    import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+    import { getAnalytics } from "firebase/analytics";
 
-  <script>
     // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
@@ -164,36 +101,35 @@
       projectId: "notice-8edc7",
       storageBucket: "notice-8edc7.firebasestorage.app",
       messagingSenderId: "948590141987",
-      appId: "1:948590141987:web:a9af8252e98f2933f40796",
-      measurementId: "G-DSM883VQPT"
+      appId: "1:948590141987:web:a505eddb3dacaaa1f40796",
+      measurementId: "G-BGXC3J55RD"
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth();
 
-    // Check if the user is logged in
-    firebase.auth().onAuthStateChanged(function(user) {
+    // Listen to authentication state
+    onAuthStateChanged(auth, (user) => {
+      const userIdStatus = document.getElementById("user-id-status");
       if (user) {
-        // If the user is logged in, update the UI
-        document.getElementById("user-id").innerText = `User ID: ${user.uid}`;
-        document.getElementById("buttons-section").style.display = 'block';  // Show buttons if logged in
+        // User is logged in
+        userIdStatus.textContent = `Your User ID: ${user.uid}`;
       } else {
-        // If no user is logged in, prompt to log in
-        document.getElementById("user-id").innerText = 'Please login first.';
-        document.getElementById("buttons-section").style.display = 'none'; // Hide buttons if not logged in
+        // User is not logged in
+        userIdStatus.textContent = 'Please login first';
       }
     });
 
-    function showRules() {
-      document.getElementById('main-section').style.display = 'none';
-      document.getElementById('rules-section').style.display = 'block';
-    }
-
-    function hideRules() {
-      document.getElementById('rules-section').style.display = 'none';
-      document.getElementById('main-section').style.display = 'block';
+    // Handle sign out
+    function logout() {
+      signOut(auth).then(() => {
+        // Sign-out successful
+        window.location.reload(); // Reload the page to reflect changes
+      }).catch((error) => {
+        console.error(error);
+      });
     }
   </script>
 </body>
