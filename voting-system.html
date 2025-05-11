@@ -3,146 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Animated Voting System</title>
+  <title>Voting Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #f0f0f0;
-      margin: 0;
-      padding: 20px;
-      animation: fadeIn 1s ease-in-out;
-    }
-
-    h1, h2, h3 {
-      text-align: center;
-      color: #00ffae;
-    }
-
-    button {
-      background: #00ffae;
-      color: #121212;
-      border: none;
-      padding: 10px 20px;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-
-    button:hover {
-      background: #00ddb3;
-      transform: scale(1.05);
-    }
-
-    #voting-options, #admin-panel {
-      animation: slideUp 0.7s ease-in-out;
-      margin-top: 20px;
-      border: 1px solid #444;
-      padding: 20px;
-      border-radius: 10px;
-      background-color: #1e1e1e;
-    }
-
-    #candidate-list div {
-      background: #2b2b2b;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      transition: transform 0.3s ease, background 0.3s ease;
-    }
-
-    #candidate-list div:hover {
-      transform: translateY(-5px);
-      background: #3b3b3b;
-    }
-
-    img {
-      border-radius: 10px;
-      transition: transform 0.3s ease;
-      width: 100px;
-    }
-
-    img:hover {
-      transform: scale(1.1);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0 }
-      to { opacity: 1 }
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px) }
-      to { opacity: 1; transform: translateY(0) }
-    }
-
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top: 4px solid #00ffae;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin: auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    #countdown {
-      text-align: center;
-      font-size: 1.2em;
-      margin-top: 10px;
-    }
+    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
+    .fade-in { animation: fadeIn 1s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body>
-  <h1>Vote for Your Candidate</h1>
-
-  <div style="text-align: center;">
-    <button id="login-user">Sign in with your @diu.edu.bd Email</button>
-    <button id="login-admin" style="float: right; background: #ffaa00;">Admin Login</button>
+<body class="p-4">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-4xl font-bold fade-in">Vote for Your Candidate</h1>
+    <button id="adminLogin" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600 fade-in">Admin Login</button>
   </div>
 
-  <div id="countdown"></div>
+  <div id="userSection" class="mb-4 fade-in">
+    <button id="userLogin" class="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">Login with DIU Email</button>
+  </div>
 
-  <div id="voting-options" style="display:none;">
-    <h2>Choose a Candidate</h2>
-    <div id="candidate-list">
-      <!-- Candidate cards will go here -->
+  <div id="voteTimer" class="text-lg font-semibold mb-4 fade-in hidden"></div>
+
+  <div id="candidatesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 fade-in">
+    <!-- Candidates will be dynamically loaded here -->
+  </div>
+
+  <div id="adminPanel" class="mt-8 hidden fade-in">
+    <h2 class="text-2xl font-bold mb-4">Admin Panel</h2>
+    <form id="addCandidateForm" class="bg-gray-800 p-4 rounded mb-4">
+      <input type="text" id="candidateName" placeholder="Candidate Name" class="p-2 mb-2 w-full rounded text-black" required>
+      <input type="file" id="candidatePhoto" accept="image/*" class="mb-2 w-full" required>
+      <button type="submit" class="bg-green-500 px-4 py-2 rounded hover:bg-green-600">Add Candidate</button>
+    </form>
+
+    <div class="mb-4">
+      <label for="voteEndTime" class="block mb-2">Set Voting End Time:</label>
+      <input type="datetime-local" id="voteEndTime" class="text-black p-2 rounded">
+      <button id="setTimer" class="ml-2 bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">Set Timer</button>
+    </div>
+
+    <div id="adminCandidateList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Admin candidate controls here -->
     </div>
   </div>
 
-  <div id="admin-panel" style="display:none;">
-    <h2>Admin Panel</h2>
-    <p>You can add/edit/remove candidates and set a vote timer.</p>
-    <div class="spinner"></div>
-  </div>
+  <!-- Firebase JS SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-  <script>
-    // Placeholder timer countdown
-    const countdownElem = document.getElementById('countdown');
-    const targetTime = new Date().getTime() + (60 * 1000 * 5); // 5 minutes
+    const firebaseConfig = {
+      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
+      authDomain: "voting-app-2b276.firebaseapp.com",
+      projectId: "voting-app-2b276",
+      storageBucket: "voting-app-2b276.appspot.com",
+      messagingSenderId: "699531517654",
+      appId: "1:699531517654:web:785702f843d21a85c17377",
+      measurementId: "G-309D0KG6KL"
+    };
 
-    function updateCountdown() {
-      const now = new Date().getTime();
-      const distance = targetTime - now;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
 
-      if (distance < 0) {
-        countdownElem.innerText = "Voting has ended.";
-        return;
-      }
+    const adminEmail = "252-35-007@diu.edu.bd";
 
-      const minutes = Math.floor(distance / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      countdownElem.innerText = `Voting ends in ${minutes}m ${seconds}s`;
-      setTimeout(updateCountdown, 1000);
-    }
+    document.getElementById("userLogin").addEventListener("click", () => {
+      signInWithPopup(auth, provider).then((result) => {
+        const user = result.user;
+        if (user.email.endsWith("@diu.edu.bd") && user.email !== adminEmail) {
+          alert("Welcome, you can now vote.");
+          // Load voting section
+        } else {
+          alert("Only DIU users are allowed to vote.");
+        }
+      }).catch((error) => alert(error.message));
+    });
 
-    updateCountdown();
+    document.getElementById("adminLogin").addEventListener("click", () => {
+      signInWithPopup(auth, provider).then((result) => {
+        const user = result.user;
+        if (user.email === adminEmail) {
+          alert("Admin access granted.");
+          document.getElementById("adminPanel").classList.remove("hidden");
+        } else {
+          alert("Only the admin can access this panel.");
+        }
+      }).catch((error) => alert(error.message));
+    });
   </script>
 </body>
 </html>
