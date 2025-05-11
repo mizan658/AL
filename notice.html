@@ -167,14 +167,14 @@
         div.className = "notice";
         const date = new Date(data.timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
         div.innerHTML =  
-          <h3 contenteditable="false">${data.title}</h3>
+          `<h3 contenteditable="false">${data.title}</h3>
           <p contenteditable="false">${data.body}</p>
           <p class="timestamp">Published on: ${date}</p>
           ${allowedAdmins.includes(auth.currentUser?.email) ? 
-            <button onclick="deleteNotice('${docSnap.id}')">Delete</button>
-             <button onclick="editNotice('${docSnap.id}', this)">Edit</button> : 
+            `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
+             <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` : 
              <p>Only admin can edit and delete notices.</p>}
-        ;
+        `;
         noticesDiv.appendChild(div);
       });
       loadingSpinner.style.display = "none"; // Hide the spinner once data is loaded
