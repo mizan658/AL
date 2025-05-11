@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DIU Voting System</title>
   <style>
     body {
@@ -42,7 +41,7 @@
     button:hover {
       background-color: #009acd;
     }
-    #adminPanel, #voteSection {
+    #adminPanel, #voteSection, #winnerDisplay {
       background-color: #1e1e1e;
       padding: 20px;
       margin-top: 20px;
@@ -108,6 +107,11 @@
       <h2>Vote for Your Candidate</h2>
       <ul id="voteList"></ul>
     </div>
+
+    <div id="winnerDisplay" style="display:none;">
+      <h2>Voting Result</h2>
+      <p id="winnerText"></p>
+    </div>
   </div>
 
   <script type="module">
@@ -136,6 +140,17 @@
       if (user) currentUser = user;
     });
 
+    async function checkWinnerStatus() {
+      const resultSnap = await getDoc(doc(db, "settings", "result"));
+      if (resultSnap.exists()) {
+        const data = resultSnap.data();
+        document.getElementById("winnerDisplay").style.display = "block";
+        document.getElementById("winnerText").innerText = `Winner is ${data.name} with ${data.votes} votes!`;
+        return true;
+      }
+      return false;
+    }
+
     window.signInAdmin = async () => {
       const result = await signInWithPopup(auth, provider);
       if (result.user.email === "252-35-007@diu.edu.bd") {
@@ -153,12 +168,17 @@
         return;
       }
       currentUser = result.user;
+
+      const winnerShown = await checkWinnerStatus();
+      if (winnerShown) return;
+
       const endSnap = await getDoc(doc(db, "settings", "voting"));
       const now = new Date();
       if (endSnap.exists() && now > new Date(endSnap.data().endTime)) {
         alert("Voting time is over");
         return;
       }
+
       document.getElementById("voteSection").style.display = "block";
       loadVotes(result.user.uid);
     };
@@ -195,8 +215,7 @@
     window.loadVotes = async (uid) => {
       const list = document.getElementById("voteList");
       list.innerHTML = "";
-      const votedRef = doc(db, "votes", uid);
-      const votedSnap = await getDoc(votedRef);
+      const votedSnap = await getDoc(doc(db, "votes", uid));
       if (votedSnap.exists()) {
         list.innerHTML = "<p>You have already voted.</p>";
         return;
@@ -229,7 +248,7 @@
       for (const docSnap of votesSnap.docs) {
         await deleteDoc(doc(db, "votes", docSnap.id));
       }
-      alert("All previous votes have been cleared!");
+      alert("All votes cleared!");
     };
 
     window.resetCandidateVotes = async () => {
@@ -237,7 +256,7 @@
       for (const docSnap of snap.docs) {
         await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
       }
-      alert("Candidate vote counts reset to 0");
+      alert("All vote counts reset to 0");
     };
 
     window.setVotingEndTime = async () => {
@@ -254,9 +273,17 @@
         const data = docSnap.data();
         if (!winner || data.votes > winner.votes) winner = data;
       });
-      if (winner) alert(`Winner is ${winner.name} with ${winner.votes} votes!`);
-      else alert("No candidates found");
+      if (winner) {
+        await setDoc(doc(db, "settings", "result"), winner);
+        document.getElementById("winnerDisplay").style.display = "block";
+        document.getElementById("winnerText").innerText = `Winner is ${winner.name} with ${winner.votes} votes!`;
+        alert("Winner published");
+      } else {
+        alert("No candidates found");
+      }
     };
+
+    checkWinnerStatus(); // Show winner if already published
   </script>
 </body>
 </html>
