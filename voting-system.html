@@ -22,6 +22,19 @@
       text-shadow: 0 0 10px green, 0 0 20px green;
       font-size: 3em;
     }
+    .loader {
+      border: 4px solid #444;
+      border-top: 4px solid #00ff00;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -53,6 +66,7 @@
 
   <div id="voteSection" style="display:none;">
     <h2>Vote for Your Candidate</h2>
+    <div id="voteLoading" class="loader" style="display:none;"></div>
     <ul id="voteList"></ul>
   </div>
 
@@ -133,14 +147,22 @@
 
     window.loadVotes = async (uid) => {
       const list = document.getElementById("voteList");
+      const loader = document.getElementById("voteLoading");
+      loader.style.display = "block";
       list.innerHTML = "";
+
       const votedRef = doc(db, "votes", uid);
       const votedSnap = await getDoc(votedRef);
+
       if (votedSnap.exists()) {
+        loader.style.display = "none";
         list.innerHTML = `<p>Thank you for voting! The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a></p>`;
         return;
       }
+
       const snap = await getDocs(collection(db, "candidates"));
+      loader.style.display = "none";
+
       snap.forEach(docSnap => {
         const c = docSnap.data();
         list.innerHTML += `
@@ -174,8 +196,11 @@
       const newVotes = cSnap.data().votes + 1;
       await updateDoc(cRef, { votes: newVotes });
 
-      alert("Vote submitted");
-      document.getElementById("voteSection").innerHTML = `<p>Thank you for voting! The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a></p>`;
+      const section = document.getElementById("voteSection");
+      section.innerHTML = `<div class="loader"></div>`;
+      setTimeout(() => {
+        section.innerHTML = `<p>Thank you for voting! The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a></p>`;
+      }, 5000);
     };
 
     window.loadVotesAdmin = async () => {
