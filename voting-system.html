@@ -3,184 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Voting System</title>
+  <title>Voting System</title>
   <style>
-    body {
-      background-color: #121212;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    .hidden { display: none; }
-    .candidate {
-      display: inline-block;
-      margin: 15px;
-      padding: 10px;
-      border: 1px solid #555;
-      border-radius: 10px;
-      background-color: #1e1e1e;
-      cursor: pointer;
-    }
-    .candidate img {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    .candidate-name {
-      margin-top: 10px;
-      font-size: 18px;
-    }
-    .admin-section, .vote-section, .profile-section {
-      margin-top: 30px;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      background-color: #6200ee;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3700b3;
-    }
+    #voting-options { display: none; }
+    #admin-panel { display: none; }
+    #login-section { display: block; }
+    #google-signin-btn { margin-top: 20px; }
+    #google-admin-btn { margin-top: 20px; position: absolute; top: 20px; right: 20px; }
   </style>
-</head>
-<body>
-
-  <h1>Vote for Your Candidate</h1>
-
-  <div class="login-section">
-    <button onclick="googleSignIn()">Login with Google</button>
-  </div>
-
-  <div class="profile-section hidden">
-    <h2>Welcome, <span id="user-name"></span></h2>
-    <p>Email: <span id="user-email"></span></p>
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <div class="vote-section hidden">
-    <div id="candidates"></div>
-  </div>
-
-  <div class="admin-section hidden">
-    <h2>Admin Controls</h2>
-    <input type="text" id="candidate-name" placeholder="Candidate Name">
-    <input type="text" id="candidate-image" placeholder="Candidate Image URL">
-    <button onclick="addCandidate()">Add Candidate</button>
-    <div id="vote-counts"></div>
-  </div>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
-  <script>
+    // Firebase Configuration
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
+      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
+      authDomain: "voting-app-2b276.firebaseapp.com",
+      projectId: "voting-app-2b276",
+      storageBucket: "voting-app-2b276.firebasestorage.app",
+      messagingSenderId: "699531517654",
+      appId: "1:699531517654:web:785702f843d21a85c17377",
+      measurementId: "G-309D0KG6KL"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
 
-    const adminEmails = ["ahamed.to.tipak@gmail.com", "252-35-007@diu.edu.bd"];
+    // Initialize Firebase Auth and Firestore
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    function googleSignIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider);
-    }
+    const provider = new GoogleAuthProvider();
 
-    function logout() {
-      auth.signOut();
-    }
+    // Elements
+    const googleSignInBtn = document.getElementById('google-signin-btn');
+    const googleAdminBtn = document.getElementById('google-admin-btn');
+    const votingOptionsDiv = document.getElementById('voting-options');
+    const adminPanelDiv = document.getElementById('admin-panel');
+    const candidateListDiv = document.getElementById("candidate-list");
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        document.querySelector('.login-section').classList.add('hidden');
-        document.querySelector('.profile-section').classList.remove('hidden');
-        document.getElementById('user-name').textContent = user.displayName;
-        document.getElementById('user-email').textContent = user.email;
+    // Google Sign-In Button for User Login
+    googleSignInBtn.addEventListener('click', async () => {
+      try {
+        const userCredential = await signInWithPopup(auth, provider);
+        const user = userCredential.user;
 
-        loadCandidates();
-
-        if (adminEmails.includes(user.email)) {
-          document.querySelector('.admin-section').classList.remove('hidden');
-          showVoteCounts();
+        if (user.email.endsWith('@diu.edu.bd')) {
+          displayCandidates();
+          votingOptionsDiv.style.display = 'block';
+          googleSignInBtn.style.display = 'none';
         } else {
-          document.querySelector('.vote-section').classList.remove('hidden');
+          alert("Only users with @diu.edu.bd emails can vote.");
         }
-      } else {
-        document.querySelector('.login-section').classList.remove('hidden');
-        document.querySelector('.profile-section').classList.add('hidden');
-        document.querySelector('.vote-section').classList.add('hidden');
-        document.querySelector('.admin-section').classList.add('hidden');
+      } catch (error) {
+        console.error("Error during Google sign-in: ", error.message);
       }
     });
 
-    function addCandidate() {
-      const name = document.getElementById('candidate-name').value;
-      const image = document.getElementById('candidate-image').value;
-      if (!name || !image) return alert("Fill both fields");
+    // Google Sign-In Button for Admin
+    googleAdminBtn.addEventListener('click', async () => {
+      try {
+        const userCredential = await signInWithPopup(auth, provider);
+        const user = userCredential.user;
 
-      db.collection('candidates').add({ name, image });
-    }
-
-    function loadCandidates() {
-      db.collection('candidates').onSnapshot(snapshot => {
-        const candidatesDiv = document.getElementById('candidates');
-        candidatesDiv.innerHTML = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const div = document.createElement('div');
-          div.className = 'candidate';
-          div.innerHTML = `
-            <img src="${data.image}" alt="${data.name}" onclick="vote('${doc.id}', '${data.name}', '${data.image}')">
-            <div class="candidate-name">${data.name}</div>
-          `;
-          candidatesDiv.appendChild(div);
-        });
-      });
-    }
-
-    function vote(id, name, image) {
-      if (!confirm(`Are you sure you want to vote for ${name}?`)) return;
-
-      const user = auth.currentUser;
-      db.collection('votes').doc(user.uid).set({
-        userId: user.uid,
-        email: user.email,
-        candidateId: id,
-        candidateName: name,
-        candidateImage: image,
-        votedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => alert("Vote submitted!"));
-    }
-
-    function showVoteCounts() {
-      db.collection('votes').onSnapshot(snapshot => {
-        const counts = {};
-        snapshot.forEach(doc => {
-          const vote = doc.data();
-          counts[vote.candidateName] = (counts[vote.candidateName] || 0) + 1;
-        });
-
-        const voteDiv = document.getElementById('vote-counts');
-        voteDiv.innerHTML = '<h3>Vote Counts:</h3>';
-        for (let [name, count] of Object.entries(counts)) {
-          voteDiv.innerHTML += `<p>${name}: ${count} votes</p>`;
+        if (user.email === '252-35-007@diu.edu.bd') {
+          adminPanelDiv.style.display = 'block';
+          googleAdminBtn.style.display = 'none';
+        } else {
+          alert("Only the admin can access this panel.");
         }
-      });
-    }
+      } catch (error) {
+        console.error("Error during Google admin sign-in: ", error.message);
+      }
+    });
+
+    // Fetch and display candidates
+    const displayCandidates = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'candidates'));
+        candidateListDiv.innerHTML = '';
+        snapshot.forEach(doc => {
+          const candidate = doc.data();
+          const candidateDiv = document.createElement('div');
+          candidateDiv.innerHTML = `
+            <img src="${candidate.photoUrl}" alt="${candidate.name}" />
+            <p>${candidate.name}</p>
+            <button onclick="voteForCandidate('${doc.id}')">Vote for ${candidate.name}</button>
+          `;
+          candidateListDiv.appendChild(candidateDiv);
+        });
+      } catch (error) {
+        console.error("Error fetching candidates: ", error.message);
+      }
+    };
+
+    // Vote for a candidate
+    window.voteForCandidate = async (candidateId) => {
+      const user = auth.currentUser;
+      if (user && user.email.endsWith('@diu.edu.bd')) {
+        try {
+          await addDoc(collection(db, 'votes'), {
+            userId: user.uid,
+            candidateId: candidateId,
+            timestamp: new Date(),
+          });
+          alert("Vote registered successfully!");
+        } catch (error) {
+          console.error("Error registering vote: ", error.message);
+        }
+      } else {
+        alert("Only users with @diu.edu.bd email can vote.");
+      }
+    };
+
+    // Check auth state to show correct interface
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        if (user.email === '252-35-007@diu.edu.bd') {
+          googleAdminBtn.style.display = 'block'; // Show Admin Login for Admin
+        }
+      }
+    });
   </script>
+</head>
+<body>
+
+  <h1>Welcome to the Voting System</h1>
+
+  <!-- Google Sign-In Button for Users -->
+  <button id="google-signin-btn">Sign in with Google to Vote</button>
+
+  <!-- Google Sign-In Button for Admin -->
+  <button id="google-admin-btn" style="display:none;">Admin Login</button>
+
+  <div id="login-section">
+    <h3>Please Sign in to Continue</h3>
+  </div>
+
+  <!-- Voting Options (Visible After Login) -->
+  <div id="voting-options">
+    <h2>Vote for Your Candidate</h2>
+    <div id="candidate-list">
+      <!-- Candidates will be dynamically loaded here -->
+    </div>
+  </div>
+
+  <!-- Admin Panel (Visible Only to Admins) -->
+  <div id="admin-panel">
+    <h2>Admin Panel</h2>
+    <button id="add-candidate-btn">Add Candidate</button>
+  </div>
+
 </body>
 </html>
