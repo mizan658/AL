@@ -1,215 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voting System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animated Voting System</title>
   <style>
-    #voting-options { display: none; }
-    #admin-panel { display: none; }
-    #login-section { display: block; }
-    #google-signin-btn { margin-top: 20px; }
-    #google-admin-btn { margin-top: 20px; position: absolute; top: 20px; right: 20px; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      color: #00ffae;
+    }
+
+    button {
+      background: #00ffae;
+      color: #121212;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #00ddb3;
+      transform: scale(1.05);
+    }
+
+    #voting-options, #admin-panel {
+      animation: slideUp 0.7s ease-in-out;
+      margin-top: 20px;
+      border: 1px solid #444;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #1e1e1e;
+    }
+
+    #candidate-list div {
+      background: #2b2b2b;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    #candidate-list div:hover {
+      transform: translateY(-5px);
+      background: #3b3b3b;
+    }
+
+    img {
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+      width: 100px;
+    }
+
+    img:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0 }
+      to { opacity: 1 }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px) }
+      to { opacity: 1; transform: translateY(0) }
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid #00ffae;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #countdown {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
   </style>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
-
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
-      authDomain: "voting-app-2b276.firebaseapp.com",
-      projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.firebasestorage.app",
-      messagingSenderId: "699531517654",
-      appId: "1:699531517654:web:785702f843d21a85c17377",
-      measurementId: "G-309D0KG6KL"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-
-    // Initialize Firebase Auth, Firestore, and Storage
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    const provider = new GoogleAuthProvider();
-
-    // Elements
-    const googleSignInBtn = document.getElementById('google-signin-btn');
-    const googleAdminBtn = document.getElementById('google-admin-btn');
-    const votingOptionsDiv = document.getElementById('voting-options');
-    const adminPanelDiv = document.getElementById('admin-panel');
-    const candidateListDiv = document.getElementById("candidate-list");
-    const addCandidateBtn = document.getElementById('add-candidate-btn');
-    const timerInput = document.getElementById('timer-input');
-    const candidateNameInput = document.getElementById('candidate-name');
-    const candidatePhotoInput = document.getElementById('candidate-photo');
-
-    // Google Sign-In Button for User Login
-    googleSignInBtn.addEventListener('click', async () => {
-      try {
-        const userCredential = await signInWithPopup(auth, provider);
-        const user = userCredential.user;
-
-        if (user.email.endsWith('@diu.edu.bd')) {
-          displayCandidates();
-          votingOptionsDiv.style.display = 'block';
-          googleSignInBtn.style.display = 'none';
-        } else {
-          alert("Only users with @diu.edu.bd emails can vote.");
-        }
-      } catch (error) {
-        console.error("Error during Google sign-in: ", error.message);
-      }
-    });
-
-    // Google Sign-In Button for Admin
-    googleAdminBtn.addEventListener('click', async () => {
-      try {
-        const userCredential = await signInWithPopup(auth, provider);
-        const user = userCredential.user;
-
-        if (user.email === '252-35-007@diu.edu.bd') {
-          adminPanelDiv.style.display = 'block';
-          googleAdminBtn.style.display = 'none';
-        } else {
-          alert("Only the admin can access this panel.");
-        }
-      } catch (error) {
-        console.error("Error during Google admin sign-in: ", error.message);
-      }
-    });
-
-    // Fetch and display candidates
-    const displayCandidates = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, 'candidates'));
-        candidateListDiv.innerHTML = '';
-        snapshot.forEach(doc => {
-          const candidate = doc.data();
-          const candidateDiv = document.createElement('div');
-          candidateDiv.innerHTML = `
-            <img src="${candidate.photoUrl}" alt="${candidate.name}" width="100" />
-            <p>${candidate.name}</p>
-            <button onclick="editCandidate('${doc.id}')">Edit</button>
-            <button onclick="removeCandidate('${doc.id}')">Remove</button>
-          `;
-          candidateListDiv.appendChild(candidateDiv);
-        });
-      } catch (error) {
-        console.error("Error fetching candidates: ", error.message);
-      }
-    };
-
-    // Edit Candidate
-    window.editCandidate = (candidateId) => {
-      const candidateRef = doc(db, 'candidates', candidateId);
-      const candidate = prompt("Enter new name for the candidate:");
-      if (candidate) {
-        updateDoc(candidateRef, {
-          name: candidate,
-        }).then(() => {
-          alert('Candidate updated successfully');
-          displayCandidates();
-        }).catch(error => {
-          console.error("Error updating candidate: ", error.message);
-        });
-      }
-    };
-
-    // Remove Candidate
-    window.removeCandidate = (candidateId) => {
-      const candidateRef = doc(db, 'candidates', candidateId);
-      deleteDoc(candidateRef).then(() => {
-        alert('Candidate removed successfully');
-        displayCandidates();
-      }).catch(error => {
-        console.error("Error removing candidate: ", error.message);
-      });
-    };
-
-    // Add New Candidate
-    addCandidateBtn.addEventListener('click', async () => {
-      const name = candidateNameInput.value;
-      const photoFile = candidatePhotoInput.files[0];
-
-      if (name && photoFile) {
-        const storageRef = ref(storage, 'candidatePhotos/' + photoFile.name);
-        uploadBytes(storageRef, photoFile).then(snapshot => {
-          getDownloadURL(snapshot.ref).then((photoUrl) => {
-            addDoc(collection(db, 'candidates'), {
-              name: name,
-              photoUrl: photoUrl,
-            }).then(() => {
-              alert('Candidate added successfully');
-              displayCandidates();
-            }).catch(error => {
-              console.error("Error adding candidate: ", error.message);
-            });
-          });
-        });
-      } else {
-        alert("Please provide both name and photo.");
-      }
-    });
-
-    // Set Voting Timer
-    timerInput.addEventListener('change', (e) => {
-      const timerValue = e.target.value;
-      console.log("Timer set to: " + timerValue);
-      // You can store the timer value in Firestore or implement logic to end voting after the timer expires.
-    });
-
-    // Check auth state to show correct interface
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        if (user.email === '252-35-007@diu.edu.bd') {
-          googleAdminBtn.style.display = 'block'; // Show Admin Login for Admin
-        }
-      }
-    });
-  </script>
 </head>
 <body>
+  <h1>Vote for Your Candidate</h1>
 
-  <h1>Welcome to the Voting System</h1>
-
-  <!-- Google Sign-In Button for Users -->
-  <button id="google-signin-btn">Sign in with Google to Vote</button>
-
-  <!-- Google Sign-In Button for Admin -->
-  <button id="google-admin-btn" style="display:none;">Admin Login</button>
-
-  <div id="login-section">
-    <h3>Please Sign in to Continue</h3>
+  <div style="text-align: center;">
+    <button id="login-user">Sign in with your @diu.edu.bd Email</button>
+    <button id="login-admin" style="float: right; background: #ffaa00;">Admin Login</button>
   </div>
 
-  <!-- Voting Options (Visible After Login) -->
-  <div id="voting-options">
-    <h2>Vote for Your Candidate</h2>
+  <div id="countdown"></div>
+
+  <div id="voting-options" style="display:none;">
+    <h2>Choose a Candidate</h2>
     <div id="candidate-list">
-      <!-- Candidates will be dynamically loaded here -->
+      <!-- Candidate cards will go here -->
     </div>
   </div>
 
-  <!-- Admin Panel (Visible Only to Admins) -->
-  <div id="admin-panel">
+  <div id="admin-panel" style="display:none;">
     <h2>Admin Panel</h2>
-    <input type="text" id="candidate-name" placeholder="Enter Candidate Name" />
-    <input type="file" id="candidate-photo" />
-    <button id="add-candidate-btn">Add Candidate</button>
-    <h3>Set Voting Timer (in minutes)</h3>
-    <input type="number" id="timer-input" min="1" placeholder="Enter voting duration" />
+    <p>You can add/edit/remove candidates and set a vote timer.</p>
+    <div class="spinner"></div>
   </div>
 
+  <script>
+    // Placeholder timer countdown
+    const countdownElem = document.getElementById('countdown');
+    const targetTime = new Date().getTime() + (60 * 1000 * 5); // 5 minutes
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = targetTime - now;
+
+      if (distance < 0) {
+        countdownElem.innerText = "Voting has ended.";
+        return;
+      }
+
+      const minutes = Math.floor(distance / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      countdownElem.innerText = `Voting ends in ${minutes}m ${seconds}s`;
+      setTimeout(updateCountdown, 1000);
+    }
+
+    updateCountdown();
+  </script>
 </body>
 </html>
