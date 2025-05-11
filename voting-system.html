@@ -26,13 +26,10 @@
     <input type="text" id="candidateName" placeholder="Candidate Name">
     <input type="text" id="candidatePhoto" placeholder="Photo URL">
     <button onclick="addCandidate()">Add Candidate</button>
-
     <h3>Manage Candidates</h3>
     <ul id="candidateList"></ul>
-
-    <h3>Manage Votes</h3>
-    <button onclick="loadVotesAdmin()">Load Votes</button>
-    <ul id="voteListAdmin"></ul>
+    <h3>Vote Count</h3>
+    <ul id="voteCountList"></ul>
   </div>
 
   <div id="voteSection" style="display:none;">
@@ -44,7 +41,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -61,12 +58,14 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
+    let currentUser = null;
 
     window.signInAdmin = async () => {
       const result = await signInWithPopup(auth, provider);
       if (result.user.email === "252-35-007@diu.edu.bd") {
         document.getElementById("adminPanel").style.display = "block";
         loadCandidates();
+        loadVoteCounts();
       } else {
         alert("Access denied: Not an admin");
       }
@@ -74,12 +73,14 @@
 
     window.signInUser = async () => {
       const result = await signInWithPopup(auth, provider);
-      if (!result.user.email.endsWith("@diu.edu.bd")) {
+      const email = result.user.email;
+      if (!email || !email.endsWith("@diu.edu.bd")) {
         alert("Only DIU emails are allowed to vote");
         return;
       }
+      currentUser = result.user;
       document.getElementById("voteSection").style.display = "block";
-      loadVotes(result.user.uid);
+      loadVotes(currentUser.uid);
     };
 
     window.addCandidate = async () => {
@@ -88,6 +89,7 @@
       if (!name) return alert("Enter a name");
       await addDoc(collection(db, "candidates"), { name, photoURL: photo, votes: 0 });
       loadCandidates();
+      loadVoteCounts();
     };
 
     window.loadCandidates = async () => {
@@ -103,9 +105,29 @@
       });
     };
 
+    window.loadVoteCounts = async () => {
+      const list = document.getElementById("voteCountList");
+      list.innerHTML = "";
+      const snap = await getDocs(collection(db, "candidates"));
+      let maxVotes = 0;
+      let winner = "";
+      snap.forEach(docSnap => {
+        const c = docSnap.data();
+        list.innerHTML += `<li><b>${c.name}</b>: ${c.votes} votes</li>`;
+        if (c.votes > maxVotes) {
+          maxVotes = c.votes;
+          winner = c.name;
+        }
+      });
+      if (maxVotes > 0) {
+        list.innerHTML += `<p><b>Winner:</b> ${winner}</p>`;
+      }
+    };
+
     window.removeCandidate = async (id) => {
       await deleteDoc(doc(db, "candidates", id));
       loadCandidates();
+      loadVoteCounts();
     };
 
     window.loadVotes = async (uid) => {
@@ -122,45 +144,29 @@
         const c = docSnap.data();
         list.innerHTML += `<li>
           <img src="${c.photoURL}" width="50"> <b>${c.name}</b>
-          <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
+          <button onclick="vote('${docSnap.id}')">Vote</button>
         </li>`;
       });
     };
 
-    window.vote = async (candidateId, uid) => {
-      const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user.email;  // Get the user's email
-
+    window.vote = async (candidateId) => {
+      if (!currentUser) return alert("Please sign in first");
+      const uid = currentUser.uid;
+      const email = currentUser.email || "undefined";
       const votedRef = doc(db, "votes", uid);
-      await addDoc(collection(db, "votes"), { 
-        uid, 
-        candidateId,
-        email: userEmail  // Store the email with the vote
-      });
-
+      const votedSnap = await getDoc(votedRef);
+      if (votedSnap.exists()) {
+        alert("You have already voted.");
+        return;
+      }
+      await setDoc(votedRef, { uid, email, candidateId });
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
-      const newVotes = cSnap.data().votes + 1;
+      const newVotes = (cSnap.data().votes || 0) + 1;
       await updateDoc(cRef, { votes: newVotes });
-
       alert("Vote submitted");
       document.getElementById("voteSection").innerHTML = "<p>Thank you for voting!</p>";
     };
-
-    window.loadVotesAdmin = async () => {
-      const list = document.getElementById("voteListAdmin");
-      list.innerHTML = "";
-      const snap = await getDocs(collection(db, "votes"));
-      snap.forEach(docSnap => {
-        const v = docSnap.data();
-        list.innerHTML += `<li>
-          <b>UID:</b> ${v.uid} <br>
-          <b>Email:</b> ${v.email} <br>
-          <b>Candidate ID:</b> ${v.candidateId}
-        </li>`;
-      });
-    };
   </script>
-
 </body>
 </html>
