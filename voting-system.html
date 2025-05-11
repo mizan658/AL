@@ -145,6 +145,7 @@
             <img src="${c.photoURL}" width="50">
             <div class="candidate-info">
               <h3>${c.name}</h3>
+              <p>${c.bio}</p>
               <button onclick="vote('${docSnap.id}', '${uid}')">Vote</button>
             </div>
           </li>
@@ -165,11 +166,7 @@
       }
 
       // Save the vote
-      await addDoc(collection(db, "votes"), { 
-        uid, 
-        candidateId,
-        email: userEmail 
-      });
+      await setDoc(doc(db, "votes", uid), { candidateId, email: userEmail });
 
       const cRef = doc(db, "candidates", candidateId);
       const cSnap = await getDoc(cRef);
@@ -187,7 +184,6 @@
       snap.forEach(docSnap => {
         const v = docSnap.data();
         list.innerHTML += `<li>
-          <b>UID:</b> ${v.uid} <br>
           <b>Email:</b> ${v.email} <br>
           <b>Candidate ID:</b> ${v.candidateId} <br>
         </li>`;
@@ -195,12 +191,20 @@
     };
 
     window.resetVotes = async () => {
+      // Reset votes count to 0 for all candidates
+      const candidatesSnap = await getDocs(collection(db, "candidates"));
+      candidatesSnap.forEach(async (docSnap) => {
+        await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
+      });
+
+      // Delete all votes
       const votesSnap = await getDocs(collection(db, "votes"));
       votesSnap.forEach(async (docSnap) => {
         await deleteDoc(doc(db, "votes", docSnap.id));
       });
+
+      alert("Votes have been reset.");
       loadCandidates();  // Reload candidate list after resetting votes
-      alert("Votes reset.");
     };
 
     window.publishWinner = async () => {
