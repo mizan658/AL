@@ -1,203 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vote for Your Candidate</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #222;
-            color: white;
-            padding: 15px 0;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        .candidate-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        .candidate {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            width: 250px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-        .candidate img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .candidate h3 {
-            margin: 15px;
-            font-size: 20px;
-        }
-        .candidate button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            cursor: pointer;
-            border-radius: 0 0 10px 10px;
-            transition: background-color 0.3s;
-        }
-        .candidate button:hover {
-            background-color: #218838;
-        }
-        .footer {
-            background-color: #222;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-        .admin-login {
-            text-align: center;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Voting System</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .hidden { display: none; }
+    .candidate {
+      display: inline-block;
+      margin: 15px;
+      padding: 10px;
+      border: 1px solid #555;
+      border-radius: 10px;
+      background-color: #1e1e1e;
+      cursor: pointer;
+    }
+    .candidate img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .candidate-name {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    .admin-section, .vote-section, .profile-section {
+      margin-top: 30px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #6200ee;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3700b3;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Vote for Your Favorite Candidate</h1>
-    </header>
-    <div class="container">
-        <div class="candidate-container" id="candidate-container">
-            <!-- Candidates will be dynamically added here from Firebase -->
-        </div>
-    </div>
 
-    <div class="admin-login" id="admin-login">
-        <button onclick="googleSignIn()">Admin Login</button>
-    </div>
+  <h1>Vote for Your Candidate</h1>
 
-    <div class="footer">
-        <p>Powered by Firebase</p>
-    </div>
+  <div class="login-section">
+    <button onclick="googleSignIn()">Login with Google</button>
+  </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-firestore.js"></script>
+  <div class="profile-section hidden">
+    <h2>Welcome, <span id="user-name"></span></h2>
+    <p>Email: <span id="user-email"></span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+  <div class="vote-section hidden">
+    <div id="candidates"></div>
+  </div>
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+  <div class="admin-section hidden">
+    <h2>Admin Controls</h2>
+    <input type="text" id="candidate-name" placeholder="Candidate Name">
+    <input type="text" id="candidate-image" placeholder="Candidate Image URL">
+    <button onclick="addCandidate()">Add Candidate</button>
+    <div id="vote-counts"></div>
+  </div>
 
-        // Fetch candidates from Firestore
-        function getCandidates() {
-            db.collection('candidates').get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const candidateData = doc.data();
-                    displayCandidate(candidateData.name, candidateData.photoUrl, doc.id);
-                });
-            });
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const adminEmails = ["ahamed.to.tipak@gmail.com", "252-35-007@diu.edu.bd"];
+
+    function googleSignIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.querySelector('.login-section').classList.add('hidden');
+        document.querySelector('.profile-section').classList.remove('hidden');
+        document.getElementById('user-name').textContent = user.displayName;
+        document.getElementById('user-email').textContent = user.email;
+
+        loadCandidates();
+
+        if (adminEmails.includes(user.email)) {
+          document.querySelector('.admin-section').classList.remove('hidden');
+          showVoteCounts();
+        } else {
+          document.querySelector('.vote-section').classList.remove('hidden');
         }
+      } else {
+        document.querySelector('.login-section').classList.remove('hidden');
+        document.querySelector('.profile-section').classList.add('hidden');
+        document.querySelector('.vote-section').classList.add('hidden');
+        document.querySelector('.admin-section').classList.add('hidden');
+      }
+    });
 
-        // Display each candidate on the page
-        function displayCandidate(name, photoUrl, id) {
-            const candidateContainer = document.getElementById('candidate-container');
-            const candidateHTML = `
-                <div class="candidate">
-                    <img src="${photoUrl}" alt="${name}">
-                    <h3>${name}</h3>
-                    <button onclick="confirmVote('${id}')">Vote</button>
-                </div>
-            `;
-            candidateContainer.innerHTML += candidateHTML;
+    function addCandidate() {
+      const name = document.getElementById('candidate-name').value;
+      const image = document.getElementById('candidate-image').value;
+      if (!name || !image) return alert("Fill both fields");
+
+      db.collection('candidates').add({ name, image });
+    }
+
+    function loadCandidates() {
+      db.collection('candidates').onSnapshot(snapshot => {
+        const candidatesDiv = document.getElementById('candidates');
+        candidatesDiv.innerHTML = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement('div');
+          div.className = 'candidate';
+          div.innerHTML = `
+            <img src="${data.image}" alt="${data.name}" onclick="vote('${doc.id}', '${data.name}', '${data.image}')">
+            <div class="candidate-name">${data.name}</div>
+          `;
+          candidatesDiv.appendChild(div);
+        });
+      });
+    }
+
+    function vote(id, name, image) {
+      if (!confirm(`Are you sure you want to vote for ${name}?`)) return;
+
+      const user = auth.currentUser;
+      db.collection('votes').doc(user.uid).set({
+        userId: user.uid,
+        email: user.email,
+        candidateId: id,
+        candidateName: name,
+        candidateImage: image,
+        votedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => alert("Vote submitted!"));
+    }
+
+    function showVoteCounts() {
+      db.collection('votes').onSnapshot(snapshot => {
+        const counts = {};
+        snapshot.forEach(doc => {
+          const vote = doc.data();
+          counts[vote.candidateName] = (counts[vote.candidateName] || 0) + 1;
+        });
+
+        const voteDiv = document.getElementById('vote-counts');
+        voteDiv.innerHTML = '<h3>Vote Counts:</h3>';
+        for (let [name, count] of Object.entries(counts)) {
+          voteDiv.innerHTML += `<p>${name}: ${count} votes</p>`;
         }
-
-        // Confirm vote before submission
-        function confirmVote(candidateId) {
-            const candidateRef = db.collection('candidates').doc(candidateId);
-            candidateRef.get().then(doc => {
-                const candidateName = doc.data().name;
-                const userConfirmed = confirm(`Are you sure you want to vote for ${candidateName}?`);
-                if (userConfirmed) {
-                    submitVote(candidateName);
-                }
-            });
-        }
-
-        // Submit vote to Firestore
-        function submitVote(candidateName) {
-            const userId = auth.currentUser.uid;
-
-            // Check if the user has already voted
-            db.collection('votes').where("userId", "==", userId).get()
-                .then(querySnapshot => {
-                    if (querySnapshot.empty) {
-                        // If user hasn't voted, submit the vote
-                        db.collection('votes').add({
-                            userId: userId,
-                            candidateName: candidateName
-                        }).then(() => {
-                            alert(`Vote submitted for ${candidateName}`);
-                        }).catch(err => {
-                            console.error('Error submitting vote: ', err);
-                        });
-                    } else {
-                        alert('You have already voted!');
-                    }
-                });
-        }
-
-        // Admin login using Google Sign-In
-        function googleSignIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    if (user.email === 'ahamed.to.tipak@gmail.com' || user.email === '252-35-007@diu.edu.bd') {
-                        alert('Welcome, Admin');
-                        // Show admin-specific controls here
-                    } else {
-                        alert('Access denied');
-                        auth.signOut();
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error during sign-in: ', error);
-                });
-        }
-
-        // Fetch candidates when page loads
-        window.onload = function() {
-            getCandidates();
-        };
-    </script>
+      });
+    }
+  </script>
 </body>
 </html>
