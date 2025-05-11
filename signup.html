@@ -1,97 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
+  <meta charset="UTF-8">
+  <title>Sign Up - DIU Private Portal</title>
+  <script type="module" src="./firebase-config.js"></script>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    button {
+      background: #00bfff;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #007bff;
+    }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <!-- Google Sign-In Button -->
-    <button id="signUpBtn" onclick="signInWithGoogle()">Sign Up with Google</button>
+  <h1>Sign Up with Google (DIU Email Only)</h1>
+  <button id="googleSignInBtn">Sign Up with Google</button>
+  <p class="error" id="errorMsg"></p>
 
-    <!-- Password Setup Form -->
-    <div id="passwordSetup" style="display:none;">
-        <h3>Set up your password</h3>
-        <form id="passwordForm">
-            <label for="password">Create Password:</label>
-            <input type="password" id="password" placeholder="Enter your password" required /><br><br>
-            <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" placeholder="Confirm your password" required /><br><br>
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { firebaseConfig } from './firebase-config.js';
 
-    <!-- Firebase Configuration -->
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-            authDomain: "notice-8edc7.firebaseapp.com",
-            projectId: "notice-8edc7",
-            storageBucket: "notice-8edc7.firebasestorage.app",
-            messagingSenderId: "948590141987",
-            appId: "1:948590141987:web:a9af8252e98f2933f40796",
-            measurementId: "G-DSM883VQPT"
-        };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const provider = new firebase.auth.GoogleAuthProvider();
-
-        // Function to handle Google Sign-In
-        function signInWithGoogle() {
-            firebase.auth().signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    console.log("User signed in: ", user);
-
-                    // After Google Sign-In, show password setup
-                    document.getElementById('signUpBtn').style.display = 'none'; // Hide Google Sign-In button
-                    document.getElementById('passwordSetup').style.display = 'block'; // Show password setup form
-
-                    // Store Google user info
-                    const email = user.email;
-                    localStorage.setItem('email', email);
-                })
-                .catch((error) => {
-                    console.error("Error during sign-in: ", error.message);
-                });
-        }
-
-        // Function to handle password form submission
-        document.getElementById('passwordForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-                return;
-            }
-
-            const email = localStorage.getItem('email');
-            
-            // Create user with email and password
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("User created: ", user);
-
-                    // Redirect to profile page or show profile details
-                    window.location.href = '/profile.html'; // Replace with your profile page URL
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    alert(errorMessage); // Show error message
-                    console.error("Error creating user: ", errorCode, errorMessage);
-                });
+    document.getElementById("googleSignInBtn").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          if (user.email.endsWith("@diu.edu.bd")) {
+            // Allow to continue to password setup
+            window.location.href = "password-setup.html?email=" + user.email;
+          } else {
+            // Block non-DIU users
+            signOut(auth);
+            document.getElementById("errorMsg").textContent = "Only @diu.edu.bd emails are allowed.";
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          document.getElementById("errorMsg").textContent = "Error signing in. Try again.";
         });
-    </script>
+    });
+  </script>
 </body>
 </html>
