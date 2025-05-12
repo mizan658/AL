@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,13 +68,11 @@
 
   <h3>Manage Candidates</h3>
   <ul id="candidateList"></ul>
-  <button onclick="reloadCandidates()">Reload Candidates</button>
 
   <h3>Manage Votes</h3>
   <button onclick="loadVotesAdmin()">Load Votes</button>
   <ul id="voteListAdmin"></ul>
   <button onclick="resetVotes()">Reset Votes</button>
-  <button onclick="reloadVotes()">Reload Votes</button>
 </div>
 
 <div id="voteSection" style="display:none;">
@@ -152,10 +151,6 @@
     });
   };
 
-  window.reloadCandidates = () => {
-    loadCandidates();
-  };
-
   window.removeCandidate = async (id) => {
     await deleteDoc(doc(db, "candidates", id));
     loadCandidates();
@@ -224,24 +219,25 @@
   window.loadVotesAdmin = async () => {
     const list = document.getElementById("voteListAdmin");
     list.innerHTML = "";
-    const snap
-= await getDocs(collection(db, "votes"));
-snap.forEach(docSnap => {
-const v = docSnap.data();
-list.innerHTML += <li><strong>User:</strong> ${v.email} <strong>Voted for:</strong> ${v.candidateId}</li> ;
-});
-};
+    const snap = await getDocs(collection(db, "votes"));
+    snap.forEach(docSnap => {
+      const v = docSnap.data();
+      list.innerHTML += `<li><b>Email:</b> ${v.email} <br><b>Candidate ID:</b> ${v.candidateId}</li>`;
+    });
+  };
 
-window.reloadVotes = () => {
-loadVotesAdmin();
-};
-
-window.resetVotes = async () => {
-const snap = await getDocs(collection(db, "votes"));
-snap.forEach(docSnap => deleteDoc(doc(db, "votes", docSnap.id)));
-alert("Votes have been reset.");
-loadVotesAdmin();
-};
+  window.resetVotes = async () => {
+    const candidatesSnap = await getDocs(collection(db, "candidates"));
+    candidatesSnap.forEach(async (docSnap) => {
+      await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
+    });
+    const votesSnap = await getDocs(collection(db, "votes"));
+    votesSnap.forEach(async (docSnap) => {
+      await deleteDoc(doc(db, "votes", docSnap.id));
+    });
+    alert("Votes have been reset.");
+    loadCandidates();
+  };
 </script>
-
-</body> </html>
+</body>
+</html>
