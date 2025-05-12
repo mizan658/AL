@@ -1,85 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notice Board</title>
   <style>
-    body { 
-      background-color: black; 
-      color: white; 
-      font-family: Arial, sans-serif; 
-      text-align: center; 
-      margin: 0; 
-      padding: 20px; 
-      animation: fadeIn 1s ease-in-out; 
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      animation: fadeIn 1s ease-in-out;
     }
 
-    #notices { 
-      margin-top: 30px; 
-      animation: fadeIn 2s ease-in-out; 
+    #notices {
+      margin-top: 30px;
+      animation: fadeIn 2s ease-in-out;
     }
 
-    .notice { 
-      border: 1px solid #444; 
-      padding: 10px; 
-      margin: 10px auto; 
-      width: 90%; 
-      max-width: 600px; 
-      background-color: #222; 
+    .notice {
+      border: 1px solid #444;
+      padding: 10px;
+      margin: 10px auto;
+      width: 90%;
+      max-width: 600px;
+      background-color: #222;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-sizing: border-box;
     }
-    
+
     .notice:hover {
       transform: scale(1.05);
       box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.3);
     }
 
-    button { 
-      margin: 5px; 
-      padding: 5px 10px; 
-      border: none; 
-      background-color: #333; 
-      color: white; 
-      cursor: pointer; 
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
       transition: background-color 0.3s ease;
+      border-radius: 4px;
     }
 
-    button:hover { 
-      background-color: #555; 
+    button:hover {
+      background-color: #555;
     }
 
-    input, textarea { 
-      width: 90%; 
-      padding: 10px; 
-      margin: 5px 0; 
-      background: #111; 
-      border: 1px solid #444; 
-      color: white; 
+    input,
+    textarea {
+      width: 95%;
+      max-width: 600px;
+      padding: 10px;
+      margin: 5px 0;
+      background: #111;
+      border: 1px solid #444;
+      color: white;
       transition: background-color 0.3s ease;
+      box-sizing: border-box;
     }
 
-    input:focus, textarea:focus {
+    input:focus,
+    textarea:focus {
       background-color: #333;
     }
 
-    #editorPanel { 
-      display: none; 
+    #editorPanel {
+      display: none;
       animation: slideIn 1s ease-out;
     }
 
-    #adminPanel { 
+    #adminPanel {
       animation: fadeIn 1.5s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-
-    @keyframes slideIn {
-      0% { transform: translateY(-50px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
     }
 
     .timestamp {
@@ -87,7 +83,6 @@
       color: #bbb;
     }
 
-    /* Spinner styles */
     #loadingSpinner {
       display: none;
       border: 4px solid #f3f3f3;
@@ -99,14 +94,58 @@
       margin: 20px auto;
     }
 
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      0% {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      .notice {
+        font-size: 16px;
+      }
+
+      button {
+        width: 90%;
+        max-width: 300px;
+      }
+
+      input,
+      textarea {
+        font-size: 16px;
+      }
     }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -133,6 +172,8 @@
     const editorPanel = document.getElementById("editorPanel");
     const adminPanel = document.getElementById("adminPanel");
     const loadingSpinner = document.getElementById("loadingSpinner");
+    const noticeForm = document.getElementById("noticeForm");
+    const noticesDiv = document.getElementById("notices");
 
     loginBtn.onclick = async () => {
       const provider = new GoogleAuthProvider();
@@ -153,28 +194,24 @@
 
     logoutBtn.onclick = () => signOut(auth);
 
-    const noticeForm = document.getElementById("noticeForm");
-    const noticesDiv = document.getElementById("notices");
-
     async function loadNotices() {
       loadingSpinner.style.display = "block";
       noticesDiv.innerHTML = "";
-      const q = query(collection(db, "notices"), orderBy("timestamp", "desc")); // ⬅️ Sort by timestamp DESC
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((docSnap) => {
+      const querySnapshot = await getDocs(collection(db, "notices"));
+      const sorted = querySnapshot.docs.sort((a, b) => b.data().timestamp?.seconds - a.data().timestamp?.seconds);
+      sorted.forEach((docSnap) => {
         const data = docSnap.data();
         const div = document.createElement("div");
         div.className = "notice";
         const date = new Date(data.timestamp.seconds * 1000).toLocaleString();
-        div.innerHTML =  
+        div.innerHTML =
           `<h3 contenteditable="false">${data.title}</h3>
           <p contenteditable="false">${data.body}</p>
           <p class="timestamp">Published on: ${date}</p>
           ${allowedAdmins.includes(auth.currentUser?.email) ? 
             `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
              <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` : 
-             `<p>Only admin can edit and delete notices.</p>`}
-        `;
+             `<p>Only admin can edit and delete notices.</p>`}`;
         noticesDiv.appendChild(div);
       });
       loadingSpinner.style.display = "none";
@@ -194,7 +231,10 @@
         btn.textContent = "Save";
       } else {
         h3.contentEditable = p.contentEditable = false;
-        updateDoc(doc(db, "notices", id), { title: h3.textContent, body: p.textContent });
+        updateDoc(doc(db, "notices", id), {
+          title: h3.textContent,
+          body: p.textContent
+        });
         btn.textContent = "Edit";
       }
     };
