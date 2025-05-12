@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Private Student Server</title>
   <style>
-    /* General body styles */
+    /* Global Styles */
     body {
       margin: 0;
       background-color: #18191A;
@@ -17,11 +17,32 @@
       justify-content: center;
       min-height: 100vh;
       padding: 20px;
+      transition: background-color 0.3s ease;
     }
 
-    /* Hero section */
+    h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .admin-note {
+      font-size: 0.9rem;
+      color: yellow;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    /* Hero Section */
     .hero {
-      background: rgba(24, 25, 26, 0.85);
+      background: rgba(24, 25, 26, 0.9);
       padding: 3rem 2rem;
       border: 2px solid #00ffff;
       border-radius: 12px;
@@ -31,6 +52,7 @@
       max-width: 800px;
       width: 100%;
       margin: 0 auto;
+      transition: transform 0.3s ease;
     }
 
     @keyframes pulse {
@@ -39,40 +61,43 @@
       100% { box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33; }
     }
 
-    /* Buttons section */
+    .hero:hover {
+      transform: scale(1.02);
+    }
+
+    /* Button Styles */
     .buttons {
       margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .buttons a, .buttons button {
       text-decoration: none;
-      padding: 0.8rem 1.5rem;
-      margin: 0.5rem;
+      padding: 1rem 2rem;
+      margin: 0.7rem;
       border-radius: 8px;
       font-weight: bold;
       display: inline-block;
       transition: 0.3s ease;
       cursor: pointer;
       border: none;
+      width: 100%;
+      max-width: 320px;
     }
 
-    /* Button styles */
     .notice-btn { background-color: #007bff; color: white; }
     .login-btn { background-color: #f4c430; color: black; }
     .signup-btn { background-color: #00bfff; color: black; }
     .rules-btn { background-color: #28a745; color: white; }
-    
+
     .buttons a:hover, .buttons button:hover {
       transform: scale(1.05);
       opacity: 0.9;
     }
 
-    /* Heading and text styles */
-    h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-    p { font-size: 1.2rem; line-height: 1.5; }
-    .admin-note { font-size: 0.85rem; color: yellow; margin-top: 1rem; }
-
-    /* Rules section */
+    /* Rules Section */
     #rules-section {
       display: none;
       text-align: left;
@@ -84,34 +109,64 @@
       width: 100%;
     }
 
-    #rules-section ul { list-style-type: square; padding-left: 1.5rem; }
+    #rules-section ul { 
+      list-style-type: square; 
+      padding-left: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #rules-section ul li {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
 
     .back-btn {
       margin-top: 2rem;
       background-color: #007bff;
       color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    /* Mobile-responsive styles */
+    /* Mobile Responsiveness */
     @media (max-width: 768px) {
       h1 {
         font-size: 1.8rem;
       }
 
       .buttons a, .buttons button {
-        padding: 0.6rem 1.2rem;
+        padding: 0.8rem 1.5rem;
         font-size: 1rem;
       }
 
       .hero {
-        padding: 2rem;
+        padding: 2rem 1.5rem;
         width: 100%;
       }
 
       #rules-section {
         padding: 1.5rem;
       }
+
+      .admin-note {
+        font-size: 0.85rem;
+      }
     }
+
+    /* Smaller Mobile Responsiveness */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .buttons a, .buttons button {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.95rem;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -142,12 +197,11 @@
   </div>
 
   <script type="module">
-    // Import the functions you need from the SDKs you need
+    // Firebase initialization and authentication
     import { initializeApp } from "firebase/app";
     import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
     import { getAnalytics } from "firebase/analytics";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
@@ -158,25 +212,21 @@
       measurementId: "G-BGXC3J55RD"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const auth = getAuth();
 
-    // Listen to authentication state
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is logged in, you can perform other tasks here if needed
+        // User is logged in
       } else {
-        // User is not logged in
+        // User is logged out
       }
     });
 
-    // Handle sign out
     function logout() {
       signOut(auth).then(() => {
-        // Sign-out successful
-        window.location.reload(); // Reload the page to reflect changes
+        window.location.reload();
       }).catch((error) => {
         console.error(error);
       });
