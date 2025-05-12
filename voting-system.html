@@ -9,25 +9,28 @@
       --primary: #1e90ff;
       --success: #4CAF50;
       --danger: #f44336;
+      --warning: #ff9800;
       --dark: #121212;
       --darker: #0a0a0a;
+      --darkest: #050505;
       --light: #f5f5f5;
       --gray: #333;
       --light-gray: #bbb;
     }
     
     body { 
-      background: var(--dark); 
+      background: var(--darkest); 
       color: white; 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      padding: 20px;
+      padding: 0;
+      margin: 0;
       line-height: 1.6;
     }
     
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 20px;
     }
     
     .btn {
@@ -46,7 +49,7 @@
     
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
     
     .btn-primary {
@@ -59,6 +62,10 @@
     
     .btn-danger {
       background: var(--danger);
+    }
+    
+    .btn-warning {
+      background: var(--warning);
     }
     
     .btn-outline {
@@ -84,7 +91,7 @@
       padding: 25px;
       border-radius: 12px;
       background: var(--darker);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
       border: 1px solid rgba(255,255,255,0.05);
     }
     
@@ -151,6 +158,10 @@
     .vote-count {
       font-weight: bold;
       color: var(--primary);
+      background: rgba(30, 144, 255, 0.1);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9em;
     }
     
     h1, h2, h3 {
@@ -163,6 +174,7 @@
       text-shadow: 0 0 10px rgba(0, 255, 0, 0.3), 0 0 20px rgba(0, 255, 0, 0.2);
       font-size: 2.5em;
       margin-bottom: 30px;
+      padding-top: 20px;
     }
     
     h2 {
@@ -210,6 +222,8 @@
       display: flex;
       justify-content: space-between;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     
     .notice {
@@ -229,10 +243,51 @@
     .notice a:hover {
       text-decoration: underline;
     }
+    
+    .winner-banner {
+      background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(76,175,80,0.4));
+      border-left: 4px solid var(--success);
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+    
+    .winner-name {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--success);
+      margin: 10px 0;
+    }
+    
+    .header {
+      background: var(--dark);
+      padding: 20px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    
+    .voting-disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .admin-only {
+      background: rgba(244, 67, 54, 0.1);
+      border-left: 4px solid var(--danger);
+      padding: 10px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      font-size: 0.9em;
+    }
   </style>
 </head>
 <body>
-<div class="container">
 
 <!-- Popup Guide -->
 <div id="popup" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:20px;">
@@ -246,50 +301,66 @@
   <div class="contact-mail" style="margin-top:20px;">Contact Mail: <a href="mailto:help.to.tz@gmail.com" style="color:#00ffff">help.to.tz@gmail.com</a></div>
 </div>
 
-<h1>Welcome to Private Voting System</h1>
+<div class="header">
+  <div class="container">
+    <h1>Welcome to Private Voting System</h1>
 
-<div class="action-buttons">
-  <div>
-    <button class="btn btn-primary" onclick="signInUser()">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="google-icon">
-      Sign in with DIU Mail to Vote
-    </button>
-    <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="btn btn-outline">Notice</button>
-    <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="btn btn-outline">Home</button>
+    <div class="action-buttons">
+      <div>
+        <button class="btn btn-primary" onclick="signInUser()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="google-icon">
+          Sign in with DIU Mail to Vote
+        </button>
+        <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="btn btn-outline">Notice</button>
+        <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="btn btn-outline">Home</button>
+      </div>
+      <button class="btn btn-danger" onclick="signInAdmin()">Admin Panel Login</button>
+    </div>
   </div>
-  <button class="btn btn-danger" onclick="signInAdmin()">Admin Panel Login</button>
 </div>
 
-<div id="adminPanel" class="panel" style="display:none;">
-  <h2>Admin Panel</h2>
-  <input type="text" id="candidateName" placeholder="Candidate Name">
-  <input type="text" id="candidatePhoto" placeholder="Photo URL">
-  <textarea id="candidateBio" placeholder="Candidate Bio" rows="4"></textarea>
-  <button class="btn btn-success" onclick="addCandidate()">Add Candidate</button>
+<div class="container">
+  <div id="winnerSection" class="panel" style="display:none;">
+    <h2>🏆 Election Results</h2>
+    <div id="winnerContent"></div>
+  </div>
 
-  <h3>Manage Candidates</h3>
-  <ul id="candidateList"></ul>
+  <div id="adminPanel" class="panel" style="display:none;">
+    <h2>Admin Panel</h2>
+    
+    <div class="admin-only">
+      <h3>Election Controls</h3>
+      <button class="btn btn-success" onclick="publishWinner()">Publish Winner</button>
+      <button class="btn btn-warning" onclick="resetVoting()">Reset Voting</button>
+      <p style="margin-top:10px;"><small>Publishing winner will end the election and show results to everyone.</small></p>
+    </div>
+    
+    <h3>Manage Candidates</h3>
+    <input type="text" id="candidateName" placeholder="Candidate Name">
+    <input type="text" id="candidatePhoto" placeholder="Photo URL">
+    <textarea id="candidateBio" placeholder="Candidate Bio" rows="4"></textarea>
+    <button class="btn btn-success" onclick="addCandidate()">Add Candidate</button>
 
-  <h3>Manage Votes</h3>
-  <button class="btn btn-primary" onclick="loadVotesAdmin()">Load Votes</button>
-  <ul id="voteListAdmin"></ul>
-  <button class="btn btn-danger" onclick="resetVotes()">Reset Votes</button>
-</div>
+    <div id="adminCandidateList"></div>
 
-<div id="voteSection" class="panel" style="display:none;">
-  <div id="authStatus" class="auth-status"></div>
-  <h2>Vote for Your Candidate</h2>
-  <div id="loading" class="loading-spinner" style="display:none;"></div>
-  <ul id="voteList"></ul>
-</div>
+    <h3>Vote Statistics</h3>
+    <button class="btn btn-primary" onclick="loadVotesAdmin()">Refresh Votes</button>
+    <div id="voteListAdmin"></div>
+  </div>
 
-<div id="candidatesListPublic" class="panel">
-  <h2>Candidates</h2>
-  <div id="publicAuthStatus"></div>
-  <div id="loadingPublic" class="loading-spinner"></div>
-  <ul id="publicCandidatesList"></ul>
-</div>
+  <div id="voteSection" class="panel" style="display:none;">
+    <div id="authStatus" class="auth-status"></div>
+    <h2>Vote for Your Candidate</h2>
+    <div id="loading" class="loading-spinner" style="display:none;"></div>
+    <div id="voteList"></div>
+  </div>
 
+  <div id="candidatesListPublic" class="panel">
+    <h2>Candidates</h2>
+    <div id="publicAuthStatus"></div>
+    <div id="loadingPublic" class="loading-spinner"></div>
+    <div id="publicCandidatesList"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -312,21 +383,73 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // Track current user
+  // Track current user and election status
   let currentUser = null;
+  let electionStatus = { isActive: true, winner: null };
 
-  // Auth state listener
-  onAuthStateChanged(auth, (user) => {
+  // Initialize the app
+  async function initApp() {
+    await checkElectionStatus();
+    onAuthStateChanged(auth, handleAuthChange);
+  }
+
+  // Check election status from Firestore
+  async function checkElectionStatus() {
+    const statusDoc = await getDoc(doc(db, "election", "status"));
+    if (statusDoc.exists()) {
+      electionStatus = statusDoc.data();
+      updateElectionUI();
+    }
+  }
+
+  // Update UI based on election status
+  function updateElectionUI() {
+    const winnerSection = document.getElementById("winnerSection");
+    const winnerContent = document.getElementById("winnerContent");
+    
+    if (!electionStatus.isActive && electionStatus.winner) {
+      winnerSection.style.display = "block";
+      winnerContent.innerHTML = `
+        <div class="winner-banner">
+          <h3>The election has concluded</h3>
+          <p>The winner is:</p>
+          <div class="winner-name">${electionStatus.winner.name}</div>
+          <img src="${electionStatus.winner.photoURL}" width="150" style="border-radius:50%; margin:10px 0;">
+          <p>${electionStatus.winner.bio}</p>
+          <p>Total votes: ${electionStatus.winner.votes}</p>
+        </div>
+      `;
+      
+      // Disable voting UI
+      document.getElementById("voteSection").style.display = "none";
+      document.getElementById("candidatesListPublic").classList.add("voting-disabled");
+    } else {
+      winnerSection.style.display = "none";
+      document.getElementById("candidatesListPublic").classList.remove("voting-disabled");
+    }
+  }
+
+  // Handle authentication state changes
+  async function handleAuthChange(user) {
     currentUser = user;
     updateAuthUI();
     
-    if (user && user.email.endsWith("@diu.edu.bd")) {
-      document.getElementById("voteSection").style.display = "block";
-      loadVotes(user.uid);
+    if (user) {
+      if (user.email === "252-35-007@diu.edu.bd") {
+        document.getElementById("adminPanel").style.display = "block";
+        loadAdminCandidates();
+        loadVotesAdmin();
+      } else if (user.email.endsWith("@diu.edu.bd") && electionStatus.isActive) {
+        document.getElementById("voteSection").style.display = "block";
+        loadVotes(user.uid);
+      }
     } else {
+      document.getElementById("adminPanel").style.display = "none";
       document.getElementById("voteSection").style.display = "none";
     }
-  });
+    
+    loadPublicCandidates();
+  }
 
   // Update authentication UI
   function updateAuthUI() {
@@ -341,9 +464,13 @@
       `;
       
       if (currentUser.email.endsWith("@diu.edu.bd")) {
-        publicAuthStatus.innerHTML = `
+        publicAuthStatus.innerHTML = electionStatus.isActive ? `
           <div class="notice">
             You are signed in. You can now vote for your preferred candidate.
+          </div>
+        ` : `
+          <div class="notice">
+            The election has ended. Thank you for participating.
           </div>
         `;
       } else {
@@ -361,7 +488,7 @@
         </button>
       `;
       
-      publicAuthStatus.innerHTML = `
+      publicAuthStatus.innerHTML = electionStatus.isActive ? `
         <button class="btn btn-primary" onclick="signInUser()" style="width:100%;">
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="google-icon">
           Sign in with DIU Mail to Vote
@@ -369,6 +496,10 @@
         <p style="text-align:center; margin-top:10px; color:var(--light-gray);">
           You must sign in with your DIU email to vote
         </p>
+      ` : `
+        <div class="notice">
+          The election has ended. Please check the results above.
+        </div>
       `;
     }
   }
@@ -400,7 +531,7 @@
       
       snap.forEach(docSnap => {
         const c = docSnap.data();
-        const canVote = currentUser && currentUser.email.endsWith("@diu.edu.bd");
+        const canVote = currentUser && currentUser.email.endsWith("@diu.edu.bd") && electionStatus.isActive;
         
         list.innerHTML += `
           <li class="candidate-item">
@@ -414,12 +545,17 @@
                     Vote
                   </button>
                 ` : `
-                  <button class="btn btn-primary" onclick="signInUser()" style="display:flex; align-items:center;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="google-icon">
-                    Sign in to Vote
-                  </button>
+                  ${electionStatus.isActive ? `
+                    <button class="btn btn-primary" onclick="signInUser()" style="display:flex; align-items:center;">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="google-icon">
+                      Sign in to Vote
+                    </button>
+                  ` : `
+                    <button class="btn" disabled style="background:var(--gray);">
+                      Voting Ended
+                    </button>
+                  `}
                 `}
-                <span class="vote-count">${c.votes || 0} votes</span>
               </div>
             </div>
           </li>
@@ -432,9 +568,9 @@
     }
   };
 
-  // Call the function when page loads
+  // Initialize the app when page loads
   window.addEventListener('DOMContentLoaded', () => {
-    loadPublicCandidates();
+    initApp();
   });
 
   window.signInAdmin = async () => {
@@ -442,7 +578,7 @@
       const result = await signInWithPopup(auth, provider);
       if (result.user.email === "252-35-007@diu.edu.bd") {
         document.getElementById("adminPanel").style.display = "block";
-        loadCandidates();
+        loadAdminCandidates();
         loadVotesAdmin();
       } else {
         alert("Access denied: Not an admin");
@@ -461,7 +597,7 @@
         await signOut(auth);
         return;
       }
-      loadPublicCandidates(); // Refresh to show vote buttons
+      loadPublicCandidates();
     } catch (error) {
       console.error("User sign in error:", error);
     }
@@ -478,36 +614,52 @@
       bio, 
       votes: 0 
     });
-    loadCandidates();
+    loadAdminCandidates();
     loadPublicCandidates();
   };
 
-  window.loadCandidates = async () => {
-    const list = document.getElementById("candidateList");
-    list.innerHTML = "";
-    const snap = await getDocs(collection(db, "candidates"));
-    snap.forEach(docSnap => {
-      const c = docSnap.data();
-      list.innerHTML += `
-        <li class="candidate-item">
-          <img src="${c.photoURL || 'https://via.placeholder.com/100'}" width="100" height="100">
-          <div class="candidate-info">
-            <h3>${c.name}</h3>
-            <p>${c.bio}</p>
-            <div style="display:flex; gap:10px; align-items:center;">
-              <button class="btn btn-danger" onclick="removeCandidate('${docSnap.id}')">Delete</button>
-              <span class="vote-count">${c.votes || 0} votes</span>
+  window.loadAdminCandidates = async () => {
+    const list = document.getElementById("adminCandidateList");
+    list.innerHTML = "<h3>Current Candidates</h3>";
+    const loading = document.createElement("div");
+    loading.className = "loading-spinner";
+    list.appendChild(loading);
+    
+    try {
+      const snap = await getDocs(collection(db, "candidates"));
+      list.innerHTML = "<h3>Current Candidates</h3>";
+      
+      if (snap.empty) {
+        list.innerHTML += "<p>No candidates available yet.</p>";
+        return;
+      }
+      
+      snap.forEach(docSnap => {
+        const c = docSnap.data();
+        list.innerHTML += `
+          <li class="candidate-item">
+            <img src="${c.photoURL || 'https://via.placeholder.com/100'}" width="100" height="100">
+            <div class="candidate-info">
+              <h3>${c.name}</h3>
+              <p>${c.bio}</p>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn btn-danger" onclick="removeCandidate('${docSnap.id}')">Delete</button>
+                <span class="vote-count">${c.votes || 0} votes</span>
+              </div>
             </div>
-          </div>
-        </li>
-      `;
-    });
+          </li>
+        `;
+      });
+    } catch (error) {
+      list.innerHTML = "<p>Error loading candidates. Please try again.</p>";
+      console.error("Error loading admin candidates:", error);
+    }
   };
 
   window.removeCandidate = async (id) => {
     if (!confirm("Are you sure you want to delete this candidate?")) return;
     await deleteDoc(doc(db, "candidates", id));
-    loadCandidates();
+    loadAdminCandidates();
     loadPublicCandidates();
   };
 
@@ -522,7 +674,7 @@
       document.getElementById("loading").style.display = "none";
       list.innerHTML = `
         <div class="notice">
-          <p>Thank you for voting! You can view the results on the <a href="https://mizan658.github.io/AL/notice.html">notice board</a>.</p>
+          <p>Thank you for voting! You can view the results when the election concludes.</p>
           <p>Remember: You can only vote once.</p>
         </div>
       `;
@@ -548,7 +700,6 @@
             <button class="btn btn-success" onclick="vote('${docSnap.id}', '${uid}', '${c.name.replace(/'/g, "\\'")}')">
               Vote for ${c.name}
             </button>
-            <span class="vote-count">${c.votes || 0} votes</span>
           </div>
         </li>
       `;
@@ -556,6 +707,11 @@
   };
 
   window.vote = async (candidateId, uid, candidateName) => {
+    if (!electionStatus.isActive) {
+      alert("The election has ended. Voting is no longer allowed.");
+      return;
+    }
+    
     if (!currentUser) {
       alert("Please sign in first");
       return signInUser();
@@ -624,40 +780,108 @@
     list.appendChild(loading);
     
     try {
-      const snap = await getDocs(collection(db, "votes"));
-      list.innerHTML = "";
+      const [votesSnap, candidatesSnap] = await Promise.all([
+        getDocs(collection(db, "votes")),
+        getDocs(collection(db, "candidates"))
+      ]);
       
-      if (snap.empty) {
-        list.innerHTML = "<p>No votes recorded yet.</p>";
+      list.innerHTML = `
+        <h4>Total Votes: ${votesSnap.size}</h4>
+        <h4>Vote Breakdown:</h4>
+      `;
+      
+      if (candidatesSnap.empty) {
+        list.innerHTML += "<p>No candidates available.</p>";
         return;
       }
       
-      snap.forEach(docSnap => {
-        const v = docSnap.data();
-        const time = v.timestamp ? v.timestamp.toDate().toLocaleString() : "Unknown time";
+      // Calculate votes per candidate
+      const voteCounts = {};
+      candidatesSnap.forEach(doc => {
+        voteCounts[doc.id] = {
+          name: doc.data().name,
+          count: doc.data().votes || 0
+        };
+      });
+      
+      // Sort by vote count (descending)
+      const sortedCandidates = Object.entries(voteCounts).sort((a, b) => b[1].count - a[1].count);
+      
+      sortedCandidates.forEach(([id, candidate]) => {
         list.innerHTML += `
-          <li style="padding:15px; margin:10px 0; background:rgba(255,255,255,0.03); border-radius:8px;">
-            <div><strong>Email:</strong> ${v.email}</div>
-            <div><strong>Candidate ID:</strong> ${v.candidateId}</div>
-            <div><strong>Time:</strong> ${time}</div>
-          </li>
+          <div style="margin:10px 0; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span>${candidate.name}</span>
+              <span class="vote-count">${candidate.count} votes</span>
+            </div>
+            <div style="height:5px; background:var(--gray); margin-top:5px; border-radius:5px;">
+              <div style="height:100%; background:var(--primary); width:${candidate.count / Math.max(1, votesSnap.size) * 100}%; border-radius:5px;"></div>
+            </div>
+          </div>
         `;
       });
+      
     } catch (error) {
       list.innerHTML = "<p>Error loading votes. Please try again.</p>";
       console.error("Error loading votes:", error);
     }
   };
 
-  window.resetVotes = async () => {
-    if (!confirm("WARNING: This will reset ALL votes. Are you sure?")) return;
-    
-    const loading = document.createElement("div");
-    loading.className = "loading-spinner";
-    document.getElementById("voteListAdmin").innerHTML = "";
-    document.getElementById("voteListAdmin").appendChild(loading);
+  window.publishWinner = async () => {
+    if (!confirm("Are you sure you want to publish the winner and end the election?")) return;
     
     try {
+      // Get all candidates and their votes
+      const candidatesSnap = await getDocs(collection(db, "candidates"));
+      if (candidatesSnap.empty) {
+        alert("No candidates available");
+        return;
+      }
+      
+      // Find the winner
+      let winner = null;
+      candidatesSnap.forEach(doc => {
+        const candidate = doc.data();
+        if (!winner || candidate.votes > winner.votes) {
+          winner = {
+            id: doc.id,
+            name: candidate.name,
+            photoURL: candidate.photoURL,
+            bio: candidate.bio,
+            votes: candidate.votes || 0
+          };
+        }
+      });
+      
+      // Update election status
+      await setDoc(doc(db, "election", "status"), {
+        isActive: false,
+        winner,
+        endDate: new Date()
+      });
+      
+      // Refresh UI
+      await checkElectionStatus();
+      loadPublicCandidates();
+      alert(`Winner published: ${winner.name}`);
+      
+    } catch (error) {
+      console.error("Error publishing winner:", error);
+      alert("Failed to publish winner. Please try again.");
+    }
+  };
+
+  window.resetVoting = async () => {
+    if (!confirm("WARNING: This will reset ALL votes and reactivate the election. Are you sure?")) return;
+    
+    try {
+      // Reset election status
+      await setDoc(doc(db, "election", "status"), {
+        isActive: true,
+        winner: null,
+        startDate: new Date()
+      });
+      
       // Reset candidate votes
       const candidatesSnap = await getDocs(collection(db, "candidates"));
       const updatePromises = [];
@@ -674,13 +898,16 @@
       });
       await Promise.all(deletePromises);
       
-      alert("All votes have been reset successfully.");
-      loadCandidates();
+      // Refresh UI
+      await checkElectionStatus();
+      loadAdminCandidates();
       loadPublicCandidates();
       loadVotesAdmin();
+      alert("Voting has been reset successfully.");
+      
     } catch (error) {
-      alert("Error resetting votes. Please try again.");
-      console.error("Error resetting votes:", error);
+      console.error("Error resetting voting:", error);
+      alert("Failed to reset voting. Please try again.");
     }
   };
 </script>
