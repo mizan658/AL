@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Private Student Server</title>
   <style>
     /* Global Styles */
@@ -37,13 +37,6 @@
       font-size: 0.9rem;
       color: yellow;
       margin-top: 1.5rem;
-      text-align: center;
-    }
-
-    .contact-mail {
-      font-size: 0.9rem;
-      color: #ccc;
-      margin-top: 0.5rem;
       text-align: center;
     }
 
@@ -137,6 +130,32 @@
       cursor: pointer;
     }
 
+    /* Loading Spinner */
+    #loading-spinner {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #00ffff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     /* Mobile Responsiveness */
     @media (max-width: 768px) {
       h1 {
@@ -162,7 +181,6 @@
       }
     }
 
-    /* Smaller Mobile Responsiveness */
     @media (max-width: 480px) {
       h1 {
         font-size: 1.5rem;
@@ -187,8 +205,10 @@
       <a href="https://mizan658.github.io/AL/voting-system.html?" class="signup-btn">Voting</a>
       <a href="#" class="login-btn">Chat Group</a>
     </div>
-    <div class="admin-note">Full control of the platform is reserved for the admin</div>
-    <div class="contact-mail">Contact Mail: <a href="mailto:help.to.tz@gmail.com" style="color:#00ffff">help.to.tz@gmail.com</a></div>
+    <div class="admin-note">
+      Full control of the platform is reserved for the admin<br />
+      Contact Mail: <a href="mailto:help.to.tz@gmail.com" style="color: #00ffff;">help.to.tz@gmail.com</a>
+    </div>
   </div>
 
   <div id="rules-section">
@@ -203,11 +223,15 @@
     <button class="back-btn" onclick="hideRules()">Back</button>
   </div>
 
+  <!-- Loading Spinner -->
+  <div id="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+
   <script type="module">
-    // Firebase initialization and authentication
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
@@ -250,6 +274,13 @@
       document.getElementById("rules-section").style.display = "none";
       document.getElementById("main-section").style.display = "block";
     }
+
+    // Show spinner on click
+    document.querySelectorAll("a, button").forEach(el => {
+      el.addEventListener("click", () => {
+        document.getElementById("loading-spinner").style.display = "flex";
+      });
+    });
   </script>
 </body>
 </html>
