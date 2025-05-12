@@ -90,8 +90,8 @@
     /* Spinner styles */
     #loadingSpinner {
       display: none;
-      border: 4px solid #f3f3f3; /* Light grey */
-      border-top: 4px solid #3498db; /* Blue */
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -103,11 +103,10 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -133,7 +132,7 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const editorPanel = document.getElementById("editorPanel");
     const adminPanel = document.getElementById("adminPanel");
-    const loadingSpinner = document.getElementById("loadingSpinner"); // Spinner element
+    const loadingSpinner = document.getElementById("loadingSpinner");
 
     loginBtn.onclick = async () => {
       const provider = new GoogleAuthProvider();
@@ -158,14 +157,15 @@
     const noticesDiv = document.getElementById("notices");
 
     async function loadNotices() {
-      loadingSpinner.style.display = "block"; // Show the spinner
+      loadingSpinner.style.display = "block";
       noticesDiv.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "notices"));
+      const q = query(collection(db, "notices"), orderBy("timestamp", "desc")); // ⬅️ Sort by timestamp DESC
+      const querySnapshot = await getDocs(q);
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const div = document.createElement("div");
         div.className = "notice";
-        const date = new Date(data.timestamp.seconds * 1000).toLocaleString(); // Convert Firestore timestamp to readable date
+        const date = new Date(data.timestamp.seconds * 1000).toLocaleString();
         div.innerHTML =  
           `<h3 contenteditable="false">${data.title}</h3>
           <p contenteditable="false">${data.body}</p>
@@ -177,7 +177,7 @@
         `;
         noticesDiv.appendChild(div);
       });
-      loadingSpinner.style.display = "none"; // Hide the spinner once data is loaded
+      loadingSpinner.style.display = "none";
     }
 
     window.deleteNotice = async (id) => {
@@ -204,14 +204,8 @@
       const title = e.target.title.value.trim();
       const body = e.target.body.value.trim();
       if (!title || !body) return alert("Please fill out both fields.");
-      
-      // Get current timestamp for the notice
       const timestamp = new Date();
-      await addDoc(collection(db, "notices"), { 
-        title, 
-        body,
-        timestamp: timestamp // Save timestamp
-      });
+      await addDoc(collection(db, "notices"), { title, body, timestamp });
       e.target.reset();
       loadNotices();
     };
@@ -231,7 +225,7 @@
 <body>
   <h1>📢 Notices</h1>
   <div id="notices"></div>
-  <div id="loadingSpinner"></div> <!-- Loading Spinner -->
+  <div id="loadingSpinner"></div>
   <div id="adminPanel">
     <p>Admin login required</p>
     <button id="loginBtn">Login with Google</button>
@@ -246,9 +240,9 @@
   </div>
   <footer>
     <p>Contact: ahamed.to.tipak@gmail.com</p>
-<a href="https://mizan658.github.io/AL/index.html" style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: black; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-  Home
-</a>
+    <a href="https://mizan658.github.io/AL/index.html" style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: black; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+      Home
+    </a>
   </footer>
 </body>
 </html>
