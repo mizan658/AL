@@ -4,91 +4,189 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Private Voting System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { background: #0f0f0f; color: white; font-family: Arial, sans-serif; padding: 20px; }
-    h1 { text-align: center; color: #00ff00; text-shadow: 0 0 10px green, 0 0 20px green; font-size: 3em; }
-    
-    .button { 
-      padding: 12px 20px; 
-      background: #1e90ff; 
-      border-radius: 15px; 
-      color: white; 
-      cursor: pointer; 
-      margin: 5px; 
-      transition: background 0.3s ease; 
-    }
-    .button:hover { 
-      background: #3498db; 
+    body {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: white;
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
     }
 
-    .admin-btn, .user-btn { margin-top: 20px; }
-    #adminPanel, #voteSection { margin-top: 20px; padding: 15px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
-    input, textarea { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
-    .candidate-item { 
-      display: flex; 
-      align-items: center; 
-      margin: 10px 0; 
-      transition: transform 0.3s ease; 
+    h1 {
+      color: #00ff00;
+      text-shadow: 0 0 10px green, 0 0 20px green;
+      font-size: 3em;
+      margin-bottom: 20px;
     }
-    .candidate-item:hover { 
-      transform: scale(1.05); 
-      background-color: #2c3e50; 
+
+    .user-btn, .admin-btn, button {
+      padding: 12px 20px;
+      background: #1e90ff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 1.1em;
+      transition: background 0.3s ease;
     }
-    .candidate-item img { 
-      border-radius: 10px; 
-      max-width: 100px; 
-      margin-right: 15px; 
+
+    .user-btn:hover, .admin-btn:hover, button:hover {
+      background: #0056b3;
     }
-    .candidate-info { 
-      flex: 1; 
+
+    #adminPanel, #voteSection {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #444;
+      border-radius: 15px;
+      background: #1a1a1a;
+      width: 80%;
+      max-width: 800px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
-    .candidate-info h3 { 
-      margin: 0; 
-      font-size: 1.2em; 
+
+    input, textarea {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #333;
+      color: white;
+      font-size: 1em;
+      width: calc(100% - 24px);
+      transition: background 0.3s ease;
     }
-    .candidate-info p { 
-      margin: 5px 0; 
-      color: #bbb; 
+
+    input:focus, textarea:focus {
+      background: #555;
+      outline: none;
     }
+
+    img {
+      border-radius: 8px;
+      max-width: 100px;
+    }
+
+    .candidate-item {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      background: #2c3e50;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .candidate-item img {
+      margin-right: 20px;
+    }
+
+    .candidate-info {
+      flex: 1;
+    }
+
+    .candidate-info h3 {
+      margin: 0;
+      font-size: 1.5em;
+      color: #3498db;
+    }
+
+    .candidate-info p {
+      margin: 5px 0;
+      color: #bbb;
+      font-size: 1.1em;
+    }
+
+    .candidate-info button {
+      background-color: #4CAF50;
+      padding: 8px 15px;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .candidate-info button:hover {
+      background-color: #45a049;
+    }
+
     .loading-spinner {
       border: 5px solid rgba(255, 255, 255, 0.2);
       border-top: 5px solid #4caf50;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       animation: spin 1s linear infinite;
       margin: 20px auto;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    /* Enhanced Pop-Up Style */
-    .popup { 
-      position: fixed; 
-      top: 0; left: 0; 
-      width: 100%; height: 100%; 
-      background: rgba(0, 0, 0, 0.75); 
-      z-index: 9999; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      flex-direction: column; 
-      padding: 20px; 
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
       text-align: center;
+      padding: 20px;
+      z-index: 9999;
     }
+
     .popup h2 {
       color: lightgreen;
-      margin-bottom: 20px;
+      font-size: 1.5em;
     }
+
+    .popup p {
+      color: #ccc;
+      font-size: 1.1em;
+    }
+
     .popup button {
-      background-color: #4caf50;
-      border: none;
-      padding: 10px 20px;
+      background: #4caf50;
+      padding: 12px 20px;
       border-radius: 10px;
       color: white;
       cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s ease;
+    }
+
+    .popup button:hover {
+      background: #45a049;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .user-btn, .admin-btn, button {
+        font-size: 1em;
+        padding: 10px 15px;
+      }
+
+      #adminPanel, #voteSection {
+        width: 95%;
+      }
     }
   </style>
 </head>
@@ -106,20 +204,18 @@
 
 <h1>Welcome to Private Voting System</h1>
 
-<!-- User & Admin buttons -->
 <div>
-  <button class="user-btn button" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
-  <button class="admin-btn button" onclick="signInAdmin()">Admin Panel Login</button>
-  <button class="button" onclick="window.location.href='https://mizan658.github.io/AL/notice.html'">Notice</button>
-  <button class="button" onclick="window.location.href='https://mizan658.github.io/AL/index.html'">Home</button>
+  <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
+  <button class="admin-btn" onclick="signInAdmin()">Admin Panel Login</button>
+  <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
+  <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
 </div>
 
-<!-- Admin Panel -->
 <div id="adminPanel" style="display:none;">
   <h2>Admin Panel</h2>
   <input type="text" id="candidateName" placeholder="Candidate Name">
   <input type="text" id="candidatePhoto" placeholder="Photo URL">
-  <textarea id="candidateBio" placeholder="Candidate Bio" rows="4" style="width:100%"></textarea>
+  <textarea id="candidateBio" placeholder="Candidate Bio" rows="4"></textarea>
   <button onclick="addCandidate()">Add Candidate</button>
 
   <h3>Manage Candidates</h3>
@@ -131,7 +227,6 @@
   <button onclick="resetVotes()">Reset Votes</button>
 </div>
 
-<!-- Voting Section -->
 <div id="voteSection" style="display:none;">
   <h2>Vote for Your Candidate</h2>
   <div id="loading" class="loading-spinner" style="display:none;"></div>
@@ -139,9 +234,8 @@
 </div>
 
 <script type="module">
-  // Firebase and Authentication logic remains the same as the previous script
-
-  // Add necessary JavaScript for improved functionalities here
+  // Your existing Firebase code here
 </script>
+
 </body>
 </html>
