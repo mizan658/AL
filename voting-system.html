@@ -1,6 +1,5 @@
-
-
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -18,6 +17,7 @@
     .candidate-info h3 { margin: 0; font-size: 1.2em; }
     .candidate-info p { margin: 5px 0; color: #bbb; }
     .candidate-info button { background-color: #4CAF50; }
+    .candidate-info button:disabled { background-color: #666; cursor: not-allowed; }
     h1 {
       text-align: center;
       color: #00ff00;
@@ -37,15 +37,23 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    #candidatesListPublic {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #444;
+      border-radius: 15px;
+      background: #1a1a1a;
+    }
   </style>
 </head>
 <body>
 
 <!-- ✅ Popup Guide -->
+
 <div id="popup" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:20px;">
   <h2 style="color:lightgreen;">🗳️ Voting System – Quick User Guide</h2>
   <p><strong>🔐 Login</strong><br>Click "Sign in with DIU Mail to Vote".<br>Use your DIU email only.</p>
-  <p><strong>✅ Vote</strong><br>Choose a candidate.<br>Click "Vote" → Confirm.<br>Sign in again to verify → Done!<br>Message: “Thank you for voting...”</p>
+  <p><strong>✅ Vote</strong><br>Choose a candidate.<br>Click "Vote" → Confirm.<br>Sign in again to verify → Done!<br>Message: "Thank you for voting..."</p>
   <p><strong>⚠️⚠️ You can vote only once.</strong></p>
   <p class="loading-message">⚠️⚠️⚠️ The server is a bit slow—please wait a moment after clicking any button.</p>
   <p><strong>📢 Results</strong><br>Visit the Notice Board:<br><a href="https://mizan658.github.io/AL/notice.html" style="color:lightblue;">https://mizan658.github.io/AL/notice.html</a></p>
@@ -65,7 +73,6 @@
     100% { text-shadow: 0 0 10px yellow, 0 0 20px yellow, 0 0 30px yellow, 0 0 40px green, 0 0 50px green, 0 0 60px green, 0 0 70px green; }
   }
 </style>
-
 
 <h1>Welcome to Private Voting System</h1>
 
@@ -98,6 +105,13 @@
   <ul id="voteList"></ul>
 </div>
 
+<div id="candidatesListPublic">
+  <h2>Candidates</h2>
+  <p>Please sign in with your DIU email to vote</p>
+  <div id="loadingPublic" class="loading-spinner"></div>
+  <ul id="publicCandidatesList"></ul>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
@@ -117,6 +131,47 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+
+  // Load candidates for public view
+  window.loadPublicCandidates = async () => {
+    const list = document.getElementById("publicCandidatesList");
+    list.innerHTML = "";
+    const loading = document.getElementById("loadingPublic");
+    loading.style.display = "block";
+    
+    try {
+      const snap = await getDocs(collection(db, "candidates"));
+      loading.style.display = "none";
+      
+      if (snap.empty) {
+        list.innerHTML = "<p>No candidates available yet.</p>";
+        return;
+      }
+      
+      snap.forEach(docSnap => {
+        const c = docSnap.data();
+        list.innerHTML += `
+          <li class="candidate-item">
+            <img src="${c.photoURL}" width="50">
+            <div class="candidate-info">
+              <h3>${c.name}</h3>
+              <p>${c.bio}</p>
+              <button disabled>Sign in to Vote</button>
+            </div>
+          </li>
+        `;
+      });
+    } catch (error) {
+      loading.style.display = "none";
+      list.innerHTML = "<p>Error loading candidates. Please try again later.</p>";
+      console.error("Error loading public candidates:", error);
+    }
+  };
+
+  // Call the function when page loads
+  window.addEventListener('DOMContentLoaded', () => {
+    loadPublicCandidates();
+  });
 
   window.signInAdmin = async () => {
     const result = await signInWithPopup(auth, provider);
@@ -146,6 +201,7 @@
     if (!name || !bio) return alert("Enter a name and bio");
     await addDoc(collection(db, "candidates"), { name, photoURL: photo, bio, votes: 0 });
     loadCandidates();
+    loadPublicCandidates(); // Refresh public view
   };
 
   window.loadCandidates = async () => {
@@ -171,6 +227,7 @@
   window.removeCandidate = async (id) => {
     await deleteDoc(doc(db, "candidates", id));
     loadCandidates();
+    loadPublicCandidates(); // Refresh public view
   };
 
   window.loadVotes = async (uid) => {
@@ -254,7 +311,9 @@
     });
     alert("Votes have been reset.");
     loadCandidates();
+    loadPublicCandidates(); // Refresh public view
   };
 </script>
+
 </body>
 </html>
