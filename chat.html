@@ -1,49 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat Group Status</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #0f172a;
-      color: #e2e8f0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-      flex-direction: column;
-    }
-
-    h1 {
-      font-size: 2.8rem;
-      color: #38bdf8;
-      margin-bottom: 0.5rem;
-    }
-
-    p {
-      font-size: 1.25rem;
-      color: #94a3b8;
-    }
-
-    .badge {
-      background-color: #1e293b;
-      border: 1px solid #38bdf8;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      margin-top: 1rem;
-      color: #38bdf8;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIU Chat Group</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #4285f4;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #e9e9e9;
+            max-width: 70%;
+        }
+        .own-message {
+            margin-left: auto;
+            background: #d3e3fd;
+        }
+        .message-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        #send-button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .online-count {
+            text-align: right;
+            padding: 5px 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .reaction {
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .typing-indicator {
+            font-style: italic;
+            color: #666;
+            padding: 5px 15px;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
-  <h1>Chat Group Feature</h1>
-  <p>Currently in development. Stay tuned!</p>
-  <div class="badge">Goody 😄</div>
+    <div class="container">
+        <div class="header">DIU Chat Group</div>
+        <div class="online-count">Online: <span id="online-count">0</span></div>
+        <div id="typing-indicator" class="typing-indicator"></div>
+        <div id="chat-area" class="chat-area"></div>
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEYjUeSuFxpyZuphg0vB2AK24eyHSjBak",
+            authDomain: "chat-7c4ed.firebaseapp.com",
+            projectId: "chat-7c4ed",
+            storageBucket: "chat-7c4ed.appspot.com",
+            messagingSenderId: "871465831321",
+            appId: "1:871465831321:web:f9ac2aeef73133450b2108",
+            measurementId: "G-SSMJNPHZXD",
+            databaseURL: "https://chat-7c4ed-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        // DOM elements
+        const chatArea = document.getElementById('chat-area');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const onlineCount = document.getElementById('online-count');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // User state
+        let currentUser = null;
+        let isTyping = false;
+        let typingTimeout = null;
+
+        // Sign in with Google
+        function signIn() {
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    currentUser = result.user;
+                    if (!currentUser.email.match(/.*@diu\.edu\.bd$/)) {
+                        alert("Only DIU email addresses are allowed");
+                        signOut();
+                        return;
+                    }
+                    setupUser();
+                })
+                .catch((error) => {
+                    console.error("Sign in error:", error);
+                });
+        }
+
+        function signOut() {
+            if (currentUser) {
+                database.ref(`onlineStatus/${currentUser.uid}`).set({
+                    state: 'offline',
+                    lastChanged: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            auth.signOut();
+            currentUser = null;
+            window.location.reload();
+        }
+
+        function setupUser() {
+            // Check if user exists in database
+            database.ref(`users/${currentUser.uid}`).once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    // Create new user with random name
+                    const randomNames = ["Chatter", "Talker", "Messenger", "User", "Member"];
+                    const randomNum = Math.floor(Math.random() * 1000);
+                    const randomName = `${randomNames[Math.floor(Math.random() * randomNames.length)]}${randomNum}`;
+                    
+                    database.ref(`users/${currentUser.uid}`).set({
+                        name: randomName,
+                        isPro: false,
+                        isBlocked: false,
+                        suspensionEnd: null,
+                        email: currentUser.email
+                    });
+                }
+            });
+
+            // Set online status
+            database.ref(`onlineStatus/${currentUser.uid}`).set({
+                state: 'online',
+                lastChanged: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            // Set onDisconnect for offline status
+            database.ref(`onlineStatus/${currentUser.uid}`).onDisconnect().set({
+                state: 'offline',
+                lastChanged: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            loadMessages();
+            setupTypingIndicator();
+        }
+
+        function loadMessages() {
+            database.ref('messages/general').on('value', (snapshot) => {
+                chatArea.innerHTML = '';
+                const messages = snapshot.val() || {};
+                
+                Object.entries(messages).forEach(([key, message]) => {
+                    displayMessage(key, message);
+                });
+                
+                scrollToBottom();
+            });
+        }
+
+        function displayMessage(id, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.senderId === currentUser.uid ? 'own-message' : ''}`;
+            messageDiv.id = `message-${id}`;
+            
+            const messageInfo = document.createElement('div');
+            messageInfo.className = 'message-info';
+            
+            database.ref(`users/${message.senderId}/name`).once('value').then((snapshot) => {
+                const senderName = snapshot.val();
+                messageInfo.innerHTML = `
+                    <span>${senderName}</span>
+                    <span>${new Date(message.timestamp).toLocaleTimeString()}</span>
+                `;
+            });
+            
+            messageDiv.appendChild(messageInfo);
+            
+            if (message.imageUrl) {
+                const img = document.createElement('img');
+                img.src = message.imageUrl;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '4px';
+                messageDiv.appendChild(img);
+            } else {
+                const text = document.createElement('div');
+                text.textContent = message.text;
+                messageDiv.appendChild(text);
+            }
+            
+            // Reactions
+            if (message.reactions) {
+                const reactionsDiv = document.createElement('div');
+                reactionsDiv.style.marginTop = '5px';
+                
+                Object.entries(message.reactions).forEach(([emoji, count]) => {
+                    if (count > 0) {
+                        const reactionSpan = document.createElement('span');
+                        reactionSpan.className = 'reaction';
+                        reactionSpan.textContent = `${emoji} ${count}`;
+                        reactionSpan.onclick = () => addReaction(id, emoji);
+                        reactionsDiv.appendChild(reactionSpan);
+                    }
+                });
+                
+                messageDiv.appendChild(reactionsDiv);
+            }
+            
+            chatArea.appendChild(messageDiv);
+        }
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text === '') return;
+            
+            database.ref('messages/general').push().set({
+                text: text,
+                senderId: currentUser.uid,
+                timestamp: Date.now(),
+                reactions: {
+                    '👍': 0,
+                    '👎': 0
+                }
+            });
+            
+            messageInput.value = '';
+            isTyping = false;
+            database.ref(`typing/general/${currentUser.uid}`).remove();
+        }
+
+        function addReaction(messageId, emoji) {
+            database.ref(`messages/general/${messageId}/reactions/${emoji}`).transaction((current) => {
+                return (current || 0) + 1;
+            });
+        }
+
+        function setupTypingIndicator() {
+            // Listen for typing events
+            database.ref(`typing/general`).on('value', (snapshot) => {
+                const typingUsers = snapshot.val() || {};
+                const typingUserIds = Object.keys(typingUsers).filter(uid => uid !== currentUser.uid);
+                
+                if (typingUserIds.length > 0) {
+                    Promise.all(typingUserIds.map(uid => 
+                        database.ref(`users/${uid}/name`).once('value')
+                    )).then((nameSnapshots) => {
+                        const names = nameSnapshots.map(snap => snap.val());
+                        typingIndicator.textContent = `${names.join(', ')} ${names.length > 1 ? 'are' : 'is'} typing...`;
+                    });
+                } else {
+                    typingIndicator.textContent = '';
+                }
+            });
+            
+            // Track own typing
+            messageInput.addEventListener('input', () => {
+                if (!isTyping) {
+                    isTyping = true;
+                    database.ref(`typing/general/${currentUser.uid}`).set(true);
+                }
+                
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    isTyping = false;
+                    database.ref(`typing/general/${currentUser.uid}`).remove();
+                }, 2000);
+            });
+        }
+
+        function updateOnlineCount() {
+            database.ref('onlineStatus').orderByChild('state').equalTo('online').on('value', (snapshot) => {
+                onlineCount.textContent = snapshot.numChildren();
+            });
+        }
+
+        function scrollToBottom() {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Initialize
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                if (!user.email.match(/.*@diu\.edu\.bd$/)) {
+                    alert("Only DIU email addresses are allowed");
+                    signOut();
+                    return;
+                }
+                currentUser = user;
+                setupUser();
+                updateOnlineCount();
+            } else {
+                signIn();
+            }
+        });
+
+        // Handle beforeunload
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                database.ref(`onlineStatus/${currentUser.uid}`).set({
+                    state: 'offline',
+                    lastChanged: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+        });
+    </script>
 </body>
 </html>
