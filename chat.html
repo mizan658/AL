@@ -3,366 +3,773 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIU Chat Group</title>
+    <title>Chat Group</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --error-color: #cf6679;
+            --online-color: #4caf50;
+            --typing-color: #ff9800;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
+        }
+        
         .header {
-            background: #4285f4;
-            color: white;
+            background-color: var(--card-color);
             padding: 15px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .chat-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-        }
-        .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #e9e9e9;
-            max-width: 70%;
-        }
-        .own-message {
-            margin-left: auto;
-            background: #d3e3fd;
-        }
-        .message-info {
             display: flex;
             justify-content: space-between;
-            font-size: 0.8em;
-            color: #666;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+        }
+        
+        .message {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+            position: relative;
+        }
+        
+        .message.sent {
+            align-self: flex-end;
+            background-color: #2a2a2a;
+        }
+        
+        .message.received {
+            align-self: flex-start;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .sender-name {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .message-time {
+            color: #757575;
+            font-size: 0.8rem;
+        }
+        
+        .message-content {
             margin-bottom: 5px;
         }
-        .input-area {
+        
+        .message-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .reactions {
             display: flex;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-            background: white;
+            gap: 5px;
+            margin-top: 5px;
         }
-        #message-input {
+        
+        .reaction {
+            background-color: #333;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .input-area {
+            background-color: var(--card-color);
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .message-input {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 10px 15px;
             border-radius: 20px;
-            outline: none;
+            border: none;
+            background-color: #333;
+            color: var(--text-color);
+            font-size: 1rem;
         }
-        #send-button {
-            margin-left: 10px;
-            padding: 10px 20px;
-            background: #4285f4;
+        
+        .send-button, .upload-button {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
+        
+        .send-button:hover, .upload-button:hover {
+            background-color: #a370d8;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            padding: 5px 15px;
+            background-color: var(--card-color);
+            border-top: 1px solid #333;
+        }
+        
         .online-count {
-            text-align: right;
-            padding: 5px 15px;
-            font-size: 0.9em;
-            color: #666;
+            color: var(--online-color);
         }
-        .reaction {
-            font-size: 0.8em;
-            cursor: pointer;
-            margin-right: 5px;
-        }
+        
         .typing-indicator {
+            color: var(--typing-color);
             font-style: italic;
-            color: #666;
-            padding: 5px 15px;
-            font-size: 0.9em;
+        }
+        
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            background-color: var(--bg-color);
+        }
+        
+        .login-card {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-title {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .google-login {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        .name-change-container {
+            margin-top: 20px;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: var(--text-color);
+        }
+        
+        .change-name-btn {
+            background-color: var(--secondary-color);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .name-warning {
+            font-size: 0.8rem;
+            color: #757575;
+            margin-top: 10px;
+        }
+        
+        .admin-panel-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .suspended-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .suspended-message {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .countdown-timer {
+            font-size: 1.5rem;
+            color: var(--error-color);
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .message {
+                max-width: 85%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">DIU Chat Group</div>
-        <div class="online-count">Online: <span id="online-count">0</span></div>
-        <div id="typing-indicator" class="typing-indicator"></div>
-        <div id="chat-area" class="chat-area"></div>
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type your message...">
-            <button id="send-button">Send</button>
-        </div>
+    <div id="app">
+        <!-- Content will be rendered here by JavaScript -->
     </div>
 
     <script>
-        // Initialize Firebase
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAEYjUeSuFxpyZuphg0vB2AK24eyHSjBak",
             authDomain: "chat-7c4ed.firebaseapp.com",
             projectId: "chat-7c4ed",
-            storageBucket: "chat-7c4ed.appspot.com",
+            storageBucket: "chat-7c4ed.firebasestorage.app",
             messagingSenderId: "871465831321",
             appId: "1:871465831321:web:f9ac2aeef73133450b2108",
             measurementId: "G-SSMJNPHZXD",
             databaseURL: "https://chat-7c4ed-default-rtdb.firebaseio.com/"
         };
-        
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
         const auth = firebase.auth();
+        const database = firebase.database();
         const provider = new firebase.auth.GoogleAuthProvider();
 
         // DOM elements
-        const chatArea = document.getElementById('chat-area');
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-button');
-        const onlineCount = document.getElementById('online-count');
-        const typingIndicator = document.getElementById('typing-indicator');
+        const app = document.getElementById('app');
 
-        // User state
+        // State
         let currentUser = null;
-        let isTyping = false;
-        let typingTimeout = null;
+        let userNameChanged = false;
+        let isAdmin = false;
 
-        // Sign in with Google
-        function signIn() {
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    currentUser = result.user;
-                    if (!currentUser.email.match(/.*@diu\.edu\.bd$/)) {
-                        alert("Only DIU email addresses are allowed");
-                        signOut();
-                        return;
-                    }
-                    setupUser();
-                })
-                .catch((error) => {
-                    console.error("Sign in error:", error);
-                });
-        }
+        // Random names for new users
+        const randomNames = [
+            "MysteryChatter", "AnonymousUser", "SecretSpeaker", 
+            "HiddenVoice", "SilentTalker", "UnknownFriend",
+            "QuietListener", "ShadowTalker", "GhostWriter",
+            "IncognitoUser"
+        ];
 
-        function signOut() {
-            if (currentUser) {
-                database.ref(`onlineStatus/${currentUser.uid}`).set({
-                    state: 'offline',
-                    lastChanged: firebase.database.ServerValue.TIMESTAMP
-                });
-            }
-            auth.signOut();
-            currentUser = null;
-            window.location.reload();
-        }
-
-        function setupUser() {
-            // Check if user exists in database
-            database.ref(`users/${currentUser.uid}`).once('value').then((snapshot) => {
-                if (!snapshot.exists()) {
-                    // Create new user with random name
-                    const randomNames = ["Chatter", "Talker", "Messenger", "User", "Member"];
-                    const randomNum = Math.floor(Math.random() * 1000);
-                    const randomName = `${randomNames[Math.floor(Math.random() * randomNames.length)]}${randomNum}`;
+        // Initialize the app
+        function initApp() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    isAdmin = user.email === '252-35-007@diu.edu.bd';
                     
-                    database.ref(`users/${currentUser.uid}`).set({
-                        name: randomName,
-                        isPro: false,
-                        isBlocked: false,
-                        suspensionEnd: null,
-                        email: currentUser.email
+                    // Check if user is suspended or blocked
+                    checkUserStatus(user.uid).then(status => {
+                        if (status.isBlocked) {
+                            if (status.suspensionEnd && status.suspensionEnd > Date.now()) {
+                                showSuspendedScreen(status.suspensionEnd);
+                                return;
+                            } else if (status.suspensionEnd && status.suspensionEnd <= Date.now()) {
+                                // Unblock user if suspension time has passed
+                                database.ref('users/' + user.uid).update({
+                                    isBlocked: false,
+                                    suspensionEnd: null
+                                });
+                            } else {
+                                // Permanent block
+                                showSuspendedScreen(null);
+                                return;
+                            }
+                        }
+                        
+                        // Check if user has a name set
+                        database.ref('users/' + user.uid).once('value').then(snapshot => {
+                            const userData = snapshot.val();
+                            
+                            if (!userData || !userData.name) {
+                                // New user - assign random name
+                                const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
+                                database.ref('users/' + user.uid).set({
+                                    name: randomName,
+                                    isPro: false,
+                                    isBlocked: false,
+                                    suspensionEnd: null,
+                                    reportCount: 0
+                                });
+                                showNameChangeScreen(randomName);
+                            } else if (!userNameChanged && !userData.nameChanged) {
+                                // Existing user who hasn't changed name
+                                showNameChangeScreen(userData.name);
+                            } else {
+                                // Regular user - show chat
+                                showChatScreen(userData.isPro);
+                            }
+                        });
                     });
+                } else {
+                    showLoginScreen();
                 }
             });
-
-            // Set online status
-            database.ref(`onlineStatus/${currentUser.uid}`).set({
-                state: 'online',
-                lastChanged: firebase.database.ServerValue.TIMESTAMP
-            });
-
-            // Set onDisconnect for offline status
-            database.ref(`onlineStatus/${currentUser.uid}`).onDisconnect().set({
-                state: 'offline',
-                lastChanged: firebase.database.ServerValue.TIMESTAMP
-            });
-
-            loadMessages();
-            setupTypingIndicator();
         }
 
-        function loadMessages() {
-            database.ref('messages/general').on('value', (snapshot) => {
-                chatArea.innerHTML = '';
-                const messages = snapshot.val() || {};
-                
-                Object.entries(messages).forEach(([key, message]) => {
-                    displayMessage(key, message);
-                });
-                
-                scrollToBottom();
+        // Check user status (blocked/suspended)
+        function checkUserStatus(uid) {
+            return database.ref('users/' + uid).once('value').then(snapshot => {
+                const userData = snapshot.val();
+                return {
+                    isBlocked: userData?.isBlocked || false,
+                    suspensionEnd: userData?.suspensionEnd || null
+                };
             });
         }
 
-        function displayMessage(id, message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.senderId === currentUser.uid ? 'own-message' : ''}`;
-            messageDiv.id = `message-${id}`;
+        // Show suspended screen
+        function showSuspendedScreen(suspensionEnd) {
+            app.innerHTML = `
+                <div class="suspended-overlay">
+                    <div class="suspended-message">
+                        <h2>Account Suspended</h2>
+                        <p>Your account has been suspended by an administrator.</p>
+                        ${suspensionEnd ? `
+                            <p>Time remaining until suspension is lifted:</p>
+                            <div class="countdown-timer" id="countdown"></div>
+                        ` : `
+                            <p>This is a permanent suspension. Please contact the administrator.</p>
+                        `}
+                        <button onclick="logout()" style="padding: 10px 20px; background-color: var(--error-color); color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button>
+                    </div>
+                </div>
+            `;
             
-            const messageInfo = document.createElement('div');
-            messageInfo.className = 'message-info';
+            if (suspensionEnd) {
+                updateCountdown(suspensionEnd);
+                const countdownInterval = setInterval(() => {
+                    updateCountdown(suspensionEnd);
+                    if (Date.now() >= suspensionEnd) {
+                        clearInterval(countdownInterval);
+                        location.reload();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Update countdown timer
+        function updateCountdown(endTime) {
+            const now = Date.now();
+            const diff = endTime - now;
             
-            database.ref(`users/${message.senderId}/name`).once('value').then((snapshot) => {
-                const senderName = snapshot.val();
-                messageInfo.innerHTML = `
-                    <span>${senderName}</span>
-                    <span>${new Date(message.timestamp).toLocaleTimeString()}</span>
-                `;
-            });
-            
-            messageDiv.appendChild(messageInfo);
-            
-            if (message.imageUrl) {
-                const img = document.createElement('img');
-                img.src = message.imageUrl;
-                img.style.maxWidth = '100%';
-                img.style.borderRadius = '4px';
-                messageDiv.appendChild(img);
-            } else {
-                const text = document.createElement('div');
-                text.textContent = message.text;
-                messageDiv.appendChild(text);
+            if (diff <= 0) {
+                document.getElementById('countdown').textContent = "00:00:00";
+                return;
             }
             
-            // Reactions
-            if (message.reactions) {
-                const reactionsDiv = document.createElement('div');
-                reactionsDiv.style.marginTop = '5px';
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('countdown').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Show login screen
+        function showLoginScreen() {
+            app.innerHTML = `
+                <div class="login-container">
+                    <div class="login-card">
+                        <h1 class="login-title">Chat Group</h1>
+                        <button class="google-login" onclick="signInWithGoogle()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Sign in with Google
+                        </button>
+                        <p style="font-size: 0.8rem; color: #757575;">Only @diu.edu.bd emails are allowed</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show name change screen
+        function showNameChangeScreen(currentName) {
+            app.innerHTML = `
+                <div class="login-container">
+                    <div class="login-card">
+                        <h1 class="login-title">Choose Your Display Name</h1>
+                        <div class="name-change-container">
+                            <input type="text" id="nameInput" class="name-input" value="${currentName}" placeholder="Enter your display name">
+                            <button class="change-name-btn" onclick="changeName()">Set Display Name</button>
+                            <p class="name-warning">You can only change your name once. Choose wisely!</p>
+                            <p class="name-warning">For your privacy, we recommend not using your real name.</p>
+                            <button onclick="skipNameChange()" style="margin-top: 10px; background: none; border: none; color: var(--secondary-color); cursor: pointer;">Continue with current name</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show chat screen
+        function showChatScreen(isPro) {
+            // Set up presence detection
+            const userStatusDatabaseRef = database.ref('onlineUsers/' + currentUser.uid);
+            const userStatusFirestoreRef = database.ref('.info/connected');
+            
+            userStatusFirestoreRef.on('value', (snapshot) => {
+                if (snapshot.val() === false) return;
                 
-                Object.entries(message.reactions).forEach(([emoji, count]) => {
-                    if (count > 0) {
-                        const reactionSpan = document.createElement('span');
-                        reactionSpan.className = 'reaction';
-                        reactionSpan.textContent = `${emoji} ${count}`;
-                        reactionSpan.onclick = () => addReaction(id, emoji);
-                        reactionsDiv.appendChild(reactionSpan);
+                userStatusDatabaseRef.onDisconnect().remove();
+                userStatusDatabaseRef.set(true);
+            });
+
+            // Set up typing indicator
+            const typingRef = database.ref('typingUsers/' + currentUser.uid);
+            let typingTimeout;
+            
+            function updateTypingIndicator(isTyping) {
+                if (isTyping) {
+                    typingRef.set(true);
+                    clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(() => {
+                        typingRef.remove();
+                    }, 1500);
+                } else {
+                    typingRef.remove();
+                }
+            }
+
+            // Render chat UI
+            app.innerHTML = `
+                <div class="container">
+                    <div class="header">
+                        <h2>${isPro ? 'Chat Pro' : 'Chat Group'}</h2>
+                        <div>
+                            <span id="onlineCount" class="online-count">0 online</span>
+                            <span id="typingIndicator" class="typing-indicator"></span>
+                        </div>
+                        <button onclick="logout()" style="background: none; border: none; color: var(--text-color); cursor: pointer;">Logout</button>
+                    </div>
+                    
+                    <div class="chat-container" id="chatContainer"></div>
+                    
+                    <div class="input-area">
+                        <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." 
+                               oninput="updateTypingIndicator(this.value.length > 0)">
+                        <button class="upload-button" onclick="uploadImage()" title="Upload Image">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
+                            </svg>
+                        </button>
+                        <button class="send-button" onclick="sendMessage()" title="Send">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="status-bar">
+                        <div>Logged in as: <span id="currentUserName" style="color: ${isPro ? 'gold' : 'var(--primary-color)'}">Loading...</span></div>
+                        <div id="connectionStatus">Connected</div>
+                    </div>
+                </div>
+                
+                ${isAdmin ? `
+                    <button class="admin-panel-btn" onclick="showAdminPanel()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V11.99z"/>
+                        </svg>
+                    </button>
+                ` : ''}
+            `;
+
+            // Load user name
+            database.ref('users/' + currentUser.uid).once('value').then(snapshot => {
+                const userData = snapshot.val();
+                document.getElementById('currentUserName').textContent = userData.name;
+            });
+
+            // Set up message listener
+            database.ref('messages').orderByChild('timestamp').limitToLast(50).on('value', snapshot => {
+                const messagesContainer = document.getElementById('chatContainer');
+                messagesContainer.innerHTML = '';
+                
+                snapshot.forEach(childSnapshot => {
+                    const message = childSnapshot.val();
+                    const isProMessage = message.isPro || false;
+                    const isCurrentUser = message.senderId === currentUser.uid;
+                    
+                    const messageElement = document.createElement('div');
+                    messageElement.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
+                    
+                    let contentHtml = `
+                        <div class="message-header">
+                            <span class="sender-name" style="${isProMessage ? 'text-shadow: 0 0 5px gold;' : ''}">${message.senderName}</span>
+                            <span class="message-time">${formatTime(message.timestamp)}</span>
+                        </div>
+                        <div class="message-content">${message.text}</div>
+                    `;
+                    
+                    if (message.imageUrl) {
+                        contentHtml += `<img src="${message.imageUrl}" class="message-image" alt="Uploaded image">`;
+                    }
+                    
+                    if (message.reactions) {
+                        contentHtml += '<div class="reactions">';
+                        Object.entries(message.reactions).forEach(([userId, reaction]) => {
+                            contentHtml += `<span class="reaction" onclick="addReaction('${childSnapshot.key}', '${userId}', '${reaction}')">${reaction}</span>`;
+                        });
+                        contentHtml += '</div>';
+                    }
+                    
+                    messageElement.innerHTML = contentHtml;
+                    messagesContainer.appendChild(messageElement);
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+
+            // Set up online users listener
+            database.ref('onlineUsers').on('value', snapshot => {
+                const onlineCount = snapshot.numChildren();
+                document.getElementById('onlineCount').textContent = `${onlineCount} online`;
+            });
+
+            // Set up typing indicators listener
+            database.ref('typingUsers').on('value', snapshot => {
+                const typingUsers = [];
+                snapshot.forEach(childSnapshot => {
+                    if (childSnapshot.key !== currentUser.uid) {
+                        typingUsers.push(childSnapshot.key);
                     }
                 });
                 
-                messageDiv.appendChild(reactionsDiv);
-            }
-            
-            chatArea.appendChild(messageDiv);
-        }
-
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text === '') return;
-            
-            database.ref('messages/general').push().set({
-                text: text,
-                senderId: currentUser.uid,
-                timestamp: Date.now(),
-                reactions: {
-                    '👍': 0,
-                    '👎': 0
-                }
-            });
-            
-            messageInput.value = '';
-            isTyping = false;
-            database.ref(`typing/general/${currentUser.uid}`).remove();
-        }
-
-        function addReaction(messageId, emoji) {
-            database.ref(`messages/general/${messageId}/reactions/${emoji}`).transaction((current) => {
-                return (current || 0) + 1;
-            });
-        }
-
-        function setupTypingIndicator() {
-            // Listen for typing events
-            database.ref(`typing/general`).on('value', (snapshot) => {
-                const typingUsers = snapshot.val() || {};
-                const typingUserIds = Object.keys(typingUsers).filter(uid => uid !== currentUser.uid);
-                
-                if (typingUserIds.length > 0) {
-                    Promise.all(typingUserIds.map(uid => 
-                        database.ref(`users/${uid}/name`).once('value')
-                    )).then((nameSnapshots) => {
-                        const names = nameSnapshots.map(snap => snap.val());
-                        typingIndicator.textContent = `${names.join(', ')} ${names.length > 1 ? 'are' : 'is'} typing...`;
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingUsers.length > 0) {
+                    // We'll update names later when we fetch them
+                    typingIndicator.textContent = typingUsers.length === 1 ? 
+                        'Someone is typing...' : `${typingUsers.length} people are typing...`;
+                    
+                    // Fetch names of typing users
+                    Promise.all(typingUsers.map(uid => 
+                        database.ref('users/' + uid).once('value').then(userSnapshot => userSnapshot.val().name)
+                    ).then(names => {
+                        if (names.length === 1) {
+                            typingIndicator.textContent = `${names[0]} is typing...`;
+                        } else if (names.length > 1) {
+                            typingIndicator.textContent = `${names.join(', ')} are typing...`;
+                        }
                     });
                 } else {
                     typingIndicator.textContent = '';
                 }
             });
-            
-            // Track own typing
-            messageInput.addEventListener('input', () => {
-                if (!isTyping) {
-                    isTyping = true;
-                    database.ref(`typing/general/${currentUser.uid}`).set(true);
+
+            // Set up connection status listener
+            database.ref('.info/connected').on('value', snapshot => {
+                document.getElementById('connectionStatus').textContent = 
+                    snapshot.val() ? 'Connected' : 'Disconnected';
+                document.getElementById('connectionStatus').style.color = 
+                    snapshot.val() ? 'var(--online-color)' : 'var(--error-color)';
+            });
+
+            // Set up Enter key to send message
+            document.getElementById('messageInput').addEventListener('keypress', e => {
+                if (e.key === 'Enter') {
+                    sendMessage();
                 }
+            });
+
+            // Define these functions in the global scope so they can be called from HTML
+            window.sendMessage = function() {
+                const input = document.getElementById('messageInput');
+                const message = input.value.trim();
                 
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => {
-                    isTyping = false;
-                    database.ref(`typing/general/${currentUser.uid}`).remove();
-                }, 2000);
-            });
-        }
-
-        function updateOnlineCount() {
-            database.ref('onlineStatus').orderByChild('state').equalTo('online').on('value', (snapshot) => {
-                onlineCount.textContent = snapshot.numChildren();
-            });
-        }
-
-        function scrollToBottom() {
-            chatArea.scrollTop = chatArea.scrollHeight;
-        }
-
-        // Event listeners
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // Initialize
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                if (!user.email.match(/.*@diu\.edu\.bd$/)) {
-                    alert("Only DIU email addresses are allowed");
-                    signOut();
-                    return;
+                if (message) {
+                    database.ref('users/' + currentUser.uid).once('value').then(snapshot => {
+                        const userData = snapshot.val();
+                        
+                        database.ref('messages').push({
+                            text: message,
+                            senderId: currentUser.uid,
+                            senderName: userData.name,
+                            timestamp: Date.now(),
+                            isPro: userData.isPro || false
+                        });
+                        
+                        input.value = '';
+                        updateTypingIndicator(false);
+                    });
                 }
-                currentUser = user;
-                setupUser();
-                updateOnlineCount();
-            } else {
-                signIn();
-            }
-        });
+            };
 
-        // Handle beforeunload
-        window.addEventListener('beforeunload', () => {
-            if (currentUser) {
-                database.ref(`onlineStatus/${currentUser.uid}`).set({
-                    state: 'offline',
-                    lastChanged: firebase.database.ServerValue.TIMESTAMP
-                });
+            window.uploadImage = function() {
+                alert("Image upload would be implemented here. In a real app, this would use Firebase Storage.");
+            };
+
+            window.addReaction = function(messageId, userId, reaction) {
+                if (userId === currentUser.uid) return; // Can't react to own message
+                
+                database.ref('messages/' + messageId + '/reactions/' + currentUser.uid).set(reaction);
+            };
+
+            window.updateTypingIndicator = updateTypingIndicator;
+        }
+
+        // Show admin panel
+        function showAdminPanel() {
+            // This would be a modal with user management controls
+            alert("Admin panel would open here with user management controls.");
+        }
+
+        // Format time
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Sign in with Google
+        function signInWithGoogle() {
+            auth.signInWithPopup(provider).then(result => {
+                const email = result.user.email;
+                if (!email.endsWith('@diu.edu.bd')) {
+                    alert('Only @diu.edu.bd emails are allowed.');
+                    auth.signOut();
+                }
+            }).catch(error => {
+                console.error('Google sign-in error:', error);
+            });
+        }
+
+        // Change name
+        function changeName() {
+            const newName = document.getElementById('nameInput').value.trim();
+            
+            if (!newName) {
+                alert('Please enter a name');
+                return;
             }
-        });
+            
+            if (newName.length < 3 || newName.length > 20) {
+                alert('Name must be between 3 and 20 characters');
+                return;
+            }
+            
+            // Simple profanity filter
+            const badWords = ['badword1', 'badword2', 'profanity']; // Add more as needed
+            const containsBadWord = badWords.some(word => 
+                newName.toLowerCase().includes(word.toLowerCase())
+            );
+            
+            if (containsBadWord) {
+                alert('Please choose an appropriate name');
+                return;
+            }
+            
+            database.ref('users/' + currentUser.uid).update({
+                name: newName,
+                nameChanged: true
+            }).then(() => {
+                userNameChanged = true;
+                database.ref('users/' + currentUser.uid).once('value').then(snapshot => {
+                    showChatScreen(snapshot.val().isPro || false);
+                });
+            });
+        }
+
+        // Skip name change
+        function skipNameChange() {
+            userNameChanged = true;
+            database.ref('users/' + currentUser.uid).once('value').then(snapshot => {
+                showChatScreen(snapshot.val().isPro || false);
+            });
+        }
+
+        // Logout
+        function logout() {
+            auth.signOut();
+        }
+
+        // Initialize the app
+        initApp();
     </script>
 </body>
 </html>
