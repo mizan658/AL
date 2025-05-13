@@ -2,51 +2,391 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sign Up - DIU Private Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIU Connect - Sign Up</title>
   <style>
+    :root {
+      --primary-color: #1877f2; /* Facebook-like blue */
+      --secondary-color: #42b72a;
+      --bg-color: #f0f2f5;
+      --card-color: #ffffff;
+      --text-color: #1c1e21;
+      --border-color: #dddfe2;
+    }
+    
     body {
-      background: black;
-      color: white;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    .header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    
+    .main-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 100px 20px 40px;
+    }
+    
+    .login-container {
+      background-color: var(--card-color);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .login-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: var(--text-color);
+    }
+    
+    .login-subtitle {
+      font-size: 16px;
+      color: #606770;
+      margin-bottom: 25px;
+    }
+    
+    .google-btn {
+      background-color: #ffffff;
+      color: #3c4043;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      transition: background-color 0.3s;
+      margin-bottom: 15px;
     }
-    button {
-      background: #00bfff;
-      color: black;
-      padding: 10px 20px;
-      border: none;
+    
+    .google-btn:hover {
+      background-color: #f8f9fa;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .google-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+    
+    .divider {
+      border-top: 1px solid var(--border-color);
+      margin: 20px 0;
+      position: relative;
+    }
+    
+    .divider-text {
+      background-color: var(--card-color);
+      padding: 0 8px;
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #606770;
+      font-size: 14px;
+    }
+    
+    .footer {
+      background-color: var(--card-color);
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #8a8d91;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .error-message {
+      color: #ff4d4f;
+      margin-top: 15px;
+      font-size: 14px;
+      padding: 10px;
+      background-color: #fff2f0;
+      border-radius: 4px;
+      border: 1px solid #ffccc7;
+    }
+    
+    /* Profile page styles (hidden by default) */
+    .profile-container {
+      display: none;
+      max-width: 1200px;
+      margin: 80px auto 20px;
+      width: 100%;
+      padding: 0 20px;
+    }
+    
+    .nav-bar {
+      background-color: var(--card-color);
       border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 16px;
       cursor: pointer;
+      padding: 8px 15px;
+      border-radius: 4px;
     }
-    button:hover {
-      background: #007bff;
+    
+    .nav-btn:hover, .nav-btn.active {
+      background-color: #f0f2f5;
     }
-    .error {
-      color: red;
+    
+    .profile-header {
+      background-color: var(--card-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 20px;
+      border: 4px solid var(--primary-color);
+    }
+    
+    .profile-details h2 {
+      margin: 0 0 5px 0;
+    }
+    
+    .profile-details p {
+      margin: 5px 0;
+      color: #65676b;
+    }
+    
+    .bio-section {
       margin-top: 20px;
+    }
+    
+    .bio-text {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f0f2f5;
+      border-radius: 8px;
+    }
+    
+    .bio-edit {
+      display: none;
+      margin-top: 10px;
+    }
+    
+    .bio-textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+    
+    .edit-btn, .save-btn, .cancel-btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .edit-btn {
+      background-color: #e4e6eb;
+      color: var(--text-color);
+    }
+    
+    .save-btn {
+      background-color: var(--primary-color);
+      color: white;
+      margin-right: 10px;
+    }
+    
+    .cancel-btn {
+      background-color: #e4e6eb;
+      color: var(--text-color);
+    }
+    
+    .content-section {
+      background-color: var(--card-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+      margin-top: 0;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+    
+    @media (max-width: 768px) {
+      .profile-info {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .profile-pic {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+      
+      .nav-bar {
+        flex-wrap: wrap;
+      }
+      
+      .nav-btn {
+        margin: 5px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Sign Up with Google (DIU Email Only)</h1>
-  <button id="googleSignInBtn">Sign Up with Google</button>
-  <p class="error" id="errorMsg"></p>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">DIU Connect</div>
+    </div>
+  </header>
+
+  <!-- Main Content - Login -->
+  <main class="main-content" id="loginContent">
+    <div class="login-container">
+      <h1 class="login-title">Welcome to DIU Connect</h1>
+      <p class="login-subtitle">Connect with your DIU community. Sign up with your DIU email.</p>
+      
+      <button class="google-btn" id="googleSignInBtn">
+        <img src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google logo" class="google-icon">
+        Continue with Google
+      </button>
+      
+      <div class="divider">
+        <span class="divider-text">or</span>
+      </div>
+      
+      <p>You must use your <strong>@diu.edu.bd</strong> email to access this platform.</p>
+      
+      <div class="error-message" id="errorMsg"></div>
+    </div>
+  </main>
+
+  <!-- Profile Content (hidden by default) -->
+  <div class="profile-container" id="profileContent">
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+      <button class="nav-btn active" id="homeBtn">Home</button>
+      <button class="nav-btn" id="profileBtn">Profile</button>
+      <button class="nav-btn" id="noticeBtn">Notices</button>
+      <button class="nav-btn" id="chatBtn">Chat Groups</button>
+      <button class="nav-btn" id="logoutBtn">Logout</button>
+    </div>
+    
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-info">
+        <img src="" alt="Profile Picture" class="profile-pic" id="profilePicture">
+        <div class="profile-details">
+          <h2 id="userName">Loading...</h2>
+          <p id="userEmail">user@diu.edu.bd</p>
+          <p>Student at Daffodil International University</p>
+        </div>
+      </div>
+      
+      <div class="bio-section">
+        <h3>About</h3>
+        <div class="bio-text" id="bioText">No bio yet. Click edit to add one.</div>
+        <button class="edit-btn" id="editBioBtn">Edit Bio</button>
+        
+        <div class="bio-edit" id="bioEdit">
+          <textarea class="bio-textarea" id="bioTextarea" placeholder="Tell others about yourself..."></textarea>
+          <button class="save-btn" id="saveBioBtn">Save</button>
+          <button class="cancel-btn" id="cancelBioBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Content Sections -->
+    <div class="content-section">
+      <h3 class="section-title">Recent Notices</h3>
+      <p>No new notices at this time.</p>
+    </div>
+    
+    <div class="content-section">
+      <h3 class="section-title">Your Groups</h3>
+      <p>You haven't joined any groups yet.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2023 DIU Connect - For Daffodil International University students only</p>
+  </footer>
 
   <script type="module">
     // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-    // Firebase config directly added here
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
       projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.firebasestorage.app",
+      storageBucket: "notice-8edc7.appspot.com",
       messagingSenderId: "948590141987",
       appId: "1:948590141987:web:a9af8252e98f2933f40796",
       measurementId: "G-DSM883VQPT"
@@ -55,26 +395,141 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
+    // DOM elements
+    const googleSignInBtn = document.getElementById("googleSignInBtn");
+    const errorMsg = document.getElementById("errorMsg");
+    const loginContent = document.getElementById("loginContent");
+    const profileContent = document.getElementById("profileContent");
+    const profilePicture = document.getElementById("profilePicture");
+    const userName = document.getElementById("userName");
+    const userEmail = document.getElementById("userEmail");
+    const bioText = document.getElementById("bioText");
+    const bioEdit = document.getElementById("bioEdit");
+    const bioTextarea = document.getElementById("bioTextarea");
+    const editBioBtn = document.getElementById("editBioBtn");
+    const saveBioBtn = document.getElementById("saveBioBtn");
+    const cancelBioBtn = document.getElementById("cancelBioBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
     // Google Sign-In Logic
-    document.getElementById("googleSignInBtn").addEventListener("click", () => {
+    googleSignInBtn.addEventListener("click", () => {
       signInWithPopup(auth, provider)
-        .then((result) => {
+        .then(async (result) => {
           const user = result.user;
           if (user.email.endsWith("@diu.edu.bd")) {
-            // Redirect to profile page
-            window.location.href = "profile.html";
+            // Check if user exists in Firestore, if not create a new document
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (!userSnap.exists()) {
+              // Create new user document with default bio
+              await setDoc(userRef, {
+                name: user.displayName,
+                email: user.email,
+                bio: "DIU Student",
+                photoURL: user.photoURL,
+                createdAt: new Date()
+              });
+            }
+            
+            // Show profile content
+            loadProfile(user);
+            loginContent.style.display = "none";
+            profileContent.style.display = "block";
           } else {
             // Not a DIU email
             signOut(auth);
-            document.getElementById("errorMsg").textContent = "Only DIU emails are allowed.";
+            errorMsg.textContent = "Only @diu.edu.bd emails are allowed. Please use your DIU email.";
           }
         })
         .catch((error) => {
           console.error(error);
-          document.getElementById("errorMsg").textContent = "Error signing in. Try again.";
+          errorMsg.textContent = "Error signing in. Please try again.";
         });
+    });
+
+    // Load profile data
+    function loadProfile(user) {
+      profilePicture.src = user.photoURL || "https://via.placeholder.com/150";
+      userName.textContent = user.displayName;
+      userEmail.textContent = user.email;
+      
+      // Load bio from Firestore
+      const userRef = doc(db, "users", user.uid);
+      getDoc(userRef).then((docSnap) => {
+        if (docSnap.exists() && docSnap.data().bio) {
+          bioText.textContent = docSnap.data().bio;
+        }
+      });
+    }
+
+    // Bio editing functionality
+    editBioBtn.addEventListener("click", () => {
+      bioText.style.display = "none";
+      editBioBtn.style.display = "none";
+      bioEdit.style.display = "block";
+      bioTextarea.value = bioText.textContent;
+    });
+
+    cancelBioBtn.addEventListener("click", () => {
+      bioEdit.style.display = "none";
+      bioText.style.display = "block";
+      editBioBtn.style.display = "inline-block";
+    });
+
+    saveBioBtn.addEventListener("click", async () => {
+      const newBio = bioTextarea.value.trim();
+      if (newBio) {
+        try {
+          const user = auth.currentUser;
+          if (user) {
+            const userRef = doc(db, "users", user.uid);
+            await setDoc(userRef, { bio: newBio }, { merge: true });
+            bioText.textContent = newBio;
+            bioEdit.style.display = "none";
+            bioText.style.display = "block";
+            editBioBtn.style.display = "inline-block";
+          }
+        } catch (error) {
+          console.error("Error updating bio:", error);
+          alert("Failed to update bio. Please try again.");
+        }
+      }
+    });
+
+    // Logout functionality
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth).then(() => {
+        profileContent.style.display = "none";
+        loginContent.style.display = "flex";
+        errorMsg.textContent = "";
+      }).catch((error) => {
+        console.error("Logout error:", error);
+      });
+    });
+
+    // Navigation buttons
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        // Here you would typically load different content based on which button was clicked
+      });
+    });
+
+    // Check if user is already logged in
+    auth.onAuthStateChanged((user) => {
+      if (user && user.email.endsWith("@diu.edu.bd")) {
+        loadProfile(user);
+        loginContent.style.display = "none";
+        profileContent.style.display = "block";
+      } else {
+        loginContent.style.display = "flex";
+        profileContent.style.display = "none";
+      }
     });
   </script>
 </body>
