@@ -1,116 +1,410 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Private Voting System</title>
   <style>
-    body { background: #0f0f0f; color: white; font-family: Arial, sans-serif; padding: 20px; }
-    .admin-btn, .user-btn, button { padding: 10px 15px; background: #1e90ff; border: none; border-radius: 10px; color: white; cursor: pointer; margin: 5px; }
-    #adminPanel, #voteSection { margin-top: 20px; padding: 15px; border: 1px solid #444; border-radius: 15px; background: #1a1a1a; }
-    input { padding: 8px; margin: 5px; border-radius: 5px; border: none; }
-    img { border-radius: 10px; max-width: 100px; }
-    .candidate-item { display: flex; align-items: center; margin: 10px 0; }
-    .candidate-item img { margin-right: 15px; }
-    .candidate-info { flex: 1; }
-    .candidate-info h3 { margin: 0; font-size: 1.2em; }
-    .candidate-info p { margin: 5px 0; color: #bbb; }
-    .candidate-info button { background-color: #4CAF50; }
-    .candidate-info button:disabled { background-color: #666; cursor: not-allowed; }
-    h1 {
-      text-align: center;
-      color: #00ff00;
-      text-shadow: 0 0 10px green, 0 0 20px green;
-      font-size: 3em;
+    body { 
+      background: #121212; 
+      color: #e0e0e0; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      margin: 0;
+      padding: 0;
     }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background: #1a1a1a;
+      padding: 15px 0;
+      border-bottom: 1px solid #333;
+      margin-bottom: 30px;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo img {
+      height: 50px;
+      margin-right: 15px;
+    }
+    
+    .logo-text h1 {
+      margin: 0;
+      font-size: 1.5em;
+      color: #4CAF50;
+      font-weight: 600;
+    }
+    
+    .logo-text p {
+      margin: 0;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+    
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    button, .admin-btn, .user-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .user-btn {
+      background: #2E7D32;
+      color: white;
+    }
+    
+    .user-btn:hover {
+      background: #1B5E20;
+    }
+    
+    .admin-btn {
+      background: #1565C0;
+      color: white;
+    }
+    
+    .admin-btn:hover {
+      background: #0D47A1;
+    }
+    
+    .nav-btn {
+      background: #424242;
+      color: white;
+    }
+    
+    .nav-btn:hover {
+      background: #616161;
+    }
+    
+    .panel {
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #333;
+    }
+    
+    .panel h2 {
+      margin-top: 0;
+      color: #4CAF50;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+      font-size: 1.4em;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background: #2d2d2d;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .candidate-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin: 15px 0;
+      background: #252525;
+      border-radius: 6px;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .candidate-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-right: 20px;
+      border: 2px solid #333;
+    }
+    
+    .candidate-info {
+      flex: 1;
+    }
+    
+    .candidate-info h3 {
+      margin: 0 0 5px 0;
+      color: #e0e0e0;
+      font-size: 1.2em;
+    }
+    
+    .candidate-info p {
+      margin: 5px 0;
+      color: #aaa;
+      font-size: 0.9em;
+    }
+    
+    .candidate-info button {
+      background-color: #2E7D32;
+      color: white;
+      padding: 8px 16px;
+      margin-top: 10px;
+    }
+    
+    .candidate-info button:disabled {
+      background-color: #424242;
+      cursor: not-allowed;
+    }
+    
+    .candidate-info button:hover:not(:disabled) {
+      background-color: #1B5E20;
+    }
+    
+    .vote-count {
+      font-weight: bold;
+      color: #4CAF50;
+    }
+    
     .loading-spinner {
       border: 5px solid rgba(255, 255, 255, 0.2);
-      border-top: 5px solid #4caf50;
+      border-top: 5px solid #4CAF50;
       border-radius: 50%;
       width: 40px;
       height: 40px;
       animation: spin 1s linear infinite;
       margin: 20px auto;
     }
+    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    #candidatesListPublic {
-      margin-top: 20px;
+    
+    #voteListAdmin li {
+      background: #252525;
       padding: 15px;
-      border: 1px solid #444;
-      border-radius: 15px;
-      background: #1a1a1a;
+      margin: 10px 0;
+      border-radius: 6px;
+      border-left: 4px solid #1565C0;
+    }
+    
+    #voteListAdmin li b {
+      color: #4CAF50;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .action-buttons button {
+      flex: 1;
+    }
+    
+    .thank-you-message {
+      text-align: center;
+      padding: 30px;
+      background: #252525;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .thank-you-message a {
+      color: #4CAF50;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .thank-you-message a:hover {
+      text-decoration: underline;
+    }
+    
+    #popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000dd;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    #popup h2 {
+      color: #4CAF50;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    
+    #popup p {
+      margin: 10px 0;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+    
+    #popup button {
+      margin-top: 20px;
+      background: #4CAF50;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+    }
+    
+    #popup button:hover {
+      background: #2E7D32;
+    }
+    
+    .loading-message {
+      color: #FFD700;
+      font-weight: bold;
+      animation: glow 1.5s infinite alternate;
+    }
+    
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 15px #FFD700, 0 0 20px orange, 0 0 30px orange, 0 0 40px orange, 0 0 50px orange; }
+      100% { text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px green, 0 0 50px green, 0 0 60px green, 0 0 70px green; }
+    }
+    
+    .contact-mail {
+      margin-top: 20px;
+      color: #aaa;
+    }
+    
+    .contact-mail a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+    
+    .contact-mail a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .auth-buttons {
+        margin-top: 15px;
+        width: 100%;
+      }
+      
+      button, .admin-btn, .user-btn {
+        width: 100%;
+        margin: 5px 0;
+      }
+      
+      .candidate-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .candidate-item img {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- ✅ Popup Guide -->
-
-<div id="popup" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000000dd;z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:20px;">
-  <h2 style="color:lightgreen;">🗳️ Voting System – Quick User Guide</h2>
+<!-- Popup Guide -->
+<div id="popup">
+  <h2>🗳️ Voting System – Quick User Guide</h2>
   <p><strong>🔐 Login</strong><br>Click "Sign in with DIU Mail to Vote".<br>Use your DIU email only.</p>
   <p><strong>✅ Vote</strong><br>Choose a candidate.<br>Click "Vote" → Confirm.<br>Sign in again to verify → Done!<br>Message: "Thank you for voting..."</p>
   <p><strong>⚠️⚠️ You can vote only once.</strong></p>
   <p class="loading-message">⚠️⚠️⚠️ The server is a bit slow—please wait a moment after clicking any button.</p>
-  <p><strong>📢 Results</strong><br>Visit the Notice Board:<br><a href="https://mizan658.github.io/AL/notice.html" style="color:lightblue;">https://mizan658.github.io/AL/notice.html</a></p>
-  <button onclick="document.getElementById('popup').style.display='none'" style="margin-top:20px;background:#4caf50;border:none;padding:10px 20px;border-radius:10px;color:white;cursor:pointer;">I Understand</button>
-  <div class="contact-mail">Contact Mail: <a href="mailto:help.to.tz@gmail.com" style="color:#00ffff">help.to.tz@gmail.com</a></div>
+  <p><strong>📢 Results</strong><br>Visit the Notice Board:<br><a href="https://mizan658.github.io/AL/notice.html">https://mizan658.github.io/AL/notice.html</a></p>
+  <button onclick="document.getElementById('popup').style.display='none'">I Understand</button>
+  <div class="contact-mail">Contact Mail: <a href="mailto:help.to.tz@gmail.com">help.to.tz@gmail.com</a></div>
 </div>
 
-<style>
-  .loading-message {
-    color: yellow;
-    font-weight: bold;
-    animation: glow 1.5s infinite alternate;
-  }
+<div class="container">
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <img src="https://i.imgur.com/m1iCYJR.png" alt="DIU Voting System Logo">
+        <div class="logo-text">
+          <h1>Private Voting System</h1>
+          <p>Secure, Private, and Tamper-proof</p>
+        </div>
+      </div>
+      <div class="auth-buttons">
+        <button class="nav-btn" onclick="window.location.href='https://mizan658.github.io/AL/index.html'">Home</button>
+        <button class="nav-btn" onclick="window.location.href='https://mizan658.github.io/AL/notice.html'">Notice Board</button>
+        <button class="user-btn" onclick="signInUser()">Sign in to Vote</button>
+        <button class="admin-btn" onclick="signInAdmin()">Admin Login</button>
+      </div>
+    </div>
+  </header>
 
-  @keyframes glow {
-    0% { text-shadow: 0 0 5px yellow, 0 0 10px yellow, 0 0 15px yellow, 0 0 20px orange, 0 0 30px orange, 0 0 40px orange, 0 0 50px orange; }
-    100% { text-shadow: 0 0 10px yellow, 0 0 20px yellow, 0 0 30px yellow, 0 0 40px green, 0 0 50px green, 0 0 60px green, 0 0 70px green; }
-  }
-</style>
+  <div id="adminPanel" class="panel" style="display:none;">
+    <h2>Admin Panel</h2>
+    <input type="text" id="candidateName" placeholder="Candidate Name">
+    <input type="text" id="candidatePhoto" placeholder="Photo URL">
+    <textarea id="candidateBio" placeholder="Candidate Bio"></textarea>
+    
+    <div class="action-buttons">
+      <button onclick="addCandidate()">Add Candidate</button>
+    </div>
 
-<h1>Welcome to Private Voting System</h1>
+    <h3>Manage Candidates</h3>
+    <ul id="candidateList"></ul>
 
-<div>
-  <button class="user-btn" onclick="signInUser()">Sign in with DIU Mail to Vote</button>
-  <button class="admin-btn" onclick="signInAdmin()" style="float:right">Admin Panel Login</button>
-  <button onclick="window.location.href='https://mizan658.github.io/AL/notice.html'" class="user-btn">Notice</button>
-  <button onclick="window.location.href='https://mizan658.github.io/AL/index.html'" class="user-btn">Home</button>
-</div>
+    <h3>Manage Votes</h3>
+    <div class="action-buttons">
+      <button onclick="loadVotesAdmin()">Load Votes</button>
+      <button onclick="resetVotes()">Reset Votes</button>
+    </div>
+    <ul id="voteListAdmin"></ul>
+  </div>
 
-<div id="adminPanel" style="display:none;">
-  <h2>Admin Panel</h2>
-  <input type="text" id="candidateName" placeholder="Candidate Name">
-  <input type="text" id="candidatePhoto" placeholder="Photo URL">
-  <textarea id="candidateBio" placeholder="Candidate Bio" rows="4" style="width:100%"></textarea>
-  <button onclick="addCandidate()">Add Candidate</button>
+  <div id="voteSection" class="panel" style="display:none;">
+    <h2>Cast Your Vote</h2>
+    <div id="loading" class="loading-spinner" style="display:none;"></div>
+    <ul id="voteList"></ul>
+  </div>
 
-  <h3>Manage Candidates</h3>
-  <ul id="candidateList"></ul>
-
-  <h3>Manage Votes</h3>
-  <button onclick="loadVotesAdmin()">Load Votes</button>
-  <ul id="voteListAdmin"></ul>
-  <button onclick="resetVotes()">Reset Votes</button>
-</div>
-
-<div id="voteSection" style="display:none;">
-  <h2>Vote for Your Candidate</h2>
-  <div id="loading" class="loading-spinner" style="display:none;"></div>
-  <ul id="voteList"></ul>
-</div>
-
-<div id="candidatesListPublic">
-  <h2>Candidates</h2>
-  <p>Please sign in with your DIU email to vote</p>
-  <div id="loadingPublic" class="loading-spinner"></div>
-  <ul id="publicCandidatesList"></ul>
+  <div id="candidatesListPublic" class="panel">
+    <h2>Candidate List</h2>
+    <p>Please sign in with your DIU email account to participate in voting</p>
+    <div id="loadingPublic" class="loading-spinner"></div>
+    <ul id="publicCandidatesList"></ul>
+  </div>
 </div>
 
 <script type="module">
@@ -153,7 +447,7 @@
         const c = docSnap.data();
         list.innerHTML += `
           <li class="candidate-item">
-            <img src="${c.photoURL}" width="50">
+            <img src="${c.photoURL || 'https://via.placeholder.com/80'}" alt="${c.name}">
             <div class="candidate-info">
               <h3>${c.name}</h3>
               <p>${c.bio}</p>
@@ -213,12 +507,12 @@
       const c = docSnap.data();
       list.innerHTML += `
         <li class="candidate-item">
-          <img src="${c.photoURL}" width="100">
+          <img src="${c.photoURL || 'https://via.placeholder.com/100'}" alt="${c.name}">
           <div class="candidate-info">
             <h3>${c.name}</h3>
             <p>${c.bio}</p>
-            <button onclick="removeCandidate('${docSnap.id}')">Delete</button>
-            <p>Votes: ${c.votes}</p>
+            <p class="vote-count">Votes: ${c.votes}</p>
+            <button onclick="removeCandidate('${docSnap.id}')">Delete Candidate</button>
           </div>
         </li>
       `;
@@ -239,7 +533,12 @@
     const votedSnap = await getDoc(votedRef);
     if (votedSnap.exists()) {
       document.getElementById("loading").style.display = "none";
-      list.innerHTML = `<p>Thank you for voting! The result will publish on <a href="https://mizan658.github.io/AL/notice.html" style="color: lightgreen; text-decoration: none;">notice board</a></p>`;
+      list.innerHTML = `
+        <div class="thank-you-message">
+          <p>Thank you for voting! The results will be published on the <a href="https://mizan658.github.io/AL/notice.html">notice board</a>.</p>
+          <p>You cannot vote again as you have already submitted your vote.</p>
+        </div>
+      `;
       return;
     }
     const snap = await getDocs(collection(db, "candidates"));
@@ -248,11 +547,11 @@
       const c = docSnap.data();
       list.innerHTML += `
         <li class="candidate-item">
-          <img src="${c.photoURL}" width="50">
+          <img src="${c.photoURL || 'https://via.placeholder.com/80'}" alt="${c.name}">
           <div class="candidate-info">
             <h3>${c.name}</h3>
             <p>${c.bio}</p>
-            <button onclick="vote('${docSnap.id}', '${uid}', '${c.name}')">Vote</button>
+            <button onclick="vote('${docSnap.id}', '${uid}', '${c.name}')">Vote for ${c.name}</button>
           </div>
         </li>
       `;
@@ -260,7 +559,7 @@
   };
 
   window.vote = async (candidateId, uid, candidateName) => {
-    const confirmVote = confirm(`Are you sure you want to vote for "${candidateName}"?`);
+    const confirmVote = confirm(`Are you sure you want to vote for "${candidateName}"?\nThis action cannot be undone.`);
     if (!confirmVote) return;
 
     document.getElementById("voteSection").innerHTML = '<div class="loading-spinner"></div>';
@@ -283,11 +582,15 @@
       await updateDoc(cRef, { votes: newVotes });
 
       setTimeout(() => {
-        document.getElementById("voteSection").innerHTML = `<p>Thank you for voting! The result will publish on <a href='https://mizan658.github.io/AL/notice.html' style='color: lightgreen; text-decoration: none;'>notice board</a></p>`;
+        document.getElementById("voteSection").innerHTML = `
+          <div class="thank-you-message">
+            <p>Thank you for voting! The results will be published on the <a href="https://mizan658.github.io/AL/notice.html">notice board</a>.</p>
+          </div>
+        `;
       }, 5000);
     } catch (error) {
       console.error("Voting failed", error);
-      alert("Something went wrong during voting.");
+      alert("Something went wrong during voting. Please try again.");
     }
   };
 
@@ -297,11 +600,18 @@
     const snap = await getDocs(collection(db, "votes"));
     snap.forEach(docSnap => {
       const v = docSnap.data();
-      list.innerHTML += `<li><b>Email:</b> ${v.email} <br><b>Candidate ID:</b> ${v.candidateId}</li>`;
+      list.innerHTML += `
+        <li>
+          <b>Email:</b> ${v.email} <br>
+          <b>Candidate ID:</b> ${v.candidateId}
+        </li>
+      `;
     });
   };
 
   window.resetVotes = async () => {
+    if (!confirm("Are you sure you want to reset ALL votes? This cannot be undone.")) return;
+    
     const candidatesSnap = await getDocs(collection(db, "candidates"));
     candidatesSnap.forEach(async (docSnap) => {
       await updateDoc(doc(db, "candidates", docSnap.id), { votes: 0 });
@@ -310,7 +620,7 @@
     votesSnap.forEach(async (docSnap) => {
       await deleteDoc(doc(db, "votes", docSnap.id));
     });
-    alert("Votes have been reset.");
+    alert("All votes have been reset.");
     loadCandidates();
     loadPublicCandidates(); // Refresh public view
   };
