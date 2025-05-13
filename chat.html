@@ -313,13 +313,13 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
         const provider = new firebase.auth.GoogleAuthProvider();
 
         // DOM elements
-        const app = document.getElementById('app');
+        const appDiv = document.getElementById('app');
 
         // State
         let currentUser = null;
@@ -336,6 +336,9 @@
 
         // Initialize the app
         function initApp() {
+            // Show loading state initially
+            appDiv.innerHTML = '<div class="login-container"><div class="login-card"><h1 class="login-title">Loading...</h1></div></div>';
+            
             auth.onAuthStateChanged(user => {
                 if (user) {
                     currentUser = user;
@@ -372,21 +375,37 @@
                                     isPro: false,
                                     isBlocked: false,
                                     suspensionEnd: null,
-                                    reportCount: 0
+                                    reportCount: 0,
+                                    nameChanged: false
+                                }, (error) => {
+                                    if (error) {
+                                        console.error("Error setting user data:", error);
+                                        showLoginScreen();
+                                    } else {
+                                        showNameChangeScreen(randomName);
+                                    }
                                 });
-                                showNameChangeScreen(randomName);
                             } else if (!userNameChanged && !userData.nameChanged) {
                                 // Existing user who hasn't changed name
                                 showNameChangeScreen(userData.name);
                             } else {
                                 // Regular user - show chat
-                                showChatScreen(userData.isPro);
+                                showChatScreen(userData.isPro || false);
                             }
+                        }).catch(error => {
+                            console.error("Error getting user data:", error);
+                            showLoginScreen();
                         });
+                    }).catch(error => {
+                        console.error("Error checking user status:", error);
+                        showLoginScreen();
                     });
                 } else {
                     showLoginScreen();
                 }
+            }, error => {
+                console.error("Auth state error:", error);
+                showLoginScreen();
             });
         }
 
@@ -403,7 +422,7 @@
 
         // Show suspended screen
         function showSuspendedScreen(suspensionEnd) {
-            app.innerHTML = `
+            appDiv.innerHTML = `
                 <div class="suspended-overlay">
                     <div class="suspended-message">
                         <h2>Account Suspended</h2>
@@ -451,7 +470,7 @@
 
         // Show login screen
         function showLoginScreen() {
-            app.innerHTML = `
+            appDiv.innerHTML = `
                 <div class="login-container">
                     <div class="login-card">
                         <h1 class="login-title">Chat Group</h1>
@@ -472,7 +491,7 @@
 
         // Show name change screen
         function showNameChangeScreen(currentName) {
-            app.innerHTML = `
+            appDiv.innerHTML = `
                 <div class="login-container">
                     <div class="login-card">
                         <h1 class="login-title">Choose Your Display Name</h1>
@@ -518,7 +537,7 @@
             }
 
             // Render chat UI
-            app.innerHTML = `
+            appDiv.innerHTML = `
                 <div class="container">
                     <div class="header">
                         <h2>${isPro ? 'Chat Pro' : 'Chat Group'}</h2>
@@ -716,6 +735,7 @@
                 }
             }).catch(error => {
                 console.error('Google sign-in error:', error);
+                alert('Error signing in with Google. Please try again.');
             });
         }
 
@@ -752,6 +772,9 @@
                 database.ref('users/' + currentUser.uid).once('value').then(snapshot => {
                     showChatScreen(snapshot.val().isPro || false);
                 });
+            }).catch(error => {
+                console.error("Error updating name:", error);
+                alert("Error updating name. Please try again.");
             });
         }
 
@@ -765,7 +788,11 @@
 
         // Logout
         function logout() {
-            auth.signOut();
+            auth.signOut().then(() => {
+                showLoginScreen();
+            }).catch(error => {
+                console.error("Error signing out:", error);
+            });
         }
 
         // Initialize the app
