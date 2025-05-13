@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,8 +80,6 @@
     img { 
       border-radius: 10px; 
       max-width: 80px;
-      height: auto;
-      display: block;
     }
     
     .candidate-item { 
@@ -92,7 +91,6 @@
     
     .candidate-item img { 
       margin-right: 10px;
-      object-fit: cover;
     }
     
     .candidate-info { 
@@ -256,8 +254,7 @@
 
 <div class="header">
   <div class="logo-container">
-    <!-- Replaced Imgur URL with more reliable placeholder -->
-    <img src="https://placehold.co/100x100/1a1a1a/4CAF50?text=DIU+Logo" alt="DIU Logo" class="logo">
+    <img src="https://i.imgur.com/m1iCYJR.png" alt="DIU Logo" class="logo">
     <div class="header-text">
       <h1>DIU Voting System</h1>
       <p>Secure, Private, and Tamper-proof</p>
@@ -275,7 +272,7 @@
 <div id="adminPanel" style="display:none;">
   <h2>Admin Panel</h2>
   <input type="text" id="candidateName" placeholder="Candidate Name">
-  <input type="text" id="candidatePhoto" placeholder="Photo URL (use https://)">
+  <input type="text" id="candidatePhoto" placeholder="Photo URL">
   <textarea id="candidateBio" placeholder="Candidate Bio" rows="4" style="width:100%"></textarea>
   <button onclick="addCandidate()">Add Candidate</button>
 
@@ -341,9 +338,7 @@
         const c = docSnap.data();
         list.innerHTML += `
           <li class="candidate-item">
-            <img src="${c.photoURL || 'https://placehold.co/80x80/1a1a1a/4CAF50?text=Candidate'}" 
-                 onerror="this.src='https://placehold.co/80x80/1a1a1a/4CAF50?text=Candidate'" 
-                 width="50">
+            <img src="${c.photoURL}" width="50">
             <div class="candidate-info">
               <h3>${c.name}</h3>
               <p>${c.bio}</p>
@@ -387,22 +382,10 @@
 
   window.addCandidate = async () => {
     const name = document.getElementById("candidateName").value;
-    let photo = document.getElementById("candidatePhoto").value;
+    const photo = document.getElementById("candidatePhoto").value;
     const bio = document.getElementById("candidateBio").value;
-    
     if (!name || !bio) return alert("Enter a name and bio");
-    
-    // Ensure photo URL is HTTPS
-    if (photo && !photo.startsWith('https://')) {
-      photo = 'https://' + photo.replace(/^https?:\/\//, '');
-    }
-    
-    await addDoc(collection(db, "candidates"), { 
-      name, 
-      photoURL: photo || 'https://placehold.co/100x100/1a1a1a/4CAF50?text=Candidate', 
-      bio, 
-      votes: 0 
-    });
+    await addDoc(collection(db, "candidates"), { name, photoURL: photo, bio, votes: 0 });
     loadCandidates();
     loadPublicCandidates(); // Refresh public view
   };
@@ -415,9 +398,7 @@
       const c = docSnap.data();
       list.innerHTML += `
         <li class="candidate-item">
-          <img src="${c.photoURL || 'https://placehold.co/100x100/1a1a1a/4CAF50?text=Candidate'}" 
-               onerror="this.src='https://placehold.co/100x100/1a1a1a/4CAF50?text=Candidate'" 
-               width="100">
+          <img src="${c.photoURL}" width="100">
           <div class="candidate-info">
             <h3>${c.name}</h3>
             <p>${c.bio}</p>
@@ -452,9 +433,7 @@
       const c = docSnap.data();
       list.innerHTML += `
         <li class="candidate-item">
-          <img src="${c.photoURL || 'https://placehold.co/80x80/1a1a1a/4CAF50?text=Candidate'}" 
-               onerror="this.src='https://placehold.co/80x80/1a1a1a/4CAF50?text=Candidate'" 
-               width="50">
+          <img src="${c.photoURL}" width="50">
           <div class="candidate-info">
             <h3>${c.name}</h3>
             <p>${c.bio}</p>
