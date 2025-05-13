@@ -4,7 +4,22 @@
   <meta charset="UTF-8" />
   <title>Sign Up - DIU Private Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
   <style>
+    :root {
+      --bg: #0d1117;
+      --text: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    body.light {
+      --bg: #f1f1f1;
+      --text: #1a1a1a;
+      --card-bg: #ffffff;
+      --border: #dddddd;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -13,24 +28,26 @@
 
     body {
       font-family: 'Inter', sans-serif;
-      background: #0d1117;
-      color: #ffffff;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       padding: 40px;
       width: 90%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      transition: background 0.3s, border 0.3s;
     }
 
     .card h1 {
@@ -41,7 +58,7 @@
 
     .card small {
       font-size: 14px;
-      color: #aaaaaa;
+      color: gray;
     }
 
     button {
@@ -55,6 +72,10 @@
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     button:hover {
@@ -67,19 +88,51 @@
       margin-top: 20px;
       font-size: 14px;
     }
+
+    .toggle-theme {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .loader {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .loader.show {
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
+  <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
+
   <div class="card">
     <h1>Sign Up with Google</h1>
     <small>Only @diu.edu.bd email is allowed</small>
-    <button id="googleSignInBtn">Sign Up with Google</button>
+    <button id="googleSignInBtn">
+      <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_jzq0q0lz.json" background="transparent" speed="1" style="width: 30px; height: 30px;" loop autoplay></lottie-player>
+      Sign Up
+    </button>
+    <div class="loader" id="loader">
+      <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_usmfx6bp.json" background="transparent" speed="1" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
+    </div>
     <p class="error" id="errorMsg"></p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
@@ -94,23 +147,45 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
 
-    document.getElementById("googleSignInBtn").addEventListener("click", () => {
+    const signInBtn = document.getElementById("googleSignInBtn");
+    const errorMsg = document.getElementById("errorMsg");
+    const loader = document.getElementById("loader");
+
+    signInBtn.addEventListener("click", () => {
+      errorMsg.textContent = "";
+      loader.classList.add("show");
+
       signInWithPopup(auth, provider)
-        .then((result) => {
+        .then(async (result) => {
           const user = result.user;
           if (user.email.endsWith("@diu.edu.bd")) {
+            const userRef = doc(db, "users", user.uid);
+            await setDoc(userRef, {
+              name: user.displayName,
+              email: user.email,
+              uid: user.uid,
+              photoURL: user.photoURL,
+              createdAt: new Date().toISOString()
+            });
             window.location.href = "profile.html";
           } else {
-            signOut(auth);
-            document.getElementById("errorMsg").textContent = "Only @diu.edu.bd emails are allowed.";
+            await signOut(auth);
+            loader.classList.remove("show");
+            errorMsg.textContent = "Only @diu.edu.bd emails are allowed.";
           }
         })
         .catch((error) => {
           console.error("Sign-in error:", error);
-          document.getElementById("errorMsg").textContent = "Sign-in failed. Please try again.";
+          loader.classList.remove("show");
+          errorMsg.textContent = "Sign-in failed. Please try again.";
         });
     });
+
+    window.toggleTheme = () => {
+      document.body.classList.toggle("light");
+    };
   </script>
 </body>
 </html>
