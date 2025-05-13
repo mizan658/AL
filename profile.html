@@ -14,16 +14,6 @@
       --border-color: #dddfe2;
     }
     
-    /* Dark mode variables */
-    [data-theme="dark"] {
-      --primary-color: #2d88ff;
-      --secondary-color: #31a24c;
-      --bg-color: #18191a;
-      --card-color: #242526;
-      --text-color: #e4e6eb;
-      --border-color: #3e4042;
-    }
-    
     body {
       font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-color);
@@ -33,7 +23,6 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      transition: background-color 0.3s, color 0.3s;
     }
     
     .header {
@@ -61,21 +50,6 @@
       font-weight: bold;
     }
     
-    .theme-toggle {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .theme-icon {
-      font-size: 20px;
-    }
-    
     .main-content {
       flex: 1;
       display: flex;
@@ -92,7 +66,6 @@
       width: 100%;
       max-width: 400px;
       text-align: center;
-      transition: background-color 0.3s;
     }
     
     .login-title {
@@ -103,14 +76,13 @@
     
     .login-subtitle {
       font-size: 16px;
-      color: var(--text-color);
-      opacity: 0.8;
+      color: #606770;
       margin-bottom: 25px;
     }
     
     .google-btn {
-      background-color: var(--card-color);
-      color: var(--text-color);
+      background-color: #ffffff;
+      color: #3c4043;
       border: 1px solid var(--border-color);
       border-radius: 4px;
       padding: 12px;
@@ -126,7 +98,7 @@
     }
     
     .google-btn:hover {
-      background-color: var(--bg-color);
+      background-color: #f8f9fa;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
     
@@ -149,8 +121,7 @@
       top: -10px;
       left: 50%;
       transform: translateX(-50%);
-      color: var(--text-color);
-      opacity: 0.8;
+      color: #606770;
       font-size: 14px;
     }
     
@@ -159,10 +130,8 @@
       padding: 20px;
       text-align: center;
       font-size: 14px;
-      color: var(--text-color);
-      opacity: 0.8;
+      color: #8a8d91;
       border-top: 1px solid var(--border-color);
-      transition: background-color 0.3s;
     }
     
     .error-message {
@@ -173,11 +142,6 @@
       background-color: #fff2f0;
       border-radius: 4px;
       border: 1px solid #ffccc7;
-    }
-    
-    [data-theme="dark"] .error-message {
-      background-color: #2a1215;
-      border-color: #58181c;
     }
     
     /* Profile page styles (hidden by default) */
@@ -197,7 +161,6 @@
       display: flex;
       justify-content: space-around;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
     }
     
     .nav-btn {
@@ -208,10 +171,12 @@
       cursor: pointer;
       padding: 8px 15px;
       border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
     }
     
     .nav-btn:hover, .nav-btn.active {
-      background-color: var(--bg-color);
+      background-color: #f0f2f5;
     }
     
     .profile-header {
@@ -220,7 +185,6 @@
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
     }
     
     .profile-info {
@@ -243,8 +207,7 @@
     
     .profile-details p {
       margin: 5px 0;
-      color: var(--text-color);
-      opacity: 0.8;
+      color: #65676b;
     }
     
     .bio-section {
@@ -254,9 +217,8 @@
     .bio-text {
       margin: 10px 0;
       padding: 10px;
-      background-color: var(--bg-color);
+      background-color: #f0f2f5;
       border-radius: 8px;
-      transition: background-color 0.3s;
     }
     
     .bio-edit {
@@ -267,8 +229,6 @@
     .bio-textarea {
       width: 100%;
       padding: 10px;
-      background-color: var(--bg-color);
-      color: var(--text-color);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       resize: vertical;
@@ -283,11 +243,10 @@
       border-radius: 4px;
       cursor: pointer;
       font-weight: 600;
-      transition: background-color 0.3s;
     }
     
     .edit-btn {
-      background-color: var(--bg-color);
+      background-color: #e4e6eb;
       color: var(--text-color);
     }
     
@@ -298,7 +257,7 @@
     }
     
     .cancel-btn {
-      background-color: var(--bg-color);
+      background-color: #e4e6eb;
       color: var(--text-color);
     }
     
@@ -308,7 +267,6 @@
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
     }
     
     .section-title {
@@ -343,10 +301,6 @@
   <header class="header">
     <div class="header-content">
       <div class="logo">DIU Connect</div>
-      <button class="theme-toggle" id="themeToggle">
-        <span class="theme-icon" id="themeIcon">🌙</span>
-        <span id="themeText">Dark Mode</span>
-      </button>
     </div>
   </header>
 
@@ -375,10 +329,10 @@
   <div class="profile-container" id="profileContent">
     <!-- Navigation Bar -->
     <div class="nav-bar">
-      <button class="nav-btn active" id="homeBtn">Home</button>
-      <button class="nav-btn" id="profileBtn">Profile</button>
-      <button class="nav-btn" id="noticeBtn">Notices</button>
-      <button class="nav-btn" id="chatBtn">Chat Groups</button>
+      <a href="https://mizan658.github.io/AL/index.html" class="nav-btn active" id="homeBtn">Home</a>
+      <a href="https://mizan658.github.io/AL/profile.html" class="nav-btn" id="profileBtn">Profile</a>
+      <a href="https://mizan658.github.io/AL/notice.html" class="nav-btn" id="noticeBtn">Notices</a>
+      <a href="https://mizan658.github.io/AL/chat.html" class="nav-btn" id="chatBtn">Chat Groups</a>
       <button class="nav-btn" id="logoutBtn">Logout</button>
     </div>
     
@@ -461,35 +415,6 @@
     const saveBioBtn = document.getElementById("saveBioBtn");
     const cancelBioBtn = document.getElementById("cancelBioBtn");
     const logoutBtn = document.getElementById("logoutBtn");
-    const themeToggle = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
-    const themeText = document.getElementById("themeText");
-
-    // Theme toggle functionality
-    function toggleTheme() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      if (currentTheme === 'dark') {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'light');
-        themeIcon.textContent = '🌙';
-        themeText.textContent = 'Dark Mode';
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-        themeIcon.textContent = '☀️';
-        themeText.textContent = 'Light Mode';
-      }
-    }
-
-    // Check for saved theme preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      themeIcon.textContent = '☀️';
-      themeText.textContent = 'Light Mode';
-    }
-
-    themeToggle.addEventListener('click', toggleTheme);
 
     // Google Sign-In Logic
     googleSignInBtn.addEventListener("click", () => {
@@ -508,8 +433,7 @@
                 email: user.email,
                 bio: "DIU Student",
                 photoURL: user.photoURL,
-                createdAt: new Date(),
-                themePreference: savedTheme || 'light'
+                createdAt: new Date()
               });
             }
             
@@ -538,16 +462,8 @@
       // Load bio from Firestore
       const userRef = doc(db, "users", user.uid);
       getDoc(userRef).then((docSnap) => {
-        if (docSnap.exists()) {
-          if (docSnap.data().bio) {
-            bioText.textContent = docSnap.data().bio;
-          }
-          // Set user's theme preference if available
-          if (docSnap.data().themePreference === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            themeIcon.textContent = '☀️';
-            themeText.textContent = 'Light Mode';
-          }
+        if (docSnap.exists() && docSnap.data().bio) {
+          bioText.textContent = docSnap.data().bio;
         }
       });
     }
@@ -594,15 +510,6 @@
         errorMsg.textContent = "";
       }).catch((error) => {
         console.error("Logout error:", error);
-      });
-    });
-
-    // Navigation buttons
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-      btn.addEventListener("click", function() {
-        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-        this.classList.add("active");
-        // Here you would typically load different content based on which button was clicked
       });
     });
 
