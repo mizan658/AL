@@ -1,208 +1,385 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Private Student Server</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* Global Styles */
+    :root {
+      --primary: #00c8ff;
+      --primary-dark: #0099cc;
+      --secondary: #7b2cbf;
+      --dark: #121212;
+      --darker: #0a0a0a;
+      --light: #f8f9fa;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #17a2b8;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
       margin: 0;
-      background-color: #18191A;
-      color: white;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       padding: 20px;
-      transition: background-color 0.3s ease;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(37, 150, 190, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(123, 44, 191, 0.1) 0%, transparent 50%);
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      margin-bottom: 1rem;
     }
 
     h1 {
       font-size: 2.5rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: var(--primary);
     }
 
     p {
-      font-size: 1.2rem;
-      line-height: 1.5;
+      font-size: 1.1rem;
       margin-bottom: 2rem;
       text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 700px;
     }
 
     .admin-note {
       font-size: 0.9rem;
-      color: yellow;
+      color: var(--warning);
       margin-top: 1.5rem;
       text-align: center;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 196, 0, 0.1);
+      border-radius: 20px;
+      display: inline-block;
     }
 
     .contact-mail {
       font-size: 0.9rem;
-      color: #ccc;
-      margin-top: 0.5rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 1.5rem;
       text-align: center;
     }
 
-    /* Hero Section */
-    .hero {
-      background: rgba(24, 25, 26, 0.9);
-      padding: 3rem 2rem;
-      border: 2px solid #00ffff;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #00ffffaa, 0 0 40px #00ffff55;
-      animation: pulse 2s infinite;
+    .contact-mail a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .contact-mail a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    /* Card Styles */
+    .card {
+      background: rgba(24, 24, 24, 0.8);
+      padding: 3rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       text-align: center;
       max-width: 800px;
       width: 100%;
       margin: 0 auto;
-      transition: transform 0.3s ease;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    @keyframes pulse {
-      0% { box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33; }
-      50% { box-shadow: 0 0 30px #00ffffcc, 0 0 60px #00ffff88; }
-      100% { box-shadow: 0 0 10px #00ffff55, 0 0 20px #00ffff33; }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0,200,255,0.1) 0%, rgba(0,200,255,0) 70%);
+      animation: rotate 15s linear infinite;
+      z-index: -1;
     }
 
-    .hero:hover {
-      transform: scale(1.02);
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 200, 255, 0.2);
+      border-color: rgba(0, 200, 255, 0.3);
     }
 
     /* Button Styles */
-    .buttons {
-      margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
+    .btn {
+      display: inline-flex;
       align-items: center;
-    }
-
-    .buttons a, .buttons button {
+      justify-content: center;
       text-decoration: none;
       padding: 1rem 2rem;
       margin: 0.7rem;
-      border-radius: 8px;
-      font-weight: bold;
-      display: inline-block;
-      transition: 0.3s ease;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
       cursor: pointer;
       border: none;
       width: 100%;
       max-width: 320px;
+      position: relative;
+      overflow: hidden;
+      font-size: 1rem;
     }
 
-    .notice-btn { background-color: #007bff; color: white; }
-    .login-btn { background-color: #f4c430; color: black; }
-    .signup-btn { background-color: #00bfff; color: black; }
-    .rules-btn { background-color: #28a745; color: white; }
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
 
-    .buttons a:hover, .buttons button:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
+    .btn:hover::after {
+      opacity: 1;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn-notice { 
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .btn-login { 
+      background: linear-gradient(135deg, var(--warning), #ffab00);
+      color: black;
+    }
+
+    .btn-signup { 
+      background: linear-gradient(135deg, var(--info), #138496);
+      color: white;
+    }
+
+    .btn-rules { 
+      background: linear-gradient(135deg, var(--success), #218838);
+      color: white;
+    }
+
+    .btn-voting { 
+      background: linear-gradient(135deg, var(--secondary), #5a189a);
+      color: white;
+    }
+
+    .btn-chat { 
+      background: linear-gradient(135deg, #ff6b6b, var(--danger));
+      color: white;
+    }
+
+    .btn-back { 
+      background: linear-gradient(135deg, #6c757d, #495057);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Button Grid */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      margin-top: 2rem;
     }
 
     /* Rules Section */
     #rules-section {
       display: none;
       text-align: left;
-      background: rgba(20, 20, 20, 0.9);
-      padding: 2rem;
-      border-radius: 10px;
-      border: 2px solid #00ffff;
+      background: rgba(24, 24, 24, 0.9);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 200, 255, 0.2);
       max-width: 800px;
       width: 100%;
+      margin: 0 auto;
     }
 
     #rules-section ul { 
-      list-style-type: square; 
-      padding-left: 1.5rem;
-      margin-bottom: 1.5rem;
+      list-style-type: none;
+      margin-bottom: 2rem;
     }
 
     #rules-section ul li {
       font-size: 1rem;
+      line-height: 1.8;
+      padding: 0.5rem 0;
+      position: relative;
+      padding-left: 1.75rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    #rules-section ul li::before {
+      content: '•';
+      color: var(--primary);
+      font-size: 1.5rem;
+      position: absolute;
+      left: 0;
+      top: 0;
       line-height: 1.6;
     }
 
-    .back-btn {
-      margin-top: 2rem;
-      background-color: #007bff;
-      color: white;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
     }
 
     /* Mobile Responsiveness */
     @media (max-width: 768px) {
       h1 {
-        font-size: 1.8rem;
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.75rem;
       }
 
-      .buttons a, .buttons button {
-        padding: 0.8rem 1.5rem;
-        font-size: 1rem;
-      }
-
-      .hero {
+      .card {
         padding: 2rem 1.5rem;
-        width: 100%;
+      }
+
+      .btn {
+        padding: 0.9rem 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .btn-grid {
+        grid-template-columns: 1fr;
       }
 
       #rules-section {
-        padding: 1.5rem;
-      }
-
-      .admin-note {
-        font-size: 0.85rem;
+        padding: 1.75rem;
       }
     }
 
     /* Smaller Mobile Responsiveness */
     @media (max-width: 480px) {
       h1 {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
       }
 
-      .buttons a, .buttons button {
-        padding: 0.7rem 1.2rem;
-        font-size: 0.95rem;
+      p {
+        font-size: 1rem;
+      }
+
+      .card {
+        padding: 1.75rem 1.25rem;
+      }
+
+      .btn {
+        padding: 0.8rem 1.25rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="hero" id="main-section">
-    <h1>Welcome to Private Student Server</h1>
-    <p>This platform is for anonymous student voting and messaging.</p>
-    <div class="buttons">
-      <a href="https://mizan658.github.io/AL/notice.html" class="notice-btn">Notice</a>
-      <button onclick="showRules()" class="rules-btn">Rules and Regulations</button>
-      <a href="https://mizan658.github.io/AL/signup.html" class="login-btn">Login/Sign Up</a>
-      <a href="https://mizan658.github.io/AL/profile.html" class="signup-btn">Profile</a>
-      <a href="https://mizan658.github.io/AL/voting-system.html?" class="signup-btn">Voting</a>
-      <a href="#" class="login-btn">Chat Group</a>
+  <div class="card fade-in" id="main-section">
+    <h1>Private Student Server</h1>
+    <p>A secure platform for anonymous student voting and messaging with end-to-end encryption and privacy-focused features.</p>
+    
+    <div class="btn-grid">
+      <a href="https://mizan658.github.io/AL/notice.html" class="btn btn-notice">
+        <i class="fas fa-bullhorn"></i> Notice Board
+      </a>
+      <button onclick="showRules()" class="btn btn-rules">
+        <i class="fas fa-scroll"></i> Rules & Regulations
+      </button>
+      <a href="https://mizan658.github.io/AL/signup.html" class="btn btn-login">
+        <i class="fas fa-sign-in-alt"></i> Login/Sign Up
+      </a>
+      <a href="https://mizan658.github.io/AL/profile.html" class="btn btn-signup">
+        <i class="fas fa-user-circle"></i> Profile
+      </a>
+      <a href="https://mizan658.github.io/AL/voting-system.html?" class="btn btn-voting">
+        <i class="fas fa-vote-yea"></i> Voting System
+      </a>
+      <a href="#" class="btn btn-chat">
+        <i class="fas fa-comments"></i> Chat Group
+      </a>
     </div>
-    <div class="admin-note">Full control of the platform is reserved for the admin</div>
-    <div class="contact-mail">Contact Mail: <a href="mailto:help.to.tz@gmail.com" style="color:#00ffff">help.to.tz@gmail.com</a></div>
+    
+    <div class="admin-note">
+      <i class="fas fa-shield-alt"></i> Full administrative control reserved
+    </div>
+    <div class="contact-mail">
+      <i class="fas fa-envelope"></i> Contact: <a href="mailto:help.to.tz@gmail.com">help.to.tz@gmail.com</a>
+    </div>
   </div>
 
-  <div id="rules-section">
-    <h2>Rules and Regulations</h2>
+  <div class="card fade-in" id="rules-section">
+    <h2><i class="fas fa-gavel"></i> Community Guidelines</h2>
     <ul>
-      <li>Respect all members and their privacy.</li>
-      <li>Do not post inappropriate or offensive content.</li>
-      <li>Only admin can edit or delete notices.</li>
-      <li>Use voting responsibly — one vote per topic.</li>
-      <li>Do not spam in the chat group.</li>
-      <li>The server is a bit slow—please wait a moment after clicking any button.</li>
+      <li>Respect all members and maintain a positive environment</li>
+      <li>Absolutely no inappropriate or offensive content</li>
+      <li>Notice modifications are admin-restricted only</li>
+      <li>Exercise voting rights responsibly - one vote per topic</li>
+      <li>Keep chat discussions relevant and spam-free</li>
+      <li>Please be patient - server responses may take a moment</li>
+      <li>All data is encrypted for your privacy and security</li>
+      <li>Report any issues immediately to the admin</li>
     </ul>
-    <button class="back-btn" onclick="hideRules()">Back</button>
+    <button class="btn btn-back" onclick="hideRules()">
+      <i class="fas fa-arrow-left"></i> Back to Main
+    </button>
   </div>
 
   <script type="module">
@@ -215,7 +392,7 @@
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
       projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.firebasestorage.app",
+      storageBucket: "notice-8edc7.appspot.com",
       messagingSenderId: "948590141987",
       appId: "1:948590141987:web:a505eddb3dacaaa1f40796",
       measurementId: "G-BGXC3J55RD"
@@ -228,8 +405,10 @@
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is logged in
+        console.log("User logged in:", user.email);
       } else {
         // User is logged out
+        console.log("User logged out");
       }
     });
 
@@ -237,7 +416,7 @@
       signOut(auth).then(() => {
         window.location.reload();
       }).catch((error) => {
-        console.error(error);
+        console.error("Logout error:", error);
       });
     }
   </script>
@@ -246,12 +425,22 @@
     function showRules() {
       document.getElementById("main-section").style.display = "none";
       document.getElementById("rules-section").style.display = "block";
+      document.getElementById("rules-section").classList.add("fade-in");
     }
 
     function hideRules() {
       document.getElementById("rules-section").style.display = "none";
       document.getElementById("main-section").style.display = "block";
+      document.getElementById("main-section").classList.add("fade-in");
     }
+
+    // Add animation to elements on load
+    document.addEventListener('DOMContentLoaded', () => {
+      const elements = document.querySelectorAll('.card, .btn');
+      elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+      });
+    });
   </script>
 </body>
 </html>
