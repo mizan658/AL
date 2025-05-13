@@ -1,139 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Up - DIU Private Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0d1117;
-      --text: #ffffff;
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --border: rgba(255, 255, 255, 0.1);
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --background: #0f172a;
+      --surface: #1e293b;
+      --text: #f8fafc;
+      --error: #ef4444;
+      --border-radius: 12px;
     }
-
-    body.light {
-      --bg: #f1f1f1;
-      --text: #1a1a1a;
-      --card-bg: #ffffff;
-      --border: #dddddd;
-    }
-
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
+    
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
+      background: var(--background);
       color: var(--text);
+      font-family: 'Inter', sans-serif;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
+      padding: 24px;
+      line-height: 1.5;
     }
-
+    
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 40px;
-      width: 90%;
+      background: var(--surface);
+      width: 100%;
       max-width: 420px;
+      padding: 40px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       text-align: center;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      transition: background 0.3s, border 0.3s;
     }
-
-    .card h1 {
+    
+    .logo {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
       font-size: 24px;
-      margin-bottom: 10px;
-      font-weight: 600;
     }
-
-    .card small {
+    
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
       font-size: 14px;
-      color: gray;
+      margin-bottom: 32px;
     }
-
+    
     button {
-      margin-top: 30px;
-      background: #00bfff;
-      color: #000;
+      background: var(--primary);
+      color: white;
       padding: 12px 24px;
-      font-size: 16px;
       border: none;
-      border-radius: 10px;
+      border-radius: var(--border-radius);
       cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 15px;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      transition: all 0.2s ease;
     }
-
+    
     button:hover {
-      background: #007bff;
-      transform: scale(1.03);
+      background: var(--primary-hover);
+      transform: translateY(-1px);
     }
-
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .google-icon {
+      width: 18px;
+      height: 18px;
+    }
+    
     .error {
-      color: #ff4d4d;
+      color: var(--error);
+      font-size: 14px;
       margin-top: 20px;
-      font-size: 14px;
-    }
-
-    .toggle-theme {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: 2px solid var(--border);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .loader {
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 6px;
       display: none;
-      margin-top: 20px;
     }
-
-    .loader.show {
-      display: inline-block;
+    
+    .footer {
+      margin-top: 32px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    
+    .footer a {
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .footer a:hover {
+      color: var(--primary);
     }
   </style>
 </head>
 <body>
-  <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
-
   <div class="card">
-    <h1>Sign Up with Google</h1>
-    <small>Only @diu.edu.bd email is allowed</small>
+    <div class="logo">DIU</div>
+    <h1>DIU Private Portal</h1>
+    <p class="subtitle">Sign up with your DIU email to access university resources</p>
+    
     <button id="googleSignInBtn">
-      <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_jzq0q0lz.json" background="transparent" speed="1" style="width: 30px; height: 30px;" loop autoplay></lottie-player>
-      Sign Up
+      <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+        <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/>
+      </svg>
+      Sign Up with Google
     </button>
-    <div class="loader" id="loader">
-      <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_usmfx6bp.json" background="transparent" speed="1" style="width: 50px; height: 50px;" loop autoplay></lottie-player>
-    </div>
+    
     <p class="error" id="errorMsg"></p>
+    
+    <p class="footer">
+      By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+    </p>
   </div>
 
   <script type="module">
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
@@ -144,48 +164,35 @@
       measurementId: "G-DSM883VQPT"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
 
-    const signInBtn = document.getElementById("googleSignInBtn");
-    const errorMsg = document.getElementById("errorMsg");
-    const loader = document.getElementById("loader");
-
-    signInBtn.addEventListener("click", () => {
-      errorMsg.textContent = "";
-      loader.classList.add("show");
-
+    // Google Sign-In Logic
+    document.getElementById("googleSignInBtn").addEventListener("click", () => {
+      const errorElement = document.getElementById("errorMsg");
+      errorElement.style.display = "none";
+      
       signInWithPopup(auth, provider)
-        .then(async (result) => {
+        .then((result) => {
           const user = result.user;
           if (user.email.endsWith("@diu.edu.bd")) {
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, {
-              name: user.displayName,
-              email: user.email,
-              uid: user.uid,
-              photoURL: user.photoURL,
-              createdAt: new Date().toISOString()
-            });
+            // Redirect to profile page
             window.location.href = "profile.html";
           } else {
-            await signOut(auth);
-            loader.classList.remove("show");
-            errorMsg.textContent = "Only @diu.edu.bd emails are allowed.";
+            // Not a DIU email
+            signOut(auth);
+            errorElement.textContent = "Only @diu.edu.bd email addresses are allowed.";
+            errorElement.style.display = "block";
           }
         })
         .catch((error) => {
-          console.error("Sign-in error:", error);
-          loader.classList.remove("show");
-          errorMsg.textContent = "Sign-in failed. Please try again.";
+          console.error(error);
+          errorElement.textContent = "Error signing in. Please try again.";
+          errorElement.style.display = "block";
         });
     });
-
-    window.toggleTheme = () => {
-      document.body.classList.toggle("light");
-    };
   </script>
 </body>
 </html>
