@@ -4,107 +4,234 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notice Board</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --dark-color: #1a1a2e;
+      --light-color: #f8f9fa;
+      --success-color: #4cc9f0;
+      --danger-color: #f72585;
+      --warning-color: #f8961e;
+      --info-color: #4895ef;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
+      background-color: #f5f7fa;
+      color: #333;
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.6;
       margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 20px;
-      animation: fadeIn 1s ease-in-out;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: var(--box-shadow);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
     }
 
     #notices {
-      margin-top: 30px;
-      animation: fadeIn 2s ease-in-out;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
     }
 
     .notice {
-      border: 1px solid #444;
-      padding: 15px;
-      margin: 10px auto;
-      width: 100%;
-      max-width: 600px;
-      background-color: #222;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border-radius: 10px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      border-left: 5px solid var(--primary-color);
+      position: relative;
+      overflow: hidden;
     }
 
     .notice:hover {
-      transform: scale(1.02);
-      box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .notice h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+      font-weight: 500;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .notice p {
+      color: #555;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .timestamp {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .timestamp i {
+      margin-right: 5px;
+    }
+
+    .notice-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
     }
 
     button {
-      margin: 8px 5px;
-      padding: 10px 15px;
+      padding: 10px 20px;
       border: none;
-      background-color: #333;
-      color: white;
+      border-radius: var(--border-radius);
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      border-radius: 5px;
-      font-size: 16px;
+      transition: var(--transition);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    button:hover {
-      background-color: #555;
+    button i {
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #d1145a;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: #e07e0e;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #3ab0d6;
     }
 
     input, textarea {
       width: 100%;
-      padding: 12px;
+      padding: 12px 15px;
       margin: 8px 0;
-      background: #111;
-      border: 1px solid #444;
-      color: white;
-      border-radius: 5px;
-      font-size: 16px;
+      background: white;
+      border: 1px solid #ddd;
+      color: #333;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
     }
 
     input:focus, textarea:focus {
-      background-color: #333;
+      border-color: var(--primary-color);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
     }
 
     #editorPanel {
+      background-color: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin: 30px 0;
       display: none;
-      animation: slideIn 1s ease-out;
     }
 
     #adminPanel {
-      animation: fadeIn 1.5s ease-in-out;
+      background-color: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin: 30px 0;
+      text-align: center;
     }
 
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    @keyframes slideIn {
-      0% { transform: translateY(-50px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-
-    .timestamp {
-      font-size: 12px;
-      color: #bbb;
+    .form-title {
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: 500;
     }
 
     #loadingSpinner {
       display: none;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
+      border: 4px solid rgba(67, 97, 238, 0.1);
+      border-top: 4px solid var(--primary-color);
       border-radius: 50%;
       width: 40px;
       height: 40px;
-      animation: spin 2s linear infinite;
-      margin: 20px auto;
+      animation: spin 1s linear infinite;
+      margin: 40px auto;
     }
 
     @keyframes spin {
@@ -113,28 +240,120 @@
     }
 
     footer {
-      margin-top: 40px;
-      font-size: 14px;
+      background-color: var(--dark-color);
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      margin-top: 50px;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
 
-    @media (max-width: 600px) {
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .home-link {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 25px;
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+    }
+
+    .home-link:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .auth-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .logout-btn {
+      background-color: transparent;
+      color: var(--danger-color);
+      border: 1px solid var(--danger-color);
+    }
+
+    .logout-btn:hover {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      #notices {
+        grid-template-columns: 1fr;
+      }
+
       h1 {
-        font-size: 24px;
+        font-size: 2rem;
       }
 
-      .notice {
-        padding: 12px;
+      .container {
+        padding: 15px;
       }
 
-      button {
-        font-size: 14px;
-        padding: 8px 12px;
+      .home-link {
+        padding: 10px 15px;
+        font-size: 0.9rem;
       }
+    }
 
-      input, textarea {
-        font-size: 14px;
-        padding: 10px;
-      }
+    /* Animation classes */
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .slide-up {
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      0% { transform: translateY(20px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
   </style>
   <script type="module">
@@ -168,6 +387,7 @@
     const loadingSpinner = document.getElementById("loadingSpinner");
     const noticeForm = document.getElementById("noticeForm");
     const noticesDiv = document.getElementById("notices");
+    const userInfo = document.getElementById("userInfo");
 
     loginBtn.onclick = async () => {
       const provider = new GoogleAuthProvider();
@@ -178,8 +398,8 @@
           editorPanel.style.display = "block";
           adminPanel.style.display = "none";
         } else {
-          alert("⛔ Access denied. only admin can login.");
-          signOut(auth);
+          alert("⛔ Access denied. Only authorized administrators can access this panel.");
+          await signOut(auth);
         }
       } catch (error) {
         alert("❌ Login failed: " + error.message);
@@ -191,46 +411,67 @@
     async function loadNotices() {
       loadingSpinner.style.display = "block";
       noticesDiv.innerHTML = "";
-      const q = query(collection(db, "notices"), orderBy("timestamp", "desc")); // NEWEST FIRST
+      const q = query(collection(db, "notices"), orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "notice";
-        const date = new Date(data.timestamp.seconds * 1000).toLocaleString();
-        div.innerHTML =
-          `<h3 contenteditable="false">${data.title}</h3>
-          <p contenteditable="false">${data.body}</p>
-          <p class="timestamp">Published on: ${date}</p>
-          ${allowedAdmins.includes(auth.currentUser?.email) ?
-            `<button onclick="deleteNotice('${docSnap.id}')">Delete</button>
-             <button onclick="editNotice('${docSnap.id}', this)">Edit</button>` :
-            `<p>Only admin can edit and delete notices.</p>`}
+      
+      if (querySnapshot.empty) {
+        noticesDiv.innerHTML = `
+          <div class="empty-state slide-up" style="grid-column: 1 / -1">
+            <i class="fas fa-bell-slash"></i>
+            <h3>No Notices Available</h3>
+            <p>There are currently no notices posted. Check back later or add a new notice if you're an admin.</p>
+          </div>
+        `;
+      } else {
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const div = document.createElement("div");
+          div.className = "notice fade-in";
+          const date = new Date(data.timestamp.seconds * 1000).toLocaleString();
+          
+          div.innerHTML = `
+            <h3 contenteditable="false">${data.title}</h3>
+            <p contenteditable="false">${data.body}</p>
+            <p class="timestamp"><i class="far fa-clock"></i> Published on: ${date}</p>
+            ${allowedAdmins.includes(auth.currentUser?.email) ? 
+              `<div class="notice-actions">
+                <button class="btn-danger" onclick="deleteNotice('${docSnap.id}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                <button class="btn-warning" onclick="editNotice('${docSnap.id}', this)"><i class="fas fa-edit"></i> Edit</button>
+              </div>` : 
+              ''}
           `;
-        noticesDiv.appendChild(div);
-      });
+          noticesDiv.appendChild(div);
+        });
+      }
       loadingSpinner.style.display = "none";
     }
 
     window.deleteNotice = async (id) => {
+      if (!confirm("Are you sure you want to delete this notice?")) return;
       await deleteDoc(doc(db, "notices", id));
       loadNotices();
     };
 
     window.editNotice = (id, btn) => {
-      const notice = btn.parentElement;
+      const notice = btn.closest('.notice');
       const h3 = notice.querySelector("h3");
       const p = notice.querySelector("p");
-      if (btn.textContent === "Edit") {
+      
+      if (btn.innerHTML.includes("Edit")) {
         h3.contentEditable = p.contentEditable = true;
-        btn.textContent = "Save";
+        h3.focus();
+        btn.innerHTML = '<i class="fas fa-save"></i> Save';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-success');
       } else {
         h3.contentEditable = p.contentEditable = false;
         updateDoc(doc(db, "notices", id), {
           title: h3.textContent,
           body: p.textContent
         });
-        btn.textContent = "Edit";
+        btn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-warning');
       }
     };
 
@@ -238,13 +479,19 @@
       e.preventDefault();
       const title = e.target.title.value.trim();
       const body = e.target.body.value.trim();
-      if (!title || !body) return alert("Please fill out both fields.");
+      
+      if (!title || !body) {
+        alert("Please fill out both fields.");
+        return;
+      }
+      
       const timestamp = new Date();
       await addDoc(collection(db, "notices"), {
         title,
         body,
         timestamp
       });
+      
       e.target.reset();
       loadNotices();
     };
@@ -253,36 +500,71 @@
       if (user && allowedAdmins.includes(user.email)) {
         editorPanel.style.display = "block";
         adminPanel.style.display = "none";
+        
+        // Update user info display
+        userInfo.innerHTML = `
+          <img src="${user.photoURL || 'https://via.placeholder.com/40'}" alt="User" class="user-avatar">
+          <span>Welcome, ${user.displayName || 'Admin'}</span>
+        `;
       } else {
         editorPanel.style.display = "none";
         adminPanel.style.display = "block";
+        userInfo.innerHTML = '';
       }
       loadNotices();
     });
   </script>
 </head>
 <body>
-  <h1>📢 Notices</h1>
-  <div id="notices"></div>
-  <div id="loadingSpinner"></div>
-  <div id="adminPanel">
-    <p>Admin login required</p>
-    <button id="loginBtn">Login with Google</button>
-  </div>
-  <div id="editorPanel">
-    <button id="logoutBtn">Logout</button>
-    <form id="noticeForm">
-      <input type="text" name="title" placeholder="Notice Title" required /><br />
-      <textarea name="body" placeholder="Notice Body" required></textarea><br />
-      <button type="submit">Add Notice</button>
-    </form>
-  </div>
+  <a href="https://mizan658.github.io/AL/index.html" class="home-link">
+    <i class="fas fa-home"></i> Home
+  </a>
+
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-bullhorn"></i> Notice Board</h1>
+      <p class="subtitle">Stay updated with the latest announcements</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="notices"></div>
+    <div id="loadingSpinner"></div>
+
+    <div id="adminPanel">
+      <h2 class="form-title">Admin Portal</h2>
+      <p>Please sign in to manage notices</p>
+      <button id="loginBtn" class="btn-primary">
+        <i class="fab fa-google"></i> Login with Google
+      </button>
+    </div>
+
+    <div id="editorPanel">
+      <div class="auth-info" id="userInfo"></div>
+      <button id="logoutBtn" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+      
+      <form id="noticeForm">
+        <h2 class="form-title">Create New Notice</h2>
+        <div class="form-group">
+          <input type="text" name="title" placeholder="Notice Title" required />
+        </div>
+        <div class="form-group">
+          <textarea name="body" placeholder="Notice Content" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-plus-circle"></i> Add Notice
+        </button>
+      </form>
+    </div>
+  </main>
+
   <footer>
-    <p>Contact Mail: help.to.tz@gmail.com</p>
-    <a href="https://mizan658.github.io/AL/index.html"
-       style="position: fixed; top: 20px; left: 20px; background-color: #00bfff; color: black; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-      Home
-    </a>
+    <div class="container footer-content">
+      <p>Contact us at: help.to.tz@gmail.com</p>
+      <p>&copy; ${new Date().getFullYear()} Notice Board. All rights reserved.</p>
+    </div>
   </footer>
 </body>
 </html>
