@@ -1,79 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Sign Up - DIU Private Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background: black;
-      color: white;
-      font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
+      background: #0d1117;
+      color: #ffffff;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
     }
-    button {
-      background: #00bfff;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 40px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
+
+    .card h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .card small {
+      font-size: 14px;
+      color: #aaaaaa;
+    }
+
+    button {
+      margin-top: 30px;
+      background: #00bfff;
+      color: #000;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
     button:hover {
       background: #007bff;
+      transform: scale(1.03);
     }
+
     .error {
-      color: red;
+      color: #ff4d4d;
       margin-top: 20px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <h1>Sign Up with Google (DIU Email Only)</h1>
-  <button id="googleSignInBtn">Sign Up with Google</button>
-  <p class="error" id="errorMsg"></p>
+  <div class="card">
+    <h1>Sign Up with Google</h1>
+    <small>Only @diu.edu.bd email is allowed</small>
+    <button id="googleSignInBtn">Sign Up with Google</button>
+    <p class="error" id="errorMsg"></p>
+  </div>
 
   <script type="module">
-    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
-    // Firebase config directly added here
     const firebaseConfig = {
       apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
       authDomain: "notice-8edc7.firebaseapp.com",
       projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.firebasestorage.app",
+      storageBucket: "notice-8edc7.appspot.com",
       messagingSenderId: "948590141987",
       appId: "1:948590141987:web:a9af8252e98f2933f40796",
       measurementId: "G-DSM883VQPT"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Google Sign-In Logic
     document.getElementById("googleSignInBtn").addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
           if (user.email.endsWith("@diu.edu.bd")) {
-            // Redirect to profile page
             window.location.href = "profile.html";
           } else {
-            // Not a DIU email
             signOut(auth);
-            document.getElementById("errorMsg").textContent = "Only DIU emails are allowed.";
+            document.getElementById("errorMsg").textContent = "Only @diu.edu.bd emails are allowed.";
           }
         })
         .catch((error) => {
-          console.error(error);
-          document.getElementById("errorMsg").textContent = "Error signing in. Try again.";
+          console.error("Sign-in error:", error);
+          document.getElementById("errorMsg").textContent = "Sign-in failed. Please try again.";
         });
     });
   </script>
