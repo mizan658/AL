@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DIU Group Chat</title>
+  <title>Private Group Chat</title>
   <style>
     * {
       box-sizing: border-box;
@@ -413,101 +414,11 @@ body.dark-mode #themeToggle {
   color: #e0e0e0;
 }
 
-/* Reaction styles */
-.reactions {
-  display: flex;
-  gap: 5px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.reaction {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 2px 6px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  transition: all 0.2s;
-}
-
-.reaction:hover {
-  background: rgba(0, 0, 0, 0.15);
-}
-
-.reaction-adder {
-  opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.message:hover .reaction-adder {
-  opacity: 1;
-}
-
-.reaction-adder:hover {
-  color: #0084ff;
-}
-
-body.dark-mode .reaction {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-}
-
-body.dark-mode .reaction:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-body.dark-mode .reaction-adder {
-  color: #b0b0b0;
-}
-
-body.dark-mode .reaction-adder:hover {
-  color: #0084ff;
-}
-
-/* Reaction picker styles */
-.reaction-picker {
-  position: absolute;
-  background: white;
-  border-radius: 20px;
-  padding: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  display: flex;
-  gap: 5px;
-  z-index: 100;
-}
-
-.reaction-option {
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 50%;
-}
-
-.reaction-option:hover {
-  background: rgba(0, 0, 0, 0.1);
-  transform: scale(1.2);
-}
-
-body.dark-mode .reaction-picker {
-  background: #2d2d2d;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-}
-
-body.dark-mode .reaction-option:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
   </style>
 </head>
 <body>
   <header>
-    <div>💬 DIU Group Chat</div>
+    <div>💬 Private Group Chat</div>
     <div style="display: flex; align-items: center;">
       <button id="themeToggle">🌓</button>
       <div id="logout" style="display:none;">
@@ -518,11 +429,11 @@ body.dark-mode .reaction-option:hover {
 
   <div id="login">
     <div class="login-container">
-      <h2>Welcome to DIU Group Chat</h2>
+      <h2>Welcome to Private Group Chat</h2>
       <p style="margin-bottom: 25px; color: #666;">Sign in with your DIU email to join the conversation</p>
       <div class="login-buttons">
-        <button id="loginUserBtn">Login as User</button>
-        <button id="loginAdminBtn">Login as Admin</button>
+        <button id="loginUserBtn">Login With DIU Mail</button>
+        <button id="loginAdminBtn">Admin Panal</button>
       </div>
     </div>
   </div>
@@ -539,14 +450,14 @@ body.dark-mode .reaction-option:hover {
   </div>
 
   <div id="adminPanel">
-    <h3>Admin Controls</h3>
+    <h3>Admin Panal</h3>
     <div id="userList"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -647,144 +558,20 @@ body.dark-mode .reaction-option:hover {
           const msg = doc.data();
           const msgEl = document.createElement("div");
           msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
-          msgEl.dataset.id = doc.id;
           
           const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
-          
-          // Create reactions display
-          let reactionsHtml = '';
-          if (msg.reactions) {
-            const reactionCounts = {};
-            msg.reactions.forEach(r => {
-              reactionCounts[r.emoji] = (reactionCounts[r.emoji] || 0) + 1;
-            });
-            
-            reactionsHtml = `<div class="reactions">`;
-            for (const [emoji, count] of Object.entries(reactionCounts)) {
-              const hasReacted = msg.reactions.some(r => r.emoji === emoji && r.userId === currentUser.uid);
-              reactionsHtml += `
-                <div class="reaction ${hasReacted ? 'user-reacted' : ''}" data-emoji="${emoji}">
-                  ${emoji} ${count}
-                </div>
-              `;
-            }
-            reactionsHtml += `</div>`;
-          }
-          
           msgEl.innerHTML = `
             <div class="sender-name">${msg.sender.split('@')[0]}</div>
             <div>${msg.text}</div>
-            <div class="message-info">
-              <span>${time}</span>
-              <span class="reaction-adder">+ Add reaction</span>
-            </div>
-            ${reactionsHtml}
+            <div class="message-info">${time}</div>
           `;
-          
           messagesDiv.appendChild(msgEl);
-          
-          // Add reaction handlers
-          const reactionAdder = msgEl.querySelector('.reaction-adder');
-          if (reactionAdder) {
-            reactionAdder.addEventListener('click', (e) => {
-              e.stopPropagation();
-              showReactionPicker(msgEl, doc.id);
-            });
-          }
-          
-          const reactions = msgEl.querySelectorAll('.reaction');
-          reactions.forEach(reaction => {
-            reaction.addEventListener('click', (e) => {
-              e.stopPropagation();
-              toggleReaction(doc.id, reaction.dataset.emoji);
-            });
-          });
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
 
       if (isAdmin) loadAdminControls();
     });
-
-    function showReactionPicker(messageEl, messageId) {
-      // Remove any existing picker
-      const existingPicker = document.querySelector('.reaction-picker');
-      if (existingPicker) existingPicker.remove();
-      
-      const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-      const picker = document.createElement('div');
-      picker.className = 'reaction-picker';
-      
-      emojis.forEach(emoji => {
-        const option = document.createElement('div');
-        option.className = 'reaction-option';
-        option.textContent = emoji;
-        option.addEventListener('click', (e) => {
-          e.stopPropagation();
-          addReaction(messageId, emoji);
-          picker.remove();
-        });
-        picker.appendChild(option);
-      });
-      
-      const rect = messageEl.getBoundingClientRect();
-      picker.style.left = `${rect.left}px`;
-      picker.style.top = `${rect.top - 50}px`;
-      
-      document.body.appendChild(picker);
-      
-      // Close picker when clicking elsewhere
-      const clickHandler = (e) => {
-        if (!picker.contains(e.target)) {
-          picker.remove();
-          document.removeEventListener('click', clickHandler);
-        }
-      };
-      setTimeout(() => document.addEventListener('click', clickHandler), 0);
-    }
-    
-    async function addReaction(messageId, emoji) {
-      const messageRef = doc(db, "messages", messageId);
-      await updateDoc(messageRef, {
-        reactions: arrayUnion({
-          emoji,
-          userId: currentUser.uid,
-          timestamp: serverTimestamp()
-        })
-      });
-    }
-    
-    async function toggleReaction(messageId, emoji) {
-      const messageRef = doc(db, "messages", messageId);
-      const q = query(collection(db, "messages"), where("__name__", "==", messageId));
-      const snapshot = await getDocs(q);
-      
-      if (snapshot.empty) return;
-      
-      const messageData = snapshot.docs[0].data();
-      if (!messageData.reactions) return;
-      
-      // Find if user already reacted with this emoji
-      const userReaction = messageData.reactions.find(
-        r => r.emoji === emoji && r.userId === currentUser.uid
-      );
-      
-      if (userReaction) {
-        // Remove reaction
-        await updateDoc(messageRef, {
-          reactions: arrayRemove(userReaction)
-        });
-      } else {
-        // Add reaction
-        await updateDoc(messageRef, {
-          reactions: arrayUnion({
-            emoji,
-            userId: currentUser.uid,
-            timestamp: serverTimestamp()
-          })
-        });
-      }
-    }
 
     sendBtn.onclick = async () => {
       const text = messageInput.value.trim();
@@ -803,8 +590,7 @@ body.dark-mode .reaction-option:hover {
       await addDoc(collection(db, "messages"), {
         text,
         sender: currentUser.email,
-        timestamp: serverTimestamp(),
-        reactions: []
+        timestamp: serverTimestamp()
       });
 
       messageInput.value = "";
