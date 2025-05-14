@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DIU Group Chat</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -14,6 +18,7 @@
       flex-direction: column;
       height: 100vh;
     }
+
     header {
       background-color: #0084ff;
       color: white;
@@ -23,12 +28,14 @@
       justify-content: space-between;
       align-items: center;
     }
+
     #messages {
       flex: 1;
       overflow-y: auto;
       padding: 20px;
       background-color: #fff;
     }
+
     .message {
       max-width: 70%;
       margin: 8px 0;
@@ -38,23 +45,27 @@
       position: relative;
       word-wrap: break-word;
     }
+
     .own {
       margin-left: auto;
       background-color: #0084ff;
       color: white;
     }
+
     .message span {
       display: block;
       font-size: 0.75em;
       opacity: 0.7;
       margin-top: 5px;
     }
+
     #inputArea {
       display: flex;
       padding: 15px;
       border-top: 1px solid #ccc;
       background: #fff;
     }
+
     #messageInput {
       flex: 1;
       padding: 12px 16px;
@@ -62,6 +73,7 @@
       border: 1px solid #ccc;
       outline: none;
     }
+
     #sendBtn {
       padding: 12px 20px;
       margin-left: 10px;
@@ -71,13 +83,16 @@
       border-radius: 25px;
       cursor: pointer;
     }
+
     #login, #logout {
       text-align: center;
       padding: 20px;
     }
+
     button {
       cursor: pointer;
     }
+
     #adminPanel {
       display: none;
       background: #fff;
@@ -86,6 +101,7 @@
       overflow-y: auto;
       max-height: 200px;
     }
+
     .banButton {
       margin-left: 5px;
       padding: 3px 8px;
@@ -94,15 +110,23 @@
       border-radius: 12px;
       background: #fce4e4;
     }
+
     @media (max-width: 600px) {
-      .message { max-width: 90%; }
-      #inputArea { flex-direction: column; }
+      .message {
+        max-width: 90%;
+      }
+
+      #inputArea {
+        flex-direction: column;
+      }
+
       #sendBtn {
         margin-left: 0;
         margin-top: 10px;
         width: 100%;
       }
     }
+
     .login-buttons button {
       padding: 10px 20px;
       margin: 5px;
@@ -110,35 +134,13 @@
       border: none;
       color: white;
     }
-    #loginUserBtn { background-color: #0084ff; }
-    #loginAdminBtn { background-color: #ff5722; }
 
-    #namePrompt {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      z-index: 10;
+    #loginUserBtn {
+      background-color: #0084ff;
     }
 
-    #namePrompt input {
-      padding: 10px;
-      width: 100%;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    #namePrompt button {
-      padding: 10px 20px;
-      border-radius: 8px;
-      background: #0084ff;
-      border: none;
-      color: white;
+    #loginAdminBtn {
+      background-color: #ff5722;
     }
   </style>
 </head>
@@ -158,17 +160,13 @@
     </div>
   </div>
 
-  <div id="namePrompt" style="display: none;">
-    <h3>Choose your display name</h3>
-    <input type="text" id="displayNameInput" placeholder="Enter display name" />
-    <button id="saveDisplayNameBtn">Save</button>
-  </div>
-
   <div id="messages" style="display: none;"></div>
+
   <div id="inputArea" style="display: none;">
     <input type="text" id="messageInput" placeholder="Type your message..." />
     <button id="sendBtn">Send</button>
   </div>
+
   <div id="adminPanel">
     <h3>Admin Panel – Ban Users</h3>
     <div id="userList"></div>
@@ -177,7 +175,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, setDoc, doc, getDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -194,8 +192,8 @@
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
+    let loginMode = "user"; // default
     let currentUser = null;
-    let displayName = "";
     let isAdmin = false;
 
     const loginUserBtn = document.getElementById("loginUserBtn");
@@ -209,24 +207,19 @@
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
-    const namePrompt = document.getElementById("namePrompt");
-    const displayNameInput = document.getElementById("displayNameInput");
-    const saveDisplayNameBtn = document.getElementById("saveDisplayNameBtn");
 
-    // Store loginMode in localStorage
     loginUserBtn.onclick = async () => {
-      localStorage.setItem("loginMode", "user");
+      loginMode = "user";
       await signInWithPopup(auth, provider);
     };
 
     loginAdminBtn.onclick = async () => {
-      localStorage.setItem("loginMode", "admin");
+      loginMode = "admin";
       await signInWithPopup(auth, provider);
     };
 
     logoutBtn.onclick = async () => {
       await signOut(auth);
-      localStorage.removeItem("loginMode");
       location.reload();
     };
 
@@ -238,9 +231,9 @@
       }
 
       const adminEmail = "252-35-007@diu.edu.bd";
-      const loginMode = localStorage.getItem("loginMode") || "user";
       currentUser = user;
 
+      // Determine admin rights based on login method
       if (loginMode === "admin") {
         if (user.email !== adminEmail) {
           alert("Only the authorized admin can login this way.");
@@ -252,26 +245,6 @@
         isAdmin = false;
       }
 
-      const userDocRef = doc(db, "users", currentUser.email);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        namePrompt.style.display = "block";
-        saveDisplayNameBtn.onclick = async () => {
-          const name = displayNameInput.value.trim();
-          if (!name) return alert("Please enter a name.");
-          await setDoc(userDocRef, { displayName: name });
-          displayName = name;
-          namePrompt.style.display = "none";
-          initChat();
-        };
-      } else {
-        displayName = userDoc.data().displayName;
-        initChat();
-      }
-    });
-
-    function initChat() {
       loginDiv.style.display = "none";
       logoutDiv.style.display = "block";
       messagesDiv.style.display = "block";
@@ -287,14 +260,14 @@
           msgEl.className = "message";
           if (msg.sender === currentUser.email) msgEl.classList.add("own");
           const time = msg.timestamp?.toDate().toLocaleTimeString() || "sending...";
-          msgEl.innerHTML = `<strong>${msg.name}</strong><br>${msg.text}<span>${time}</span>`;
+          msgEl.innerHTML = `<strong>${msg.sender}</strong><br>${msg.text}<span>${time}</span>`;
           messagesDiv.appendChild(msgEl);
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
 
       if (isAdmin) loadAdminControls();
-    }
+    });
 
     sendBtn.onclick = async () => {
       const text = messageInput.value.trim();
@@ -313,7 +286,6 @@
       await addDoc(collection(db, "messages"), {
         text,
         sender: currentUser.email,
-        name: displayName,
         timestamp: serverTimestamp()
       });
 
@@ -326,21 +298,19 @@
       snapshot.forEach(doc => users.add(doc.data().sender));
 
       userList.innerHTML = "";
-      for (const email of users) {
-        if (email === "252-35-007@diu.edu.bd") continue;
-        const userDoc = await getDoc(doc(db, "users", email));
-        const name = userDoc.exists() ? userDoc.data().displayName : email;
-        const div = document.createElement("div");
-        div.innerHTML = `<strong>${name}</strong>`;
+      users.forEach(email => {
+        if (email === "252-35-007@diu.edu.bd") return;
+        const span = document.createElement("div");
+        span.innerHTML = `<strong>${email}</strong>`;
         ["10min", "1hr", "1d", "1w"].forEach(duration => {
           const btn = document.createElement("button");
           btn.className = "banButton";
           btn.textContent = duration;
           btn.onclick = () => banUser(email, duration);
-          div.appendChild(btn);
+          span.appendChild(btn);
         });
-        userList.appendChild(div);
-      }
+        userList.appendChild(span);
+      });
     }
 
     async function banUser(email, duration) {
