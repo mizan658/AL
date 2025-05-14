@@ -2,47 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Group Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIU Group Chat</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f0f2f5; }
-    #app { display: flex; flex-direction: column; height: 100vh; }
-    #messages { flex: 1; padding: 10px; overflow-y: auto; background: white; }
-    .message { margin-bottom: 10px; padding: 8px; border-radius: 5px; background: #e4e6eb; max-width: 60%; }
-    .own { background: #0084ff; color: white; align-self: flex-end; }
-    #inputArea { display: flex; padding: 10px; background: #fff; }
-    #messageInput { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 20px; }
-    #sendBtn { margin-left: 10px; padding: 8px 16px; background: #0084ff; color: white; border: none; border-radius: 20px; cursor: pointer; }
-    #login { padding: 20px; text-align: center; }
-    #adminPanel { padding: 10px; background: #ffe5e5; display: none; }
-    .banButton { margin: 0 5px; padding: 5px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+    #login, #logout, #adminPanel {
+      padding: 15px;
+      text-align: center;
+    }
+    #messages {
+      display: none;
+      flex-direction: column;
+      height: 80vh;
+      overflow-y: scroll;
+      padding: 10px;
+      background: white;
+      margin: 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .message {
+      padding: 8px 10px;
+      margin: 5px;
+      background: #e4e6eb;
+      border-radius: 8px;
+      max-width: 60%;
+    }
+    .own {
+      align-self: flex-end;
+      background: #0084ff;
+      color: white;
+    }
+    #inputArea {
+      display: none;
+      padding: 10px 15px;
+      display: flex;
+      gap: 10px;
+    }
+    #inputArea input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+    }
+    #inputArea button {
+      padding: 10px 20px;
+      border-radius: 20px;
+      background: #0084ff;
+      color: white;
+      border: none;
+    }
+    .banButton {
+      margin-left: 5px;
+      padding: 2px 5px;
+      font-size: 0.8em;
+    }
+    #adminPanel {
+      display: none;
+      text-align: left;
+      padding: 10px 20px;
+      background: #fff0f0;
+      border: 1px solid red;
+      margin: 10px 15px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-  <div id="app">
-    <div id="login">
-      <button id="loginBtn">Sign in with Google</button>
-    </div>
-
-    <div id="adminPanel">
-      <strong>Admin Controls:</strong> <span id="userList"></span>
-    </div>
-
-    <div id="messages" style="display:none;"></div>
-
-    <div id="inputArea" style="display:none;">
-      <input type="text" id="messageInput" placeholder="Type a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
+  <div id="login">
+    <h2>DIU Group Chat</h2>
+    <button id="loginBtn">Sign in with Google</button>
   </div>
 
-  <!-- Firebase SDK -->
+  <div id="logout" style="display:none;">
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="inputArea">
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <div id="adminPanel">
+    <h3>Admin Panel – Ban Users</h3>
+    <div id="userList"></div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    // Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
       authDomain: "voting-app-2b276.firebaseapp.com",
@@ -64,6 +121,8 @@
     const messageInput = document.getElementById("messageInput");
     const sendBtn = document.getElementById("sendBtn");
     const loginDiv = document.getElementById("login");
+    const logoutDiv = document.getElementById("logout");
+    const logoutBtn = document.getElementById("logoutBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
 
@@ -71,7 +130,12 @@
     let isAdmin = false;
 
     loginBtn.onclick = async () => {
-      const result = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
+    };
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      location.reload();
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -87,6 +151,7 @@
       loginDiv.style.display = "none";
       messagesDiv.style.display = "flex";
       inputArea.style.display = "flex";
+      logoutDiv.style.display = "block";
       if (isAdmin) adminPanel.style.display = "block";
 
       const q = query(collection(db, "messages"), orderBy("timestamp"));
@@ -110,11 +175,12 @@
       const text = messageInput.value.trim();
       if (text === "") return;
 
-      const bans = await getDocs(collection(db, "bans"));
-      for (const ban of bans.docs) {
-        const b = ban.data();
-        if (b.email === currentUser.email && b.until > Date.now()) {
-          alert("You are suspended until " + new Date(b.until).toLocaleString());
+      const bansSnapshot = await getDocs(collection(db, "bans"));
+      const now = Date.now();
+      for (const docSnap of bansSnapshot.docs) {
+        const data = docSnap.data();
+        if (data.email === currentUser.email && data.until > now) {
+          alert("You're suspended until " + new Date(data.until).toLocaleString());
           return;
         }
       }
@@ -130,8 +196,7 @@
 
     async function loadAdminControls() {
       const users = new Set();
-      const q = query(collection(db, "messages"));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(query(collection(db, "messages")));
       snapshot.forEach(doc => users.add(doc.data().sender));
 
       userList.innerHTML = "";
