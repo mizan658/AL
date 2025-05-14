@@ -125,6 +125,22 @@
         width: 100%;
       }
     }
+
+    .login-buttons button {
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 25px;
+      border: none;
+      color: white;
+    }
+
+    #loginUserBtn {
+      background-color: #0084ff;
+    }
+
+    #loginAdminBtn {
+      background-color: #ff5722;
+    }
   </style>
 </head>
 <body>
@@ -137,7 +153,10 @@
 
   <div id="login">
     <h2>Sign in to join the group chat</h2>
-    <button id="loginBtn" style="padding: 10px 20px; background: #0084ff; color: white; border: none; border-radius: 25px;">Sign in with Google</button>
+    <div class="login-buttons">
+      <button id="loginUserBtn">Login as User</button>
+      <button id="loginAdminBtn">Login as Admin</button>
+    </div>
   </div>
 
   <div id="messages" style="display: none;"></div>
@@ -161,7 +180,7 @@
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
       authDomain: "voting-app-2b276.firebaseapp.com",
       projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.firebasestorage.app",
+      storageBucket: "voting-app-2b276.appspot.com",
       messagingSenderId: "699531517654",
       appId: "1:699531517654:web:785702f843d21a85c17377",
       measurementId: "G-309D0KG6KL"
@@ -172,7 +191,12 @@
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
-    const loginBtn = document.getElementById("loginBtn");
+    let loginMode = "user"; // default
+    let currentUser = null;
+    let isAdmin = false;
+
+    const loginUserBtn = document.getElementById("loginUserBtn");
+    const loginAdminBtn = document.getElementById("loginAdminBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const loginDiv = document.getElementById("login");
     const logoutDiv = document.getElementById("logout");
@@ -183,10 +207,13 @@
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
 
-    let currentUser = null;
-    let isAdmin = false;
+    loginUserBtn.onclick = async () => {
+      loginMode = "user";
+      await signInWithPopup(auth, provider);
+    };
 
-    loginBtn.onclick = async () => {
+    loginAdminBtn.onclick = async () => {
+      loginMode = "admin";
       await signInWithPopup(auth, provider);
     };
 
@@ -202,8 +229,20 @@
         return;
       }
 
+      const adminEmail = "252-35-007@diu.edu.bd";
       currentUser = user;
-      isAdmin = user.email === "252-35-007@diu.edu.bd";
+
+      // Determine admin rights based on login method
+      if (loginMode === "admin") {
+        if (user.email !== adminEmail) {
+          alert("Only the authorized admin can login this way.");
+          signOut(auth);
+          return;
+        }
+        isAdmin = true;
+      } else {
+        isAdmin = false;
+      }
 
       loginDiv.style.display = "none";
       logoutDiv.style.display = "block";
