@@ -2,220 +2,187 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DIU Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIU Chat Room</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #111;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #e5ddd5;
     }
-
-    #chatWindow {
-      width: 90%;
-      height: 400px;
-      background: #222;
-      overflow-y: scroll;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .message {
-      background: #333;
-      padding: 8px;
-      margin: 5px 0;
-      border-radius: 5px;
-      position: relative;
-    }
-
-    .input-area {
-      display: flex;
-      margin-top: 10px;
-      width: 90%;
-    }
-
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 5px 0 0 5px;
-      border: none;
-      outline: none;
-    }
-
-    button {
-      background: #25d366;
-      border: none;
-      color: white;
-      padding: 10px;
-      border-radius: 0 5px 5px 0;
-      cursor: pointer;
-    }
-
-    .reaction {
-      float: right;
-      cursor: pointer;
-    }
-
-    .delete {
-      float: right;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-
-    #chatHeader {
-      display: flex;
-      justify-content: space-between;
-      width: 90%;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    #loginSection {
+    #login {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
-
-    #loginBtn {
-      background-color: #4CAF50;
-      color: white;
-      padding: 20px 40px;
-      font-size: 18px;
-      cursor: pointer;
+    #chat {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background-color: #fff;
+    }
+    .message {
+      background: #dcf8c6;
+      padding: 8px;
+      margin: 5px;
       border-radius: 8px;
+      max-width: 70%;
+    }
+    #input-area {
+      display: flex;
+      padding: 10px;
+      background-color: #f0f0f0;
+    }
+    #input-area input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #input-area button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #128C7E;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    #status {
+      padding: 5px;
+      text-align: center;
+      font-size: 12px;
+      color: gray;
     }
   </style>
 </head>
 <body>
-  <div id="loginSection">
-    <button id="loginBtn">Login with DIU Email</button>
+
+<div id="login">
+  <button id="googleSignIn">Sign in with Google</button>
+</div>
+
+<div id="chat">
+  <div id="status">Loading...</div>
+  <div id="messages"></div>
+  <div id="input-area">
+    <input id="messageInput" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
   </div>
+</div>
 
-  <div id="chatSection" style="display:none;">
-    <div id="chatHeader">
-      <h2 id="welcomeMessage"></h2>
-      <button id="logoutBtn">Logout</button>
-    </div>
-    <div id="chatWindow"></div>
-    <div class="input-area">
-      <input id="messageInput" type="text" placeholder="Type a message" />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
+<script>
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
+    authDomain: "chat-88f0f.firebaseapp.com",
+    projectId: "chat-88f0f",
+    storageBucket: "chat-88f0f.appspot.com",
+    messagingSenderId: "146118641258",
+    appId: "1:146118641258:web:f311645f40c8fbcadbac13",
+    measurementId: "G-H7LPCPMMYM"
+  };
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
-      authDomain: "voting-app-2b276.firebaseapp.com",
-      projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.firebasestorage.app",
-      messagingSenderId: "699531517654",
-      appId: "1:699531517654:web:785702f843d21a85c17377",
-      measurementId: "G-309D0KG6KL"
-    };
+  const loginDiv = document.getElementById('login');
+  const chatDiv = document.getElementById('chat');
+  const status = document.getElementById('status');
+  const messagesDiv = document.getElementById('messages');
+  const input = document.getElementById('messageInput');
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getDatabase(app);
-    const analytics = getAnalytics(app);
+  let currentUser = null;
+  let typingTimeout;
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const messageInput = document.getElementById("messageInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const chatWindow = document.getElementById("chatWindow");
-    const welcomeMessage = document.getElementById("welcomeMessage");
+  document.getElementById('googleSignIn').onclick = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    if (!user.email.endsWith("@diu.edu.bd")) {
+      alert("Only @diu.edu.bd email allowed");
+      await auth.signOut();
+      return;
+    }
+    currentUser = user;
+    loginDiv.style.display = "none";
+    chatDiv.style.display = "flex";
+    updateStatus("You are online");
+    startChat();
+  };
 
-    let currentUser = null;
-    let isAdmin = false;
+  function updateStatus(text) {
+    status.textContent = text;
+  }
 
-    // Login button functionality
-    loginBtn.onclick = async () => {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const email = result.user.email;
-        if (!email.endsWith("@diu.edu.bd")) {
-          alert("Only @diu.edu.bd emails are allowed!");
-          await signOut(auth);
-          return;
-        }
-        location.reload(); // Reload after login to display chat section
-      } catch (error) {
-        console.error("Error during login:", error);
-      }
-    };
-
-    // Logout button functionality
-    logoutBtn.onclick = async () => {
-      await signOut(auth);
-      location.reload();
-    };
-
-    // On authentication state change
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith("@diu.edu.bd")) {
-        currentUser = user;
-        isAdmin = user.email === "252-35-007@diu.edu.bd"; // Set admin condition
-
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("chatSection").style.display = "block";
-        welcomeMessage.textContent = `Welcome, ${user.displayName}`;
-      }
+  function sendMessage() {
+    const text = input.value.trim();
+    if (text === "") return;
+    db.collection("messages").add({
+      name: currentUser.displayName,
+      text: text,
+      uid: currentUser.uid,
+      time: firebase.firestore.FieldValue.serverTimestamp()
     });
+    input.value = "";
+    db.collection("status").doc(currentUser.uid).set({ typing: false }, { merge: true });
+  }
 
-    // Send message button functionality
-    sendBtn.onclick = () => {
-      const msg = messageInput.value.trim();
-      if (!msg || !currentUser) return; // Do nothing if no message or user is not logged in
-      push(ref(db, "messages"), {
-        text: msg,
-        sender: currentUser.displayName,
-        uid: currentUser.uid,
-        timestamp: Date.now()
+  function startChat() {
+    // Load messages
+    db.collection("messages").orderBy("time")
+      .onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `<strong>${msg.name}</strong><br>${msg.text}`;
+          messagesDiv.appendChild(div);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
-      messageInput.value = ""; // Clear input field after sending
-    };
 
-    // Listen for new messages and update chat window in real-time
-    onChildAdded(ref(db, "messages"), (snapshot) => {
-      const data = snapshot.val();
-      const key = snapshot.key;
-      const div = document.createElement("div");
-      div.className = "message";
-      div.innerHTML = ` 
-        <strong>${data.sender}:</strong> ${data.text}
-        ${isAdmin ? `<span class="delete" data-key="${key}">🗑️</span>` : ''} 
-        <span class="reaction">💬</span>
-      `;
-
-      div.querySelector(".reaction").onclick = () => {
-        div.querySelector(".reaction").textContent = "❤️";
-      };
-
-      if (isAdmin && div.querySelector(".delete")) {
-        div.querySelector(".delete").onclick = () => {
-          remove(ref(db, `messages/${key}`));
-        };
-      }
-
-      chatWindow.appendChild(div);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
+    // Typing indicator
+    input.addEventListener("input", () => {
+      db.collection("status").doc(currentUser.uid).set({ typing: true }, { merge: true });
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        db.collection("status").doc(currentUser.uid).set({ typing: false }, { merge: true });
+      }, 1500);
     });
-  </script>
+
+    // Listen to who's typing
+    db.collection("status").onSnapshot(snapshot => {
+      let typingUsers = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.typing && doc.id !== currentUser.uid) {
+          typingUsers.push(data.name || "Someone");
+        }
+      });
+      if (typingUsers.length > 0) {
+        updateStatus(`${typingUsers.join(", ")} is typing...`);
+      } else {
+        updateStatus("You are online");
+      }
+    });
+
+    // Set online
+    db.collection("status").doc(currentUser.uid).set({
+      name: currentUser.displayName,
+      typing: false
+    }, { merge: true });
+  }
+</script>
 </body>
 </html>
