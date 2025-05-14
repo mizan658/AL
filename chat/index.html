@@ -4,20 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Chat</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div id="loginSection">
-    <button id="loginBtn">Login with DIU Email</button>
-  </div>
-
-  <div id="chatSection" style="display:none;"><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DIU Chat</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       font-family: sans-serif;
@@ -125,7 +111,6 @@
   </div>
 
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
@@ -159,6 +144,7 @@
     let currentUser = null;
     let isAdmin = false;
 
+    // Login button functionality
     loginBtn.onclick = async () => {
       try {
         const result = await signInWithPopup(auth, provider);
@@ -168,21 +154,23 @@
           await signOut(auth);
           return;
         }
-        location.reload();
+        location.reload(); // Reload after login to display chat section
       } catch (error) {
-        console.error(error);
+        console.error("Error during login:", error);
       }
     };
 
+    // Logout button functionality
     logoutBtn.onclick = async () => {
       await signOut(auth);
       location.reload();
     };
 
+    // On authentication state change
     onAuthStateChanged(auth, (user) => {
       if (user && user.email.endsWith("@diu.edu.bd")) {
         currentUser = user;
-        isAdmin = user.email === "252-35-007@diu.edu.bd";
+        isAdmin = user.email === "252-35-007@diu.edu.bd"; // Set admin condition
 
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("chatSection").style.display = "block";
@@ -190,18 +178,20 @@
       }
     });
 
+    // Send message button functionality
     sendBtn.onclick = () => {
       const msg = messageInput.value.trim();
-      if (!msg || !currentUser) return;
+      if (!msg || !currentUser) return; // Do nothing if no message or user is not logged in
       push(ref(db, "messages"), {
         text: msg,
         sender: currentUser.displayName,
         uid: currentUser.uid,
         timestamp: Date.now()
       });
-      messageInput.value = "";
+      messageInput.value = ""; // Clear input field after sending
     };
 
+    // Listen for new messages and update chat window
     onChildAdded(ref(db, "messages"), (snapshot) => {
       const data = snapshot.val();
       const key = snapshot.key;
@@ -221,141 +211,6 @@
         div.querySelector(".delete").onclick = () => {
           remove(ref(db, `messages/${key}`));
         };
-      }
-
-      chatWindow.appendChild(div);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    });
-  </script>
-</body>
-</html>
-
-    <div id="chatHeader">
-      <h2 id="welcomeMessage"></h2>
-      <button id="logoutBtn">Logout</button>
-    </div>
-    <div id="chatWindow"></div>
-    <div class="input-area">
-      <input id="messageInput" type="text" placeholder="Type a message" />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onChildAdded,
-      remove
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAEYjUeSuFxpyZuphg0vB2AK24eyHSjBak",
-      authDomain: "chat-7c4ed.firebaseapp.com",
-      databaseURL: "https://chat-7c4ed-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "chat-7c4ed",
-      storageBucket: "chat-7c4ed.appspot.com",
-      messagingSenderId: "871465831321",
-      appId: "1:871465831321:web:f9ac2aeef73133450b2108"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getDatabase(app);
-
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const messageInput = document.getElementById("messageInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const chatWindow = document.getElementById("chatWindow");
-    const welcomeMessage = document.getElementById("welcomeMessage");
-
-    let currentUser = null;
-    let isAdmin = false;
-
-    loginBtn.onclick = async () => {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const email = result.user.email;
-        if (!email.endsWith("@diu.edu.bd")) {
-          alert("Only @diu.edu.bd emails are allowed!");
-          await signOut(auth);
-          return;
-        }
-        // Do not reload here; state change will handle UI.
-      } catch (error) {
-        console.error("Login failed:", error.message);
-      }
-    };
-
-    logoutBtn.onclick = async () => {
-      await signOut(auth);
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.email.endsWith("@diu.edu.bd")) {
-        currentUser = user;
-        isAdmin = user.email === "252-35-007@diu.edu.bd";
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("chatSection").style.display = "block";
-        welcomeMessage.textContent = `Welcome, ${user.displayName}`;
-      } else {
-        document.getElementById("loginSection").style.display = "block";
-        document.getElementById("chatSection").style.display = "none";
-      }
-    });
-
-    sendBtn.onclick = () => {
-      const msg = messageInput.value.trim();
-      if (!msg || !currentUser) return;
-      push(ref(db, "messages"), {
-        text: msg,
-        sender: currentUser.displayName,
-        uid: currentUser.uid,
-        timestamp: Date.now()
-      });
-      messageInput.value = "";
-    };
-
-    onChildAdded(ref(db, "messages"), (snapshot) => {
-      const data = snapshot.val();
-      const key = snapshot.key;
-
-      const div = document.createElement("div");
-      div.className = "message";
-
-      const sender = document.createElement("strong");
-      sender.textContent = data.sender + ": ";
-
-      const text = document.createTextNode(data.text);
-
-      const reaction = document.createElement("span");
-      reaction.className = "reaction";
-      reaction.textContent = "💬";
-      reaction.onclick = () => {
-        reaction.textContent = "❤️";
-      };
-
-      div.appendChild(sender);
-      div.appendChild(text);
-      div.appendChild(reaction);
-
-      if (isAdmin) {
-        const del = document.createElement("span");
-        del.className = "delete";
-        del.textContent = "🗑️";
-        del.onclick = () => remove(ref(db, `messages/${key}`));
-        div.appendChild(del);
       }
 
       chatWindow.appendChild(div);
