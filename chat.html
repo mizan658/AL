@@ -5,88 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DIU Group Chat</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
       margin: 0;
-      padding: 0;
-    }
-    #login, #logout, #adminPanel {
-      padding: 15px;
-      text-align: center;
-    }
-    #messages {
-      display: none;
-      flex-direction: column;
-      height: 80vh;
-      overflow-y: scroll;
-      padding: 10px;
-      background: white;
-      margin: 0 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    .message {
-      padding: 8px 10px;
-      margin: 5px;
-      background: #e4e6eb;
-      border-radius: 8px;
-      max-width: 60%;
-    }
-    .own {
-      align-self: flex-end;
-      background: #0084ff;
-      color: white;
-    }
-    #inputArea {
-      display: none;
-      padding: 10px 15px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
       display: flex;
-      gap: 10px;
+      flex-direction: column;
+      height: 100vh;
     }
-    #inputArea input {
+
+    header {
+      background-color: #0084ff;
+      color: white;
+      padding: 12px 20px;
+      font-size: 1.3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #messages {
       flex: 1;
-      padding: 10px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
+      overflow-y: auto;
+      padding: 20px;
+      background-color: #fff;
     }
-    #inputArea button {
-      padding: 10px 20px;
+
+    .message {
+      max-width: 70%;
+      margin: 8px 0;
+      padding: 10px 15px;
       border-radius: 20px;
+      background-color: #e4e6eb;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .own {
+      margin-left: auto;
+      background-color: #0084ff;
+      color: white;
+    }
+
+    .message span {
+      display: block;
+      font-size: 0.75em;
+      opacity: 0.7;
+      margin-top: 5px;
+    }
+
+    #inputArea {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid #ccc;
+      background: #fff;
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    #sendBtn {
+      padding: 12px 20px;
+      margin-left: 10px;
+      border: none;
       background: #0084ff;
       color: white;
-      border: none;
+      border-radius: 25px;
+      cursor: pointer;
     }
-    .banButton {
-      margin-left: 5px;
-      padding: 2px 5px;
-      font-size: 0.8em;
+
+    #login, #logout {
+      text-align: center;
+      padding: 20px;
     }
+
+    button {
+      cursor: pointer;
+    }
+
     #adminPanel {
       display: none;
-      text-align: left;
-      padding: 10px 20px;
-      background: #fff0f0;
-      border: 1px solid red;
-      margin: 10px 15px;
-      border-radius: 8px;
+      background: #fff;
+      padding: 15px 20px;
+      border-top: 1px solid #ddd;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+
+    .banButton {
+      margin-left: 5px;
+      padding: 3px 8px;
+      font-size: 0.75em;
+      border: 1px solid #aaa;
+      border-radius: 12px;
+      background: #fce4e4;
+    }
+
+    @media (max-width: 600px) {
+      .message {
+        max-width: 90%;
+      }
+
+      #inputArea {
+        flex-direction: column;
+      }
+
+      #sendBtn {
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
+  <header>
+    <div>📨 DIU Group Chat</div>
+    <div id="logout" style="display:none;">
+      <button id="logoutBtn" style="padding: 6px 12px; border-radius: 5px;">Logout</button>
+    </div>
+  </header>
+
   <div id="login">
-    <h2>DIU Group Chat</h2>
-    <button id="loginBtn">Sign in with Google</button>
+    <h2>Sign in to join the group chat</h2>
+    <button id="loginBtn" style="padding: 10px 20px; background: #0084ff; color: white; border: none; border-radius: 25px;">Sign in with Google</button>
   </div>
 
-  <div id="logout" style="display:none;">
-    <button id="logoutBtn">Logout</button>
-  </div>
+  <div id="messages" style="display: none;"></div>
 
-  <div id="messages"></div>
-
-  <div id="inputArea">
-    <input type="text" id="messageInput" placeholder="Type a message..." />
+  <div id="inputArea" style="display: none;">
+    <input type="text" id="messageInput" placeholder="Type your message..." />
     <button id="sendBtn">Send</button>
   </div>
 
@@ -116,13 +173,13 @@
     const db = getFirestore(app);
 
     const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginDiv = document.getElementById("login");
+    const logoutDiv = document.getElementById("logout");
     const messagesDiv = document.getElementById("messages");
     const inputArea = document.getElementById("inputArea");
     const messageInput = document.getElementById("messageInput");
     const sendBtn = document.getElementById("sendBtn");
-    const loginDiv = document.getElementById("login");
-    const logoutDiv = document.getElementById("logout");
-    const logoutBtn = document.getElementById("logoutBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
 
@@ -149,9 +206,9 @@
       isAdmin = user.email === "252-35-007@diu.edu.bd";
 
       loginDiv.style.display = "none";
-      messagesDiv.style.display = "flex";
-      inputArea.style.display = "flex";
       logoutDiv.style.display = "block";
+      messagesDiv.style.display = "block";
+      inputArea.style.display = "flex";
       if (isAdmin) adminPanel.style.display = "block";
 
       const q = query(collection(db, "messages"), orderBy("timestamp"));
@@ -162,7 +219,8 @@
           const msgEl = document.createElement("div");
           msgEl.className = "message";
           if (msg.sender === currentUser.email) msgEl.classList.add("own");
-          msgEl.textContent = `${msg.sender}: ${msg.text}`;
+          const time = msg.timestamp?.toDate().toLocaleTimeString() || "sending...";
+          msgEl.innerHTML = `<strong>${msg.sender}</strong><br>${msg.text}<span>${time}</span>`;
           messagesDiv.appendChild(msgEl);
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -202,8 +260,8 @@
       userList.innerHTML = "";
       users.forEach(email => {
         if (email === "252-35-007@diu.edu.bd") return;
-        const span = document.createElement("span");
-        span.textContent = email;
+        const span = document.createElement("div");
+        span.innerHTML = `<strong>${email}</strong>`;
         ["10min", "1hr", "1d", "1w"].forEach(duration => {
           const btn = document.createElement("button");
           btn.className = "banButton";
@@ -212,7 +270,6 @@
           span.appendChild(btn);
         });
         userList.appendChild(span);
-        userList.appendChild(document.createElement("br"));
       });
     }
 
