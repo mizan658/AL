@@ -2,187 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DIU Chat Room</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Chat</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #e5ddd5;
-    }
-    #login {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    #chat {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      background-color: #fff;
-    }
-    .message {
-      background: #dcf8c6;
-      padding: 8px;
-      margin: 5px;
-      border-radius: 8px;
-      max-width: 70%;
-    }
-    #input-area {
-      display: flex;
-      padding: 10px;
-      background-color: #f0f0f0;
-    }
-    #input-area input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #input-area button {
-      margin-left: 10px;
-      padding: 10px 20px;
-      background-color: #128C7E;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    #status {
-      padding: 5px;
-      text-align: center;
-      font-size: 12px;
-      color: gray;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f0f2f5; }
+    #app { display: flex; flex-direction: column; height: 100vh; }
+    #messages { flex: 1; padding: 10px; overflow-y: auto; background: white; }
+    .message { margin-bottom: 10px; padding: 8px; border-radius: 5px; background: #e4e6eb; max-width: 60%; }
+    .own { background: #0084ff; color: white; align-self: flex-end; }
+    #inputArea { display: flex; padding: 10px; background: #fff; }
+    #messageInput { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 20px; }
+    #sendBtn { margin-left: 10px; padding: 8px 16px; background: #0084ff; color: white; border: none; border-radius: 20px; cursor: pointer; }
+    #login { padding: 20px; text-align: center; }
+    #adminPanel { padding: 10px; background: #ffe5e5; display: none; }
+    .banButton { margin: 0 5px; padding: 5px; }
   </style>
 </head>
 <body>
+  <div id="app">
+    <div id="login">
+      <button id="loginBtn">Sign in with Google</button>
+    </div>
 
-<div id="login">
-  <button id="googleSignIn">Sign in with Google</button>
-</div>
+    <div id="adminPanel">
+      <strong>Admin Controls:</strong> <span id="userList"></span>
+    </div>
 
-<div id="chat">
-  <div id="status">Loading...</div>
-  <div id="messages"></div>
-  <div id="input-area">
-    <input id="messageInput" placeholder="Type your message..." />
-    <button onclick="sendMessage()">Send</button>
+    <div id="messages" style="display:none;"></div>
+
+    <div id="inputArea" style="display:none;">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
   </div>
-</div>
 
-<script>
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
-    authDomain: "chat-88f0f.firebaseapp.com",
-    projectId: "chat-88f0f",
-    storageBucket: "chat-88f0f.appspot.com",
-    messagingSenderId: "146118641258",
-    appId: "1:146118641258:web:f311645f40c8fbcadbac13",
-    measurementId: "G-H7LPCPMMYM"
-  };
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    // Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
+      authDomain: "voting-app-2b276.firebaseapp.com",
+      projectId: "voting-app-2b276",
+      storageBucket: "voting-app-2b276.firebasestorage.app",
+      messagingSenderId: "699531517654",
+      appId: "1:699531517654:web:785702f843d21a85c17377",
+      measurementId: "G-309D0KG6KL"
+    };
 
-  const loginDiv = document.getElementById('login');
-  const chatDiv = document.getElementById('chat');
-  const status = document.getElementById('status');
-  const messagesDiv = document.getElementById('messages');
-  const input = document.getElementById('messageInput');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
 
-  let currentUser = null;
-  let typingTimeout;
+    const loginBtn = document.getElementById("loginBtn");
+    const messagesDiv = document.getElementById("messages");
+    const inputArea = document.getElementById("inputArea");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const loginDiv = document.getElementById("login");
+    const adminPanel = document.getElementById("adminPanel");
+    const userList = document.getElementById("userList");
 
-  document.getElementById('googleSignIn').onclick = async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-    const user = result.user;
-    if (!user.email.endsWith("@diu.edu.bd")) {
-      alert("Only @diu.edu.bd email allowed");
-      await auth.signOut();
-      return;
-    }
-    currentUser = user;
-    loginDiv.style.display = "none";
-    chatDiv.style.display = "flex";
-    updateStatus("You are online");
-    startChat();
-  };
+    let currentUser = null;
+    let isAdmin = false;
 
-  function updateStatus(text) {
-    status.textContent = text;
-  }
+    loginBtn.onclick = async () => {
+      const result = await signInWithPopup(auth, provider);
+    };
 
-  function sendMessage() {
-    const text = input.value.trim();
-    if (text === "") return;
-    db.collection("messages").add({
-      name: currentUser.displayName,
-      text: text,
-      uid: currentUser.uid,
-      time: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    input.value = "";
-    db.collection("status").doc(currentUser.uid).set({ typing: false }, { merge: true });
-  }
+    onAuthStateChanged(auth, async (user) => {
+      if (!user || !user.email.endsWith("@diu.edu.bd")) {
+        alert("Only @diu.edu.bd emails are allowed.");
+        signOut(auth);
+        return;
+      }
 
-  function startChat() {
-    // Load messages
-    db.collection("messages").orderBy("time")
-      .onSnapshot(snapshot => {
+      currentUser = user;
+      isAdmin = user.email === "252-35-007@diu.edu.bd";
+
+      loginDiv.style.display = "none";
+      messagesDiv.style.display = "flex";
+      inputArea.style.display = "flex";
+      if (isAdmin) adminPanel.style.display = "block";
+
+      const q = query(collection(db, "messages"), orderBy("timestamp"));
+      onSnapshot(q, (snapshot) => {
         messagesDiv.innerHTML = "";
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc) => {
           const msg = doc.data();
-          const div = document.createElement("div");
-          div.className = "message";
-          div.innerHTML = `<strong>${msg.name}</strong><br>${msg.text}`;
-          messagesDiv.appendChild(div);
+          const msgEl = document.createElement("div");
+          msgEl.className = "message";
+          if (msg.sender === currentUser.email) msgEl.classList.add("own");
+          msgEl.textContent = `${msg.sender}: ${msg.text}`;
+          messagesDiv.appendChild(msgEl);
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
 
-    // Typing indicator
-    input.addEventListener("input", () => {
-      db.collection("status").doc(currentUser.uid).set({ typing: true }, { merge: true });
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
-        db.collection("status").doc(currentUser.uid).set({ typing: false }, { merge: true });
-      }, 1500);
+      if (isAdmin) loadAdminControls();
     });
 
-    // Listen to who's typing
-    db.collection("status").onSnapshot(snapshot => {
-      let typingUsers = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (data.typing && doc.id !== currentUser.uid) {
-          typingUsers.push(data.name || "Someone");
+    sendBtn.onclick = async () => {
+      const text = messageInput.value.trim();
+      if (text === "") return;
+
+      const bans = await getDocs(collection(db, "bans"));
+      for (const ban of bans.docs) {
+        const b = ban.data();
+        if (b.email === currentUser.email && b.until > Date.now()) {
+          alert("You are suspended until " + new Date(b.until).toLocaleString());
+          return;
         }
-      });
-      if (typingUsers.length > 0) {
-        updateStatus(`${typingUsers.join(", ")} is typing...`);
-      } else {
-        updateStatus("You are online");
       }
-    });
 
-    // Set online
-    db.collection("status").doc(currentUser.uid).set({
-      name: currentUser.displayName,
-      typing: false
-    }, { merge: true });
-  }
-</script>
+      await addDoc(collection(db, "messages"), {
+        text,
+        sender: currentUser.email,
+        timestamp: serverTimestamp()
+      });
+
+      messageInput.value = "";
+    };
+
+    async function loadAdminControls() {
+      const users = new Set();
+      const q = query(collection(db, "messages"));
+      const snapshot = await getDocs(q);
+      snapshot.forEach(doc => users.add(doc.data().sender));
+
+      userList.innerHTML = "";
+      users.forEach(email => {
+        if (email === "252-35-007@diu.edu.bd") return;
+        const span = document.createElement("span");
+        span.textContent = email;
+        ["10min", "1hr", "1d", "1w"].forEach(duration => {
+          const btn = document.createElement("button");
+          btn.className = "banButton";
+          btn.textContent = duration;
+          btn.onclick = () => banUser(email, duration);
+          span.appendChild(btn);
+        });
+        userList.appendChild(span);
+        userList.appendChild(document.createElement("br"));
+      });
+    }
+
+    async function banUser(email, duration) {
+      const now = Date.now();
+      let ms = 0;
+      if (duration === "10min") ms = 10 * 60 * 1000;
+      if (duration === "1hr") ms = 60 * 60 * 1000;
+      if (duration === "1d") ms = 24 * 60 * 60 * 1000;
+      if (duration === "1w") ms = 7 * 24 * 60 * 60 * 1000;
+
+      await addDoc(collection(db, "bans"), {
+        email,
+        until: now + ms
+      });
+
+      alert(`${email} has been suspended for ${duration}`);
+    }
+  </script>
 </body>
 </html>
