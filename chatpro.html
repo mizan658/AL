@@ -310,6 +310,19 @@
 
     .like-count, .dislike-count {
       font-weight: bold;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+      animation: pulse 2s infinite;
+    }
+
+    .own-message .like-count, 
+    .own-message .dislike-count {
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
     }
 
     /* Dark mode styles */
@@ -351,6 +364,11 @@
 
     body.dark-mode .dislike-btn:hover {
       background: rgba(255, 87, 34, 0.2);
+    }
+
+    body.dark-mode .like-count,
+    body.dark-mode .dislike-count {
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
     }
 
     /* Theme toggle button */
@@ -480,7 +498,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -582,6 +600,10 @@
           
           const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
           
+          // Check if user has already reacted
+          const hasLiked = msg.likedBy?.includes(currentUser.uid);
+          const hasDisliked = msg.dislikedBy?.includes(currentUser.uid);
+          
           msgEl.innerHTML = `
             <div class="sender-name">${msg.sender.split('@')[0]}</div>
             <div>${msg.text}</div>
@@ -589,10 +611,14 @@
               <span>${time}</span>
             </div>
             <div class="reaction-buttons">
-              <button class="like-btn" onclick="handleLike('${doc.id}')">
+              <button class="like-btn ${hasLiked ? 'user-reacted' : ''}" 
+                      onclick="handleLike('${doc.id}')"
+                      ${hasDisliked ? 'disabled' : ''}>
                 👍 <span class="like-count">${msg.likes || 0}</span>
               </button>
-              <button class="dislike-btn" onclick="handleDislike('${doc.id}')">
+              <button class="dislike-btn ${hasDisliked ? 'user-reacted' : ''}" 
+                      onclick="handleDislike('${doc.id}')"
+                      ${hasLiked ? 'disabled' : ''}>
                 👎 <span class="dislike-count">${msg.dislikes || 0}</span>
               </button>
             </div>
@@ -610,8 +636,24 @@
     window.handleLike = async (messageId) => {
       try {
         const messageRef = doc(db, "messages", messageId);
+        const messageDoc = await getDoc(messageRef);
+        const messageData = messageDoc.data();
+        
+        // Check if user already disliked
+        if (messageData.dislikedBy?.includes(currentUser.uid)) {
+          alert("You've already disliked this message");
+          return;
+        }
+        
+        // Check if user already liked
+        if (messageData.likedBy?.includes(currentUser.uid)) {
+          alert("You've already liked this message");
+          return;
+        }
+        
         await updateDoc(messageRef, {
-          likes: increment(1)
+          likes: increment(1),
+          likedBy: arrayUnion(currentUser.uid)
         });
       } catch (error) {
         console.error("Error adding like:", error);
@@ -622,8 +664,24 @@
     window.handleDislike = async (messageId) => {
       try {
         const messageRef = doc(db, "messages", messageId);
+        const messageDoc = await getDoc(messageRef);
+        const messageData = messageDoc.data();
+        
+        // Check if user already liked
+        if (messageData.likedBy?.includes(currentUser.uid)) {
+          alert("You've already liked this message");
+          return;
+        }
+        
+        // Check if user already disliked
+        if (messageData.dislikedBy?.includes(currentUser.uid)) {
+          alert("You've already disliked this message");
+          return;
+        }
+        
         await updateDoc(messageRef, {
-          dislikes: increment(1)
+          dislikes: increment(1),
+          dislikedBy: arrayUnion(currentUser.uid)
         });
       } catch (error) {
         console.error("Error adding dislike:", error);
@@ -650,7 +708,9 @@
         sender: currentUser.email,
         timestamp: serverTimestamp(),
         likes: 0,
-        dislikes: 0
+        dislikes: 0,
+        likedBy: [],
+        dislikedBy: []
       });
 
       messageInput.value = "";
