@@ -523,7 +523,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, arrayUnion, arrayRemove, where, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, where, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -727,8 +727,19 @@
     async function addReaction(messageId, emoji) {
       try {
         const messageRef = doc(db, "messages", messageId);
+        const messageDoc = await getDoc(messageRef);
+        
+        if (!messageDoc.exists()) {
+          console.error("Message not found");
+          return;
+        }
+        
+        const messageData = messageDoc.data();
+        const currentReactions = messageData.reactions || {};
+        currentReactions[currentUser.uid] = emoji;
+        
         await updateDoc(messageRef, {
-          [`reactions.${currentUser.uid}`]: emoji
+          reactions: currentReactions
         });
       } catch (error) {
         console.error("Error adding reaction:", error);
@@ -747,19 +758,20 @@
         }
         
         const messageData = messageDoc.data();
-        const currentReaction = messageData.reactions?.[currentUser.uid];
+        const currentReactions = messageData.reactions || {};
+        const currentReaction = currentReactions[currentUser.uid];
         
         if (currentReaction === emoji) {
           // Remove reaction
-          await updateDoc(messageRef, {
-            [`reactions.${currentUser.uid}`]: deleteField()
-          });
+          delete currentReactions[currentUser.uid];
         } else {
           // Add/update reaction
-          await updateDoc(messageRef, {
-            [`reactions.${currentUser.uid}`]: emoji
-          });
+          currentReactions[currentUser.uid] = emoji;
         }
+        
+        await updateDoc(messageRef, {
+          reactions: currentReactions
+        });
       } catch (error) {
         console.error("Error toggling reaction:", error);
         alert("Failed to update reaction. Please try again.");
@@ -784,7 +796,7 @@
         text,
         sender: currentUser.email,
         timestamp: serverTimestamp(),
-        reactions: {} // Initialize as empty map
+        reactions: {}
       });
 
       messageInput.value = "";
