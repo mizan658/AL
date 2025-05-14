@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,12 +21,6 @@
       display: flex;
       flex-direction: column;
       color: #333;
-      transition: all 0.3s ease;
-    }
-
-    body.night-mode {
-      background-color: #121212;
-      color: #e0e0e0;
     }
 
     header {
@@ -35,10 +32,6 @@
       align-items: center;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       z-index: 10;
-    }
-
-    .night-mode header {
-      background: linear-gradient(135deg, #1a237e, #0d47a1);
     }
 
     header div {
@@ -55,12 +48,6 @@
       padding: 20px;
       background-color: #f0f2f5;
       background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      transition: all 0.3s ease;
-    }
-
-    .night-mode #messages {
-      background-color: #1e1e1e;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23606060' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
 
     .message {
@@ -86,20 +73,11 @@
       margin-right: auto;
     }
 
-    .night-mode .other-message {
-      background-color: #2d2d2d;
-      color: #e0e0e0;
-    }
-
     .own-message {
       background: linear-gradient(135deg, #0084ff, #0066cc);
       color: white;
       border-top-right-radius: 5px;
       margin-left: auto;
-    }
-
-    .night-mode .own-message {
-      background: linear-gradient(135deg, #1a237e, #0d47a1);
     }
 
     .message-info {
@@ -114,18 +92,17 @@
       color: rgba(255, 255, 255, 0.8);
     }
 
+    .sender-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
     #inputArea {
       display: flex;
       padding: 15px;
       background-color: white;
       border-top: 1px solid #e1e4e8;
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-    }
-
-    .night-mode #inputArea {
-      background-color: #1e1e1e;
-      border-top: 1px solid #333;
     }
 
     #messageInput {
@@ -136,23 +113,11 @@
       outline: none;
       font-size: 1rem;
       transition: border 0.3s;
-      background-color: white;
-    }
-
-    .night-mode #messageInput {
-      background-color: #2d2d2d;
-      border-color: #444;
-      color: #e0e0e0;
     }
 
     #messageInput:focus {
       border-color: #0084ff;
       box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
-    }
-
-    .night-mode #messageInput:focus {
-      border-color: #1a237e;
-      box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.3);
     }
 
     #sendBtn {
@@ -168,18 +133,9 @@
       box-shadow: 0 2px 5px rgba(0, 132, 255, 0.3);
     }
 
-    .night-mode #sendBtn {
-      background: linear-gradient(135deg, #1a237e, #0d47a1);
-      box-shadow: 0 2px 5px rgba(26, 35, 126, 0.4);
-    }
-
     #sendBtn:hover {
       transform: translateY(-1px);
       box-shadow: 0 3px 8px rgba(0, 132, 255, 0.4);
-    }
-
-    .night-mode #sendBtn:hover {
-      box-shadow: 0 3px 8px rgba(26, 35, 126, 0.5);
     }
 
     #sendBtn:active {
@@ -194,11 +150,6 @@
       flex: 1;
       padding: 20px;
       background: linear-gradient(135deg, #f5f7fb, #e4e8f0);
-      transition: all 0.3s ease;
-    }
-
-    .night-mode #login {
-      background: linear-gradient(135deg, #121212, #1e1e1e);
     }
 
     .login-container {
@@ -209,22 +160,12 @@
       text-align: center;
       max-width: 500px;
       width: 100%;
-      transition: all 0.3s ease;
-    }
-
-    .night-mode .login-container {
-      background: #2d2d2d;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .login-container h2 {
       margin-bottom: 25px;
       color: #333;
       font-size: 1.8rem;
-    }
-
-    .night-mode .login-container h2 {
-      color: #e0e0e0;
     }
 
     .login-buttons {
@@ -243,6 +184,11 @@
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     }
 
     #loginUserBtn {
@@ -264,17 +210,8 @@
       transition: all 0.2s;
     }
 
-    .night-mode #logoutBtn {
-      background-color: #2d2d2d;
-      color: #1a237e;
-    }
-
     #logoutBtn:hover {
       background-color: #f0f7ff;
-    }
-
-    .night-mode #logoutBtn:hover {
-      background-color: #333;
     }
 
     #adminPanel {
@@ -285,12 +222,6 @@
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       max-height: 250px;
       overflow-y: auto;
-      transition: all 0.3s ease;
-    }
-
-    .night-mode #adminPanel {
-      background: #1e1e1e;
-      border-top: 1px solid #333;
     }
 
     #adminPanel h3 {
@@ -301,11 +232,6 @@
       border-bottom: 1px solid #eee;
     }
 
-    .night-mode #adminPanel h3 {
-      color: #e0e0e0;
-      border-bottom: 1px solid #444;
-    }
-
     .user-item {
       display: flex;
       justify-content: space-between;
@@ -314,17 +240,9 @@
       border-bottom: 1px solid #f0f2f5;
     }
 
-    .night-mode .user-item {
-      border-bottom: 1px solid #333;
-    }
-
     .user-email {
       font-weight: 500;
       color: #333;
-    }
-
-    .night-mode .user-email {
-      color: #e0e0e0;
     }
 
     .ban-buttons {
@@ -344,17 +262,8 @@
       transition: all 0.2s;
     }
 
-    .night-mode .banButton {
-      background: #3a1e1e;
-      color: #ff8a80;
-    }
-
     .banButton:hover {
       background: #ffcdd2;
-    }
-
-    .night-mode .banButton:hover {
-      background: #4a2a2a;
     }
 
     .banButton:nth-child(1) { background: #fff3e0; color: #ef6c00; }
@@ -367,16 +276,6 @@
     .banButton:nth-child(3):hover { background: #ffe0b2; }
     .banButton:nth-child(4):hover { background: #ffccbc; }
 
-    .night-mode .banButton:nth-child(1) { background: #3a2e1e; color: #ffb74d; }
-    .night-mode .banButton:nth-child(2) { background: #3a311e; color: #ffcc80; }
-    .night-mode .banButton:nth-child(3) { background: #3a2a1e; color: #ffa726; }
-    .night-mode .banButton:nth-child(4) { background: #3a241e; color: #ff8a65; }
-
-    .night-mode .banButton:nth-child(1):hover { background: #4a3a2a; }
-    .night-mode .banButton:nth-child(2):hover { background: #4a412a; }
-    .night-mode .banButton:nth-child(3):hover { background: #4a3a2a; }
-    .night-mode .banButton:nth-child(4):hover { background: #4a342a; }
-
     /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
@@ -387,25 +286,13 @@
       border-radius: 10px;
     }
 
-    .night-mode ::-webkit-scrollbar-track {
-      background: #2d2d2d;
-    }
-
     ::-webkit-scrollbar-thumb {
       background: #c1c1c1;
       border-radius: 10px;
     }
 
-    .night-mode ::-webkit-scrollbar-thumb {
-      background: #555;
-    }
-
     ::-webkit-scrollbar-thumb:hover {
       background: #a8a8a8;
-    }
-
-    .night-mode ::-webkit-scrollbar-thumb:hover {
-      background: #666;
     }
 
     @media (max-width: 600px) {
@@ -431,59 +318,6 @@
         margin-top: 0;
         width: auto;
       }
-    }
-
-    /* Theme toggle button */
-    #themeToggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0084ff, #0066cc);
-      color: white;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      z-index: 100;
-      transition: all 0.3s ease;
-    }
-
-    .night-mode #themeToggle {
-      background: linear-gradient(135deg, #1a237e, #0d47a1);
-    }
-
-    #themeToggle:hover {
-      transform: scale(1.1);
-    }
-
-    /* Loading spinner */
-    .spinner {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(0, 132, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #0084ff;
-      animation: spin 1s ease-in-out infinite;
-      z-index: 1000;
-    }
-
-    .night-mode .spinner {
-      border: 5px solid rgba(26, 35, 126, 0.3);
-      border-top-color: #1a237e;
-    }
-
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
     }
   </style>
 </head>
@@ -517,9 +351,6 @@
     <h3>Admin Controls</h3>
     <div id="userList"></div>
   </div>
-
-  <button id="themeToggle">🌙</button>
-  <div class="spinner"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -556,22 +387,6 @@
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
-    const themeToggle = document.getElementById("themeToggle");
-    const spinner = document.querySelector('.spinner');
-
-    // Theme toggle functionality
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('night-mode');
-      const isNightMode = document.body.classList.contains('night-mode');
-      themeToggle.textContent = isNightMode ? '☀️' : '🌙';
-      localStorage.setItem('nightMode', isNightMode);
-    });
-
-    // Check for saved theme preference
-    if (localStorage.getItem('nightMode') {
-      document.body.classList.add('night-mode');
-      themeToggle.textContent = '☀️';
-    }
 
     loginUserBtn.onclick = async () => {
       loginMode = "user";
@@ -616,9 +431,6 @@
       inputArea.style.display = "flex";
       if (isAdmin) adminPanel.style.display = "block";
 
-      // Show spinner while loading messages
-      spinner.style.display = 'block';
-
       const q = query(collection(db, "messages"), orderBy("timestamp"));
       onSnapshot(q, (snapshot) => {
         messagesDiv.innerHTML = "";
@@ -636,9 +448,6 @@
           messagesDiv.appendChild(msgEl);
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        
-        // Hide spinner after messages are loaded
-        spinner.style.display = 'none';
       });
 
       if (isAdmin) loadAdminControls();
