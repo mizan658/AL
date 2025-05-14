@@ -1,133 +1,655 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Pro</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8;
-        }
-        .chat-container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .chat-message {
-            border-bottom: 1px solid #e1e1e1;
-            padding: 10px;
-        }
-        .chat-message:last-child {
-            border-bottom: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIU Group Chat</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+body {
+background-color: #f5f7fb;
+height: 100vh;
+display: flex;
+flex-direction: column;
+color: #333;
+}
+
+header {
+background: linear-gradient(135deg, #0084ff, #0066cc);
+color: white;
+padding: 15px 25px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+z-index: 10;
+}
+
+header div {
+font-size: 1.4rem;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+#messages {
+flex: 1;
+overflow-y: auto;
+padding: 20px;
+background-color: #f0f2f5;
+background-image: url("data\:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.message {
+max-width: 70%;
+margin-bottom: 15px;
+padding: 12px 16px;
+border-radius: 18px;
+position: relative;
+word-wrap: break-word;
+line-height: 1.4;
+animation: fadeIn 0.3s ease-out;
+box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(5px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.other-message {
+background-color: white;
+border-top-left-radius: 5px;
+margin-right: auto;
+}
+
+.own-message {
+background: linear-gradient(135deg, #0084ff, #0066cc);
+color: white;
+border-top-right-radius: 5px;
+margin-left: auto;
+}
+
+.message-info {
+display: flex;
+justify-content: space-between;
+margin-top: 8px;
+font-size: 0.75rem;
+opacity: 0.8;
+}
+
+.own-message .message-info {
+color: rgba(255, 255, 255, 0.8);
+}
+
+.sender-name {
+font-weight: 600;
+margin-bottom: 4px;
+}
+
+#inputArea {
+display: flex;
+padding: 15px;
+background-color: white;
+border-top: 1px solid #e1e4e8;
+box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+#messageInput {
+flex: 1;
+padding: 12px 18px;
+border-radius: 25px;
+border: 1px solid #e1e4e8;
+outline: none;
+font-size: 1rem;
+transition: border 0.3s;
+}
+
+#messageInput:focus {
+border-color: #0084ff;
+box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
+}
+
+#sendBtn {
+padding: 12px 24px;
+margin-left: 12px;
+border: none;
+background: linear-gradient(135deg, #0084ff, #0066cc);
+color: white;
+border-radius: 25px;
+cursor: pointer;
+font-weight: 600;
+transition: transform 0.2s, box-shadow 0.2s;
+box-shadow: 0 2px 5px rgba(0, 132, 255, 0.3);
+}
+
+#sendBtn:hover {
+transform: translateY(-1px);
+box-shadow: 0 3px 8px rgba(0, 132, 255, 0.4);
+}
+
+#sendBtn:active {
+transform: translateY(0);
+}
+
+#login {
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+flex: 1;
+padding: 20px;
+background: linear-gradient(135deg, #f5f7fb, #e4e8f0);
+}
+
+.login-container {
+background: white;
+padding: 40px;
+border-radius: 15px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+text-align: center;
+max-width: 500px;
+width: 100%;
+}
+
+.login-container h2 {
+margin-bottom: 25px;
+color: #333;
+font-size: 1.8rem;
+}
+
+.login-buttons {
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+.login-buttons button {
+padding: 14px;
+border-radius: 30px;
+border: none;
+color: white;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s;
+box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-buttons button:hover {
+transform: translateY(-2px);
+box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+#loginUserBtn {
+background: linear-gradient(135deg, #0084ff, #0066cc);
+}
+
+#loginAdminBtn {
+background: linear-gradient(135deg, #ff5722, #e64a19);
+}
+
+#logoutBtn {
+padding: 8px 16px;
+border-radius: 20px;
+border: none;
+background-color: white;
+color: #0084ff;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+#logoutBtn:hover {
+background-color: #f0f7ff;
+}
+
+#adminPanel {
+display: none;
+background: white;
+padding: 20px;
+border-top: 1px solid #e1e4e8;
+box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+max-height: 250px;
+overflow-y: auto;
+}
+
+#adminPanel h3 {
+margin-bottom: 15px;
+color: #333;
+font-size: 1.2rem;
+padding-bottom: 10px;
+border-bottom: 1px solid #eee;
+}
+
+.user-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 0;
+border-bottom: 1px solid #f0f2f5;
+}
+
+.user-email {
+font-weight: 500;
+color: #333;
+}
+
+.ban-buttons {
+display: flex;
+gap: 8px;
+}
+
+.banButton {
+padding: 5px 12px;
+font-size: 0.75rem;
+border: none;
+border-radius: 15px;
+background: #ffebee;
+color: #d32f2f;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.banButton:hover {
+background: #ffcdd2;
+}
+
+.banButton:nth-child(1) { background: #fff3e0; color: #ef6c00; }
+.banButton:nth-child(2) { background: #fff8e1; color: #f57c00; }
+.banButton:nth-child(3) { background: #fff3e0; color: #e65100; }
+.banButton:nth-child(4) { background: #fbe9e7; color: #d84315; }
+
+.banButton:nth-child(1):hover { background: #ffe0b2; }
+.banButton:nth-child(2):hover { background: #ffecb3; }
+.banButton:nth-child(3):hover { background: #ffe0b2; }
+.banButton:nth-child(4):hover { background: #ffccbc; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+width: 8px;
+}
+
+::-webkit-scrollbar-track {
+background: #f1f1f1;
+border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+background: #c1c1c1;
+border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: #a8a8a8;
+}
+
+@media (max-width: 600px) {
+.message {
+max-width: 85%;
+}
+
+.login-container {
+padding: 30px 20px;
+}
+
+.login-buttons {
+gap: 10px;
+}
+
+#inputArea {
+flex-direction: row;
+padding: 12px;
+}
+
+#sendBtn {
+margin-left: 10px;
+margin-top: 0;
+width: auto;
+}
+}
+
+/* Loading spinner styles */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #0084ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode #messages {
+  background-color: #1e1e1e;
+  background-image: url("data\:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23444444' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+body.dark-mode .other-message {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode #inputArea,
+body.dark-mode #adminPanel {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+body.dark-mode #messageInput {
+  background-color: #2d2d2d;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+body.dark-mode .login-container {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode .login-container h2 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .login-container p {
+  color: #b0b0b0;
+}
+
+body.dark-mode #adminPanel h3 {
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+body.dark-mode .user-item {
+  border-color: #444;
+}
+
+body.dark-mode .user-email {
+  color: #e0e0e0;
+}
+
+/* Theme toggle button */
+#themeToggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: 15px;
+  transition: transform 0.3s;
+}
+
+#themeToggle:hover {
+  transform: rotate(30deg);
+}
+
+body.dark-mode #themeToggle {
+  color: #e0e0e0;
+}
+
+  </style>
 </head>
 <body>
-    <div class="flex justify-center items-center h-screen bg-gray-200">
-        <div class="chat-container">
-            <h2 class="text-center text-2xl font-bold mb-5">Chat Pro</h2>
-            <div id="messages" class="mb-5"></div>
-            <div class="flex">
-                <input type="text" id="messageInput" class="flex-1 p-2 border rounded-l-md" placeholder="Type your message" />
-                <button id="sendMessageBtn" class="bg-blue-500 text-white p-2 rounded-r-md">Send</button>
-            </div>
-            <div class="mt-5">
-                <button id="sendPollBtn" class="bg-green-500 text-white p-2 rounded-md">Create Poll</button>
-            </div>
-        </div>
+  <header>
+    <div>💬 DIU Group Chat</div>
+    <div style="display: flex; align-items: center;">
+      <button id="themeToggle">🌓</button>
+      <div id="logout" style="display:none;">
+        <button id="logoutBtn">Logout</button>
+      </div>
     </div>
+  </header>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-    <script>
-        // Firebase configuration (same as above)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAEYjUeSuFxpyZuphg0vB2AK24eyHSjBak",
-            authDomain: "chat-7c4ed.firebaseapp.com",
-            databaseURL: "https://chat-7c4ed-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "chat-7c4ed",
-            storageBucket: "chat-7c4ed.firebasestorage.app",
-            messagingSenderId: "871465831321",
-            appId: "1:871465831321:web:f9ac2aeef73133450b2108",
-            measurementId: "G-SSMJNPHZXD"
-        };
+  <div id="login">
+    <div class="login-container">
+      <h2>Welcome to DIU Group Chat</h2>
+      <p style="margin-bottom: 25px; color: #666;">Sign in with your DIU email to join the conversation</p>
+      <div class="login-buttons">
+        <button id="loginUserBtn">Login as User</button>
+        <button id="loginAdminBtn">Login as Admin</button>
+      </div>
+    </div>
+  </div>
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+  <div id="loading" style="display: none;" class="loading-container">
+    <div class="loading-spinner"></div>
+  </div>
 
-        // Firebase Authentication
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById("sendMessageBtn").disabled = false;
-                document.getElementById("sendPollBtn").disabled = false;
-            } else {
-                document.getElementById("sendMessageBtn").disabled = true;
-                document.getElementById("sendPollBtn").disabled = true;
-                alert("Please sign in to start chatting.");
-            }
-        });
+  <div id="messages" style="display: none;"></div>
 
-        // Send message
-        document.getElementById("sendMessageBtn").addEventListener("click", () => {
-            const messageInput = document.getElementById("messageInput");
-            if (messageInput.value.trim() !== "") {
-                db.collection("messages").add({
-                    sender: auth.currentUser.displayName || 'Anonymous',
-                    text: messageInput.value.trim(),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    type: "message"
-                });
-                messageInput.value = ""; // Clear input after sending
-            }
-        });
+  <div id="inputArea" style="display: none;">
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
+  </div>
 
-        // Create Poll
-        document.getElementById("sendPollBtn").addEventListener("click", () => {
-            const pollOptions = prompt("Enter poll options, separated by commas:");
-            if (pollOptions) {
-                db.collection("messages").add({
-                    sender: auth.currentUser.displayName || 'Anonymous',
-                    text: pollOptions.trim(),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    type: "poll"
-                });
-            }
-        });
+  <div id="adminPanel">
+    <h3>Admin Controls</h3>
+    <div id="userList"></div>
+  </div>
 
-        // Listen to new messages
-        db.collection("messages").orderBy("timestamp").onSnapshot(snapshot => {
-            const messagesDiv = document.getElementById("messages");
-            messagesDiv.innerHTML = ""; // Clear current messages
-            snapshot.forEach(doc => {
-                const message = doc.data();
-                const messageDiv = document.createElement("div");
-                messageDiv.classList.add("chat-message");
-                if (message.type === "poll") {
-                    messageDiv.innerHTML = `<strong>${message.sender}:</strong> <span class="text-blue-500">${message.text}</span>`;
-                } else {
-                    messageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
-                }
-                messagesDiv.appendChild(messageDiv);
-            });
-        });
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        // Firebase Sign-In (Google)
-        function signIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then((result) => {
-                console.log(result.user);
-            }).catch((error) => {
-                console.error(error);
-            });
+    const firebaseConfig = {
+      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
+      authDomain: "voting-app-2b276.firebaseapp.com",
+      projectId: "voting-app-2b276",
+      storageBucket: "voting-app-2b276.appspot.com",
+      messagingSenderId: "699531517654",
+      appId: "1:699531517654:web:785702f843d21a85c17377",
+      measurementId: "G-309D0KG6KL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
+
+    let loginMode = "user"; // default
+    let currentUser = null;
+    let isAdmin = false;
+
+    const loginUserBtn = document.getElementById("loginUserBtn");
+    const loginAdminBtn = document.getElementById("loginAdminBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginDiv = document.getElementById("login");
+    const logoutDiv = document.getElementById("logout");
+    const messagesDiv = document.getElementById("messages");
+    const inputArea = document.getElementById("inputArea");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const adminPanel = document.getElementById("adminPanel");
+    const userList = document.getElementById("userList");
+    const loadingDiv = document.getElementById("loading");
+    const themeToggle = document.getElementById("themeToggle");
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      // Save preference to localStorage
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDarkMode);
+    });
+
+    // Check for saved theme preference
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
+    loginUserBtn.onclick = async () => {
+      loginMode = "user";
+      await signInWithPopup(auth, provider);
+    };
+
+    loginAdminBtn.onclick = async () => {
+      loginMode = "admin";
+      await signInWithPopup(auth, provider);
+    };
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      location.reload();
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user || !user.email.endsWith("@diu.edu.bd")) {
+        alert("Only @diu.edu.bd emails are allowed.");
+        signOut(auth);
+        return;
+      }
+
+      const adminEmail = "252-35-007@diu.edu.bd";
+      currentUser = user;
+
+      // Determine admin rights based on login method
+      if (loginMode === "admin") {
+        if (user.email !== adminEmail) {
+          alert("Only the authorized admin can login this way.");
+          signOut(auth);
+          return;
         }
-    </script>
+        isAdmin = true;
+      } else {
+        isAdmin = false;
+      }
+
+      loginDiv.style.display = "none";
+      logoutDiv.style.display = "block";
+      loadingDiv.style.display = "flex";
+      
+      const q = query(collection(db, "messages"), orderBy("timestamp"));
+      onSnapshot(q, (snapshot) => {
+        loadingDiv.style.display = "none";
+        messagesDiv.style.display = "block";
+        inputArea.style.display = "flex";
+        if (isAdmin) adminPanel.style.display = "block";
+        
+        messagesDiv.innerHTML = "";
+        snapshot.forEach((doc) => {
+          const msg = doc.data();
+          const msgEl = document.createElement("div");
+          msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
+          
+          const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
+          msgEl.innerHTML = `
+            <div class="sender-name">${msg.sender.split('@')[0]}</div>
+            <div>${msg.text}</div>
+            <div class="message-info">${time}</div>
+          `;
+          messagesDiv.appendChild(msgEl);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+
+      if (isAdmin) loadAdminControls();
+    });
+
+    sendBtn.onclick = async () => {
+      const text = messageInput.value.trim();
+      if (text === "") return;
+
+      const bansSnapshot = await getDocs(collection(db, "bans"));
+      const now = Date.now();
+      for (const docSnap of bansSnapshot.docs) {
+        const data = docSnap.data();
+        if (data.email === currentUser.email && data.until > now) {
+          alert("You're suspended until " + new Date(data.until).toLocaleString());
+          return;
+        }
+      }
+
+      await addDoc(collection(db, "messages"), {
+        text,
+        sender: currentUser.email,
+        timestamp: serverTimestamp()
+      });
+
+      messageInput.value = "";
+    };
+
+    messageInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+
+    async function loadAdminControls() {
+      const users = new Set();
+      const snapshot = await getDocs(query(collection(db, "messages")));
+      snapshot.forEach(doc => users.add(doc.data().sender));
+
+      userList.innerHTML = "";
+      users.forEach(email => {
+        if (email === "252-35-007@diu.edu.bd") return;
+        
+        const userItem = document.createElement("div");
+        userItem.className = "user-item";
+        
+        const userEmail = document.createElement("span");
+        userEmail.className = "user-email";
+        userEmail.textContent = email.split('@')[0];
+        
+        const banButtons = document.createElement("div");
+        banButtons.className = "ban-buttons";
+        
+        ["10min", "1hr", "1d", "1w"].forEach(duration => {
+          const btn = document.createElement("button");
+          btn.className = "banButton";
+          btn.textContent = duration;
+          btn.onclick = () => banUser(email, duration);
+          banButtons.appendChild(btn);
+        });
+        
+        userItem.appendChild(userEmail);
+        userItem.appendChild(banButtons);
+        userList.appendChild(userItem);
+      });
+    }
+
+    async function banUser(email, duration) {
+      const now = Date.now();
+      let ms = 0;
+      if (duration === "10min") ms = 10 * 60 * 1000;
+      if (duration === "1hr") ms = 60 * 60 * 1000;
+      if (duration === "1d") ms = 24 * 60 * 60 * 1000;
+      if (duration === "1w") ms = 7 * 24 * 60 * 60 * 1000;
+
+      await addDoc(collection(db, "bans"), {
+        email,
+        until: now + ms
+      });
+
+      alert(`${email.split('@')[0]} has been suspended for ${duration}`);
+    }
+  </script>
+
 </body>
 </html>
