@@ -194,7 +194,6 @@
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
-    let loginMode = "user";
     let currentUser = null;
     let displayName = "";
     let isAdmin = false;
@@ -210,23 +209,24 @@
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
-
     const namePrompt = document.getElementById("namePrompt");
     const displayNameInput = document.getElementById("displayNameInput");
     const saveDisplayNameBtn = document.getElementById("saveDisplayNameBtn");
 
+    // Store loginMode in localStorage
     loginUserBtn.onclick = async () => {
-      loginMode = "user";
+      localStorage.setItem("loginMode", "user");
       await signInWithPopup(auth, provider);
     };
 
     loginAdminBtn.onclick = async () => {
-      loginMode = "admin";
+      localStorage.setItem("loginMode", "admin");
       await signInWithPopup(auth, provider);
     };
 
     logoutBtn.onclick = async () => {
       await signOut(auth);
+      localStorage.removeItem("loginMode");
       location.reload();
     };
 
@@ -238,6 +238,7 @@
       }
 
       const adminEmail = "252-35-007@diu.edu.bd";
+      const loginMode = localStorage.getItem("loginMode") || "user";
       currentUser = user;
 
       if (loginMode === "admin") {
