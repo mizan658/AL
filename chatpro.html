@@ -498,7 +498,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -613,12 +613,12 @@
             <div class="reaction-buttons">
               <button class="like-btn ${hasLiked ? 'user-reacted' : ''}" 
                       onclick="handleLike('${doc.id}')"
-                      ${hasDisliked ? 'disabled' : ''}>
+                      ${hasLiked || hasDisliked ? 'disabled' : ''}>
                 👍 <span class="like-count">${msg.likes || 0}</span>
               </button>
               <button class="dislike-btn ${hasDisliked ? 'user-reacted' : ''}" 
                       onclick="handleDislike('${doc.id}')"
-                      ${hasLiked ? 'disabled' : ''}>
+                      ${hasDisliked || hasLiked ? 'disabled' : ''}>
                 👎 <span class="dislike-count">${msg.dislikes || 0}</span>
               </button>
             </div>
@@ -639,18 +639,13 @@
         const messageDoc = await getDoc(messageRef);
         const messageData = messageDoc.data();
         
-        // Check if user already disliked
-        if (messageData.dislikedBy?.includes(currentUser.uid)) {
-          alert("You've already disliked this message");
+        // Check if user already reacted (like or dislike)
+        if (messageData.likedBy?.includes(currentUser.uid) || messageData.dislikedBy?.includes(currentUser.uid)) {
+          alert("You've already reacted to this message");
           return;
         }
         
-        // Check if user already liked
-        if (messageData.likedBy?.includes(currentUser.uid)) {
-          alert("You've already liked this message");
-          return;
-        }
-        
+        // Update the message with the like
         await updateDoc(messageRef, {
           likes: increment(1),
           likedBy: arrayUnion(currentUser.uid)
@@ -667,18 +662,13 @@
         const messageDoc = await getDoc(messageRef);
         const messageData = messageDoc.data();
         
-        // Check if user already liked
-        if (messageData.likedBy?.includes(currentUser.uid)) {
-          alert("You've already liked this message");
+        // Check if user already reacted (like or dislike)
+        if (messageData.likedBy?.includes(currentUser.uid) || messageData.dislikedBy?.includes(currentUser.uid)) {
+          alert("You've already reacted to this message");
           return;
         }
         
-        // Check if user already disliked
-        if (messageData.dislikedBy?.includes(currentUser.uid)) {
-          alert("You've already disliked this message");
-          return;
-        }
-        
+        // Update the message with the dislike
         await updateDoc(messageRef, {
           dislikes: increment(1),
           dislikedBy: arrayUnion(currentUser.uid)
