@@ -522,7 +522,7 @@ body.dark-mode #themeToggle {
 
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
-        alert("Only @diu.edu.bd emails are allowed.");
+        alert("Only DIU emails are allowed.");
         signOut(auth);
         return;
       }
