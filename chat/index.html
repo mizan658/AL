@@ -191,7 +191,7 @@
       messageInput.value = ""; // Clear input field after sending
     };
 
-    // Listen for new messages and update chat window
+    // Listen for new messages and update chat window in real-time
     onChildAdded(ref(db, "messages"), (snapshot) => {
       const data = snapshot.val();
       const key = snapshot.key;
