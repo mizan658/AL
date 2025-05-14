@@ -1,406 +1,178 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DIU Group Chat</title>
+  <!-- Previous head content remains the same until the style section -->
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    }
-
-    body {
-      background-color: #f5f7fb;
-      height: 100vh;
+    /* Add these new styles at the end of your existing styles */
+    
+    /* Name Change Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
       display: flex;
-      flex-direction: column;
-      color: #333;
-    }
-
-    header {
-      background: linear-gradient(135deg, #0084ff, #0066cc);
-      color: white;
-      padding: 15px 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-    }
-
-    header div {
-      font-size: 1.4rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      background-color: #f0f2f5;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .message {
-      max-width: 70%;
-      margin-bottom: 15px;
-      padding: 12px 16px;
-      border-radius: 18px;
-      position: relative;
-      word-wrap: break-word;
-      line-height: 1.4;
-      animation: fadeIn 0.3s ease-out;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .other-message {
-      background-color: white;
-      border-top-left-radius: 5px;
-      margin-right: auto;
-    }
-
-    .own-message {
-      background: linear-gradient(135deg, #0084ff, #0066cc);
-      color: white;
-      border-top-right-radius: 5px;
-      margin-left: auto;
-    }
-
-    .message-info {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      font-size: 0.75rem;
-      opacity: 0.8;
-    }
-
-    .own-message .message-info {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .sender-name {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    #inputArea {
-      display: flex;
-      padding: 15px;
-      background-color: white;
-      border-top: 1px solid #e1e4e8;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    #messageInput {
-      flex: 1;
-      padding: 12px 18px;
-      border-radius: 25px;
-      border: 1px solid #e1e4e8;
-      outline: none;
-      font-size: 1rem;
-      transition: border 0.3s;
-    }
-
-    #messageInput:focus {
-      border-color: #0084ff;
-      box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
-    }
-
-    #sendBtn {
-      padding: 12px 24px;
-      margin-left: 12px;
-      border: none;
-      background: linear-gradient(135deg, #0084ff, #0066cc);
-      color: white;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 5px rgba(0, 132, 255, 0.3);
-    }
-
-    #sendBtn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0, 132, 255, 0.4);
-    }
-
-    #sendBtn:active {
-      transform: translateY(0);
-    }
-
-    #login {
-      display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex: 1;
-      padding: 20px;
-      background: linear-gradient(135deg, #f5f7fb, #e4e8f0);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
     }
-
-    .login-container {
-      background: white;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      max-width: 500px;
-      width: 100%;
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
     }
-
-    .login-container h2 {
-      margin-bottom: 25px;
+    
+    .modal-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+    
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    
+    .modal-content h3 {
+      margin-bottom: 15px;
       color: #333;
-      font-size: 1.8rem;
     }
-
-    .login-buttons {
+    
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    
+    .modal-buttons {
       display: flex;
-      flex-direction: column;
-      gap: 15px;
+      justify-content: flex-end;
+      gap: 10px;
     }
-
-    .login-buttons button {
-      padding: 14px;
-      border-radius: 30px;
+    
+    .modal-buttons button {
+      padding: 8px 16px;
+      border-radius: 6px;
       border: none;
-      color: white;
-      font-size: 1rem;
-      font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
     }
-
-    .login-buttons button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    
+    .modal-buttons button:first-child {
+      background-color: #f0f0f0;
+      color: #333;
     }
-
-    #loginUserBtn {
-      background: linear-gradient(135deg, #0084ff, #0066cc);
+    
+    .modal-buttons button:last-child {
+      background-color: #0084ff;
+      color: white;
     }
-
-    #loginAdminBtn {
-      background: linear-gradient(135deg, #ff5722, #e64a19);
-    }
-
-    #logoutBtn {
+    
+    #changeNameBtn {
+      margin-left: 10px;
       padding: 8px 16px;
       border-radius: 20px;
       border: none;
-      background-color: white;
+      background-color: #f0f7ff;
       color: #0084ff;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    #logoutBtn:hover {
-      background-color: #f0f7ff;
-    }
-
-    #adminPanel {
-      display: none;
-      background: white;
-      padding: 20px;
-      border-top: 1px solid #e1e4e8;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-      max-height: 250px;
-      overflow-y: auto;
-    }
-
-    #adminPanel h3 {
-      margin-bottom: 15px;
-      color: #333;
-      font-size: 1.2rem;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .user-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f2f5;
-    }
-
-    .user-email {
-      font-weight: 500;
-      color: #333;
-    }
-
-    .ban-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .banButton {
-      padding: 5px 12px;
-      font-size: 0.75rem;
-      border: none;
-      border-radius: 15px;
-      background: #ffebee;
-      color: #d32f2f;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .banButton:hover {
-      background: #ffcdd2;
-    }
-
-    .banButton:nth-child(1) { background: #fff3e0; color: #ef6c00; }
-    .banButton:nth-child(2) { background: #fff8e1; color: #f57c00; }
-    .banButton:nth-child(3) { background: #fff3e0; color: #e65100; }
-    .banButton:nth-child(4) { background: #fbe9e7; color: #d84315; }
-
-    .banButton:nth-child(1):hover { background: #ffe0b2; }
-    .banButton:nth-child(2):hover { background: #ffecb3; }
-    .banButton:nth-child(3):hover { background: #ffe0b2; }
-    .banButton:nth-child(4):hover { background: #ffccbc; }
-
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
-    }
-
-    @media (max-width: 600px) {
-      .message {
-        max-width: 85%;
-      }
-
-      .login-container {
-        padding: 30px 20px;
-      }
-
-      .login-buttons {
-        gap: 10px;
-      }
-
-      #inputArea {
-        flex-direction: row;
-        padding: 12px;
-      }
-
-      #sendBtn {
-        margin-left: 10px;
-        margin-top: 0;
-        width: auto;
-      }
+    
+    #changeNameBtn:hover {
+      background-color: #d6e8ff;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div>💬 DIU Group Chat</div>
-    <div id="logout" style="display:none;">
-      <button id="logoutBtn">Logout</button>
-    </div>
-  </header>
+  <!-- Previous body content remains the same until the script section -->
 
-  <div id="login">
-    <div class="login-container">
-      <h2>Welcome to DIU Group Chat</h2>
-      <p style="margin-bottom: 25px; color: #666;">Sign in with your DIU email to join the conversation</p>
-      <div class="login-buttons">
-        <button id="loginUserBtn">Login as User</button>
-        <button id="loginAdminBtn">Login as Admin</button>
+  <!-- Add this modal HTML right before the closing </body> tag -->
+  <div class="modal-overlay" id="nameModal">
+    <div class="modal-content">
+      <h3>Change Your Display Name</h3>
+      <p>You can set your display name only once. Choose wisely!</p>
+      <input type="text" id="nameInput" placeholder="Enter your display name" maxlength="20" />
+      <div class="modal-buttons">
+        <button id="cancelNameBtn">Cancel</button>
+        <button id="saveNameBtn">Save</button>
       </div>
     </div>
-  </div>
-
-  <div id="messages" style="display: none;"></div>
-
-  <div id="inputArea" style="display: none;">
-    <input type="text" id="messageInput" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
-  </div>
-
-  <div id="adminPanel">
-    <h3>Admin Controls</h3>
-    <div id="userList"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
-      authDomain: "voting-app-2b276.firebaseapp.com",
-      projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.appspot.com",
-      messagingSenderId: "699531517654",
-      appId: "1:699531517654:web:785702f843d21a85c17377",
-      measurementId: "G-309D0KG6KL"
-    };
+    // ... (keep your existing Firebase config and initialization code)
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
+    // Add these new variables
+    const nameModal = document.getElementById('nameModal');
+    const nameInput = document.getElementById('nameInput');
+    const saveNameBtn = document.getElementById('saveNameBtn');
+    const cancelNameBtn = document.getElementById('cancelNameBtn');
+    const changeNameBtn = document.createElement('button');
+    changeNameBtn.id = 'changeNameBtn';
+    changeNameBtn.textContent = 'Change Name';
+    changeNameBtn.style.display = 'none';
 
-    let loginMode = "user"; // default
-    let currentUser = null;
-    let isAdmin = false;
+    // Add the change name button to the header
+    document.querySelector('header div').appendChild(changeNameBtn);
 
-    const loginUserBtn = document.getElementById("loginUserBtn");
-    const loginAdminBtn = document.getElementById("loginAdminBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const loginDiv = document.getElementById("login");
-    const logoutDiv = document.getElementById("logout");
-    const messagesDiv = document.getElementById("messages");
-    const inputArea = document.getElementById("inputArea");
-    const messageInput = document.getElementById("messageInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const adminPanel = document.getElementById("adminPanel");
-    const userList = document.getElementById("userList");
+    // Add these new event listeners
+    changeNameBtn.addEventListener('click', () => {
+      nameModal.classList.add('active');
+    });
 
-    loginUserBtn.onclick = async () => {
-      loginMode = "user";
-      await signInWithPopup(auth, provider);
-    };
+    cancelNameBtn.addEventListener('click', () => {
+      nameModal.classList.remove('active');
+    });
 
-    loginAdminBtn.onclick = async () => {
-      loginMode = "admin";
-      await signInWithPopup(auth, provider);
-    };
+    saveNameBtn.addEventListener('click', async () => {
+      const newName = nameInput.value.trim();
+      if (!newName) {
+        alert('Please enter a valid name');
+        return;
+      }
+      
+      if (newName.length > 20) {
+        alert('Name must be 20 characters or less');
+        return;
+      }
+      
+      try {
+        // Store the display name in Firestore
+        const userRef = doc(db, 'users', currentUser.email);
+        await setDoc(userRef, {
+          displayName: newName,
+          email: currentUser.email,
+          timestamp: serverTimestamp()
+        }, { merge: true });
+        
+        nameModal.classList.remove('active');
+        changeNameBtn.style.display = 'none'; // Hide the button after name is set
+        alert('Display name set successfully!');
+      } catch (error) {
+        console.error('Error saving display name:', error);
+        alert('Error saving display name');
+      }
+    });
 
-    logoutBtn.onclick = async () => {
-      await signOut(auth);
-      location.reload();
-    };
-
+    // Modify the onAuthStateChanged callback to check for display name
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
         alert("Only @diu.edu.bd emails are allowed.");
@@ -411,123 +183,49 @@
       const adminEmail = "252-35-007@diu.edu.bd";
       currentUser = user;
 
-      // Determine admin rights based on login method
-      if (loginMode === "admin") {
-        if (user.email !== adminEmail) {
-          alert("Only the authorized admin can login this way.");
-          signOut(auth);
-          return;
-        }
-        isAdmin = true;
+      // Check if user has a display name set
+      const userRef = doc(db, 'users', user.email);
+      const userSnap = await getDoc(userRef);
+      
+      // Show change name button only if display name isn't set yet
+      if (!userSnap.exists() || !userSnap.data().displayName) {
+        changeNameBtn.style.display = 'block';
       } else {
-        isAdmin = false;
+        changeNameBtn.style.display = 'none';
       }
 
-      loginDiv.style.display = "none";
-      logoutDiv.style.display = "block";
-      messagesDiv.style.display = "block";
-      inputArea.style.display = "flex";
-      if (isAdmin) adminPanel.style.display = "block";
-
-      const q = query(collection(db, "messages"), orderBy("timestamp"));
-      onSnapshot(q, (snapshot) => {
-        messagesDiv.innerHTML = "";
-        snapshot.forEach((doc) => {
-          const msg = doc.data();
-          const msgEl = document.createElement("div");
-          msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
-          
-          const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
-          msgEl.innerHTML = `
-            <div class="sender-name">${msg.sender.split('@')[0]}</div>
-            <div>${msg.text}</div>
-            <div class="message-info">${time}</div>
-          `;
-          messagesDiv.appendChild(msgEl);
-        });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
-
-      if (isAdmin) loadAdminControls();
+      // ... (rest of your existing auth state changed code)
     });
 
-    sendBtn.onclick = async () => {
-      const text = messageInput.value.trim();
-      if (text === "") return;
-
-      const bansSnapshot = await getDocs(collection(db, "bans"));
-      const now = Date.now();
-      for (const docSnap of bansSnapshot.docs) {
-        const data = docSnap.data();
-        if (data.email === currentUser.email && data.until > now) {
-          alert("You're suspended until " + new Date(data.until).toLocaleString());
-          return;
+    // Modify the message display code to use display names
+    onSnapshot(q, async (snapshot) => {
+      messagesDiv.innerHTML = "";
+      for (const docSnap of snapshot.docs) {
+        const msg = docSnap.data();
+        
+        // Get the display name for the sender
+        let displayName = msg.sender.split('@')[0];
+        const userRef = doc(db, 'users', msg.sender);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists() && userSnap.data().displayName) {
+          displayName = userSnap.data().displayName;
         }
+        
+        const msgEl = document.createElement("div");
+        msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
+        
+        const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
+        msgEl.innerHTML = `
+          <div class="sender-name">${displayName}</div>
+          <div>${msg.text}</div>
+          <div class="message-info">${time}</div>
+        `;
+        messagesDiv.appendChild(msgEl);
       }
-
-      await addDoc(collection(db, "messages"), {
-        text,
-        sender: currentUser.email,
-        timestamp: serverTimestamp()
-      });
-
-      messageInput.value = "";
-    };
-
-    messageInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        sendBtn.click();
-      }
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
 
-    async function loadAdminControls() {
-      const users = new Set();
-      const snapshot = await getDocs(query(collection(db, "messages")));
-      snapshot.forEach(doc => users.add(doc.data().sender));
-
-      userList.innerHTML = "";
-      users.forEach(email => {
-        if (email === "252-35-007@diu.edu.bd") return;
-        
-        const userItem = document.createElement("div");
-        userItem.className = "user-item";
-        
-        const userEmail = document.createElement("span");
-        userEmail.className = "user-email";
-        userEmail.textContent = email.split('@')[0];
-        
-        const banButtons = document.createElement("div");
-        banButtons.className = "ban-buttons";
-        
-        ["10min", "1hr", "1d", "1w"].forEach(duration => {
-          const btn = document.createElement("button");
-          btn.className = "banButton";
-          btn.textContent = duration;
-          btn.onclick = () => banUser(email, duration);
-          banButtons.appendChild(btn);
-        });
-        
-        userItem.appendChild(userEmail);
-        userItem.appendChild(banButtons);
-        userList.appendChild(userItem);
-      });
-    }
-
-    async function banUser(email, duration) {
-      const now = Date.now();
-      let ms = 0;
-      if (duration === "10min") ms = 10 * 60 * 1000;
-      if (duration === "1hr") ms = 60 * 60 * 1000;
-      if (duration === "1d") ms = 24 * 60 * 60 * 1000;
-      if (duration === "1w") ms = 7 * 24 * 60 * 60 * 1000;
-
-      await addDoc(collection(db, "bans"), {
-        email,
-        until: now + ms
-      });
-
-      alert(`${email.split('@')[0]} has been suspended for ${duration}`);
-    }
+    // ... (rest of your existing code)
   </script>
 </body>
 </html>
