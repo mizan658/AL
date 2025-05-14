@@ -3,188 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DIU Chat Room</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #e5ddd5;
-    }
-    #login {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    #chat {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      background-color: #fff;
-    }
-    .message {
-      background: #dcf8c6;
-      padding: 8px;
-      margin: 5px;
-      border-radius: 8px;
-      max-width: 70%;
-    }
-    #input-area {
-      display: flex;
-      padding: 10px;
-      background-color: #f0f0f0;
-    }
-    #input-area input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #input-area button {
-      margin-left: 10px;
-      padding: 10px 20px;
-      background-color: #128C7E;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    #status {
-      padding: 5px;
-      text-align: center;
-      font-size: 12px;
-      color: gray;
-    }
-  </style>
+  <title>DIU Chat App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
-<button id="googleSignIn" style="padding: 10px 20px; background: #4285F4; color: white; border: none; border-radius: 5px;">
-  <img src="https://img.icons8.com/color/16/000000/google-logo.png" style="vertical-align: middle; margin-right: 8px;"/>
-  Sign in with Google
-</button>
-
-
-<div id="chat">
-  <div id="status">Loading...</div>
-  <div id="messages"></div>
-  <div id="input-area">
-    <input id="messageInput" placeholder="Type your message..." />
-    <button onclick="sendMessage()">Send</button>
+  <div id="chatApp" class="w-full max-w-lg bg-gray-800 rounded-lg p-4 hidden">
+    <div class="flex justify-between items-center mb-2">
+      <div id="userName" class="text-green-400 font-semibold">Welcome</div>
+      <button id="logout" class="text-sm text-red-400 hover:underline">Logout</button>
+    </div>
+    <div id="messages" class="h-80 overflow-y-scroll mb-2 space-y-2"></div>
+    <div class="text-sm text-gray-400 mb-2" id="typingStatus"></div>
+    <form id="chatForm" class="flex gap-2">
+      <input id="messageInput" class="flex-1 p-2 rounded bg-gray-700 text-white" placeholder="Type a message..." />
+      <button class="bg-green-600 px-4 rounded">Send</button>
+    </form>
   </div>
-</div>
 
-<script>
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
-    authDomain: "chat-88f0f.firebaseapp.com",
-    projectId: "chat-88f0f",
-    storageBucket: "chat-88f0f.appspot.com",
-    messagingSenderId: "146118641258",
-    appId: "1:146118641258:web:f311645f40c8fbcadbac13",
-    measurementId: "G-H7LPCPMMYM"
-  };
+  <button id="signInBtn" class="bg-green-600 px-6 py-3 rounded hidden">Sign in with DIU Google</button>
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  const loginDiv = document.getElementById('login');
-  const chatDiv = document.getElementById('chat');
-  const status = document.getElementById('status');
-  const messagesDiv = document.getElementById('messages');
-  const input = document.getElementById('messageInput');
-
-  let currentUser = null;
-  let typingTimeout;
-
-  document.getElementById('googleSignIn').onclick = async () => {
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
+      authDomain: "chat-88f0f.firebaseapp.com",
+      projectId: "chat-88f0f",
+      storageBucket: "chat-88f0f.appspot.com",
+      messagingSenderId: "146118641258",
+      appId: "1:146118641258:web:f311645f40c8fbcadbac13",
+      measurementId: "G-H7LPCPMMYM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-    const user = result.user;
-    if (!user.email.endsWith("@diu.edu.bd")) {
-      alert("Only @diu.edu.bd email allowed");
-      await auth.signOut();
-      return;
-    }
-    currentUser = user;
-    loginDiv.style.display = "none";
-    chatDiv.style.display = "flex";
-    updateStatus("You are online");
-    startChat();
-  };
+  </script>
 
-  function updateStatus(text) {
-    status.textContent = text;
-  }
+  <!-- App Logic -->
+  <script>
+    const signInBtn = document.getElementById("signInBtn");
+    const chatApp = document.getElementById("chatApp");
+    const userName = document.getElementById("userName");
+    const logoutBtn = document.getElementById("logout");
+    const messageInput = document.getElementById("messageInput");
+    const chatForm = document.getElementById("chatForm");
+    const messagesDiv = document.getElementById("messages");
+    const typingStatus = document.getElementById("typingStatus");
 
-  function sendMessage() {
-    const text = input.value.trim();
-    if (text === "") return;
-    db.collection("messages").add({
-      name: currentUser.displayName,
-      text: text,
-      uid: currentUser.uid,
-      time: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    input.value = "";
-    db.collection("status").doc(currentUser.uid).set({ typing: false }, { merge: true });
-  }
+    let currentUser = null;
+    let typingTimeout = null;
 
-  function startChat() {
-    // Load messages
-    db.collection("messages").orderBy("time")
-      .onSnapshot(snapshot => {
-        messagesDiv.innerHTML = "";
-        snapshot.forEach(doc => {
-          const msg = doc.data();
-          const div = document.createElement("div");
-          div.className = "message";
-          div.innerHTML = `<strong>${msg.name}</strong><br>${msg.text}`;
-          messagesDiv.appendChild(div);
-        });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
-
-    // Typing indicator
-    input.addEventListener("input", () => {
-      db.collection("status").doc(currentUser.uid).set({ typing: true }, { merge: true });
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
-        db.collection("status").doc(currentUser.uid).set({ typing: false }, { merge: true });
-      }, 1500);
-    });
-
-    // Listen to who's typing
-    db.collection("status").onSnapshot(snapshot => {
-      let typingUsers = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (data.typing && doc.id !== currentUser.uid) {
-          typingUsers.push(data.name || "Someone");
-        }
-      });
-      if (typingUsers.length > 0) {
-        updateStatus(`${typingUsers.join(", ")} is typing...`);
+    auth.onAuthStateChanged(user => {
+      if (user && user.email.endsWith("@diu.edu.bd")) {
+        currentUser = user;
+        userName.textContent = `Welcome, ${user.displayName}`;
+        signInBtn.classList.add("hidden");
+        chatApp.classList.remove("hidden");
+        listenToMessages();
+        listenToTyping();
       } else {
-        updateStatus("You are online");
+        auth.signOut();
+        signInBtn.classList.remove("hidden");
+        chatApp.classList.add("hidden");
       }
     });
 
-    // Set online
-    db.collection("status").doc(currentUser.uid).set({
-      name: currentUser.displayName,
-      typing: false
-    }, { merge: true });
-  }
-</script>
+    signInBtn.addEventListener("click", () => {
+      auth.signInWithPopup(provider);
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      auth.signOut();
+    });
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      if (text) {
+        await db.collection("messages").add({
+          text,
+          name: currentUser.displayName,
+          uid: currentUser.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        messageInput.value = "";
+        updateTyping(false);
+      }
+    });
+
+    messageInput.addEventListener("input", () => {
+      updateTyping(true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => updateTyping(false), 2000);
+    });
+
+    function updateTyping(isTyping) {
+      if (currentUser) {
+        db.collection("typing").doc(currentUser.uid).set({
+          name: currentUser.displayName,
+          isTyping,
+          timestamp: Date.now()
+        });
+      }
+    }
+
+    function listenToMessages() {
+      db.collection("messages").orderBy("createdAt").onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const msgDiv = document.createElement("div");
+          msgDiv.className = `p-2 rounded ${msg.uid === currentUser.uid ? "bg-green-600 text-right ml-10" : "bg-gray-700 mr-10"}`;
+          msgDiv.innerHTML = `<div class="text-sm text-gray-300">${msg.name}</div><div>${addEmoji(msg.text)}</div>`;
+          messagesDiv.appendChild(msgDiv);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
+
+    function addEmoji(text) {
+      return text.replace(/:smile:/g, "😄")
+                 .replace(/:heart:/g, "❤️")
+                 .replace(/:fire:/g, "🔥")
+                 .replace(/:thumbsup:/g, "👍");
+    }
+
+    function listenToTyping() {
+      db.collection("typing").onSnapshot(snapshot => {
+        let typingUsers = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.uid !== currentUser?.uid && data.isTyping) {
+            typingUsers.push(data.name);
+          }
+        });
+        typingStatus.textContent = typingUsers.length ? `${typingUsers.join(", ")} is typing...` : \"\";
+      });
+    }
+  </script>
 </body>
 </html>
