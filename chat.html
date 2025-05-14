@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -273,101 +274,6 @@
     .banButton:nth-child(3):hover { background: #ffe0b2; }
     .banButton:nth-child(4):hover { background: #ffccbc; }
 
-    /* Name change modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .modal-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #666;
-    }
-
-    .modal-body {
-      margin-bottom: 20px;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .modal-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .modal-btn-primary {
-      background: #0084ff;
-      color: white;
-    }
-
-    .modal-btn-secondary {
-      background: #f0f2f5;
-      color: #333;
-    }
-
-    #nameInput {
-      width: 100%;
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-bottom: 15px;
-    }
-
-    #profileBtn {
-      margin-left: 10px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: none;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    #profileBtn:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
     /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
@@ -417,7 +323,6 @@
   <header>
     <div>💬 DIU Group Chat</div>
     <div id="logout" style="display:none;">
-      <button id="profileBtn" title="Change display name">👤</button>
       <button id="logoutBtn">Logout</button>
     </div>
   </header>
@@ -445,28 +350,10 @@
     <div id="userList"></div>
   </div>
 
-  <!-- Name Change Modal -->
-  <div id="nameModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">Change Display Name</div>
-        <button class="close-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="text" id="nameInput" placeholder="Enter your new display name" maxlength="20" />
-        <p style="font-size: 0.8rem; color: #666;">This will change how your name appears to others</p>
-      </div>
-      <div class="modal-footer">
-        <button class="modal-btn modal-btn-secondary close-modal">Cancel</button>
-        <button class="modal-btn modal-btn-primary" id="saveNameBtn">Save</button>
-      </div>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -486,9 +373,7 @@
     let loginMode = "user"; // default
     let currentUser = null;
     let isAdmin = false;
-    let displayNames = {}; // Cache for display names
 
-    // DOM Elements
     const loginUserBtn = document.getElementById("loginUserBtn");
     const loginAdminBtn = document.getElementById("loginAdminBtn");
     const logoutBtn = document.getElementById("logoutBtn");
@@ -500,82 +385,6 @@
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
-    const profileBtn = document.getElementById("profileBtn");
-    const nameModal = document.getElementById("nameModal");
-    const nameInput = document.getElementById("nameInput");
-    const saveNameBtn = document.getElementById("saveNameBtn");
-    const closeModalBtns = document.querySelectorAll(".close-modal");
-
-    // Modal handlers
-    profileBtn.onclick = () => {
-      nameModal.style.display = "flex";
-      nameInput.value = displayNames[currentUser.email]?.name || currentUser.email.split('@')[0];
-    };
-
-    closeModalBtns.forEach(btn => {
-      btn.onclick = () => {
-        nameModal.style.display = "none";
-      };
-    });
-
-    saveNameBtn.onclick = async () => {
-      const newName = nameInput.value.trim();
-      if (newName === "") return;
-
-      // Save to Firestore
-      await setDoc(doc(db, "displayNames", currentUser.email), {
-        name: newName,
-        email: currentUser.email,
-        updatedAt: serverTimestamp()
-      });
-
-      // Update local cache
-      displayNames[currentUser.email] = { name: newName };
-      
-      nameModal.style.display = "none";
-      loadMessages(); // Refresh messages to show new name
-    };
-
-    // Get display name from Firestore or use email prefix
-    async function getDisplayName(email) {
-      if (displayNames[email]) {
-        return displayNames[email].name;
-      }
-
-      const docRef = doc(db, "displayNames", email);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        displayNames[email] = docSnap.data();
-        return docSnap.data().name;
-      } else {
-        return email.split('@')[0]; // Default to email prefix
-      }
-    }
-
-    // Load messages with display names
-    async function loadMessages() {
-      const q = query(collection(db, "messages"), orderBy("timestamp"));
-      onSnapshot(q, async (snapshot) => {
-        messagesDiv.innerHTML = "";
-        for (const docSnap of snapshot.docs) {
-          const msg = docSnap.data();
-          const msgEl = document.createElement("div");
-          msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
-          
-          const displayName = await getDisplayName(msg.sender);
-          const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
-          
-          msgEl.innerHTML = `
-            <div class="sender-name">${displayName}</div>
-            <div>${msg.text}</div>
-            <div class="message-info">${time}</div>
-          `;
-          messagesDiv.appendChild(msgEl);
-        }
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
-    }
 
     loginUserBtn.onclick = async () => {
       loginMode = "user";
@@ -620,7 +429,24 @@
       inputArea.style.display = "flex";
       if (isAdmin) adminPanel.style.display = "block";
 
-      loadMessages();
+      const q = query(collection(db, "messages"), orderBy("timestamp"));
+      onSnapshot(q, (snapshot) => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach((doc) => {
+          const msg = doc.data();
+          const msgEl = document.createElement("div");
+          msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
+          
+          const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
+          msgEl.innerHTML = `
+            <div class="sender-name">${msg.sender.split('@')[0]}</div>
+            <div>${msg.text}</div>
+            <div class="message-info">${time}</div>
+          `;
+          messagesDiv.appendChild(msgEl);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
 
       if (isAdmin) loadAdminControls();
     });
@@ -660,17 +486,15 @@
       snapshot.forEach(doc => users.add(doc.data().sender));
 
       userList.innerHTML = "";
-      for (const email of users) {
-        if (email === "252-35-007@diu.edu.bd") continue;
-        
-        const displayName = await getDisplayName(email);
+      users.forEach(email => {
+        if (email === "252-35-007@diu.edu.bd") return;
         
         const userItem = document.createElement("div");
         userItem.className = "user-item";
         
         const userEmail = document.createElement("span");
         userEmail.className = "user-email";
-        userEmail.textContent = displayName;
+        userEmail.textContent = email.split('@')[0];
         
         const banButtons = document.createElement("div");
         banButtons.className = "ban-buttons";
@@ -686,7 +510,7 @@
         userItem.appendChild(userEmail);
         userItem.appendChild(banButtons);
         userList.appendChild(userItem);
-      }
+      });
     }
 
     async function banUser(email, duration) {
@@ -702,8 +526,7 @@
         until: now + ms
       });
 
-      const displayName = await getDisplayName(email);
-      alert(`${displayName} has been suspended for ${duration}`);
+      alert(`${email.split('@')[0]} has been suspended for ${duration}`);
     }
   </script>
 </body>
