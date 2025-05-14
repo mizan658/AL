@@ -1,8 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DIU Chat</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #111;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #chatWindow {
+      width: 90%;
+      height: 400px;
+      background: #222;
+      overflow-y: scroll;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .message {
+      background: #333;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .message small {
+      display: block;
+      color: #aaa;
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    .input-area {
+      display: flex;
+      margin-top: 10px;
+      width: 90%;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 5px 0 0 5px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #25d366;
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .reaction, .delete {
+      float: right;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .reaction:hover {
+      transform: scale(1.2);
+    }
+
+    #chatHeader {
+      display: flex;
+      justify-content: space-between;
+      width: 90%;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    #loginSection {
+      margin-top: 50px;
+    }
+
+    #loginBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      background: #4285f4;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <div id="loginSection">
@@ -10,6 +105,10 @@
   </div>
 
   <div id="chatSection" style="display:none;">
+    <div id="chatHeader">
+      <h2 id="welcomeMessage"></h2>
+      <button id="logoutBtn">Logout</button>
+    </div>
     <div id="chatWindow"></div>
     <div class="input-area">
       <input id="messageInput" type="text" placeholder="Type a message" />
@@ -17,6 +116,116 @@
     </div>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEYjUeSuFxpyZuphg0vB2AK24eyHSjBak",
+      authDomain: "chat-7c4ed.firebaseapp.com",
+      databaseURL: "https://chat-7c4ed-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "chat-7c4ed",
+      storageBucket: "chat-7c4ed.appspot.com",
+      messagingSenderId: "871465831321",
+      appId: "1:871465831321:web:f9ac2aeef73133450b2108"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const db = getDatabase(app);
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatWindow = document.getElementById("chatWindow");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+
+    let currentUser = null;
+
+    loginBtn.onclick = async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const email = result.user.email;
+        if (!email.endsWith("@diu.edu.bd")) {
+          alert("Only @diu.edu.bd emails allowed");
+          await signOut(auth);
+          return;
+        }
+        location.reload();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      location.reload();
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.email.endsWith("@diu.edu.bd")) {
+        currentUser = user;
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("chatSection").style.display = "block";
+        welcomeMessage.textContent = `Welcome, ${user.displayName}`;
+      }
+    });
+
+    const formatTime = (timestamp) => {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const renderMessage = (data, key) => {
+      const div = document.createElement("div");
+      div.className = "message";
+      div.innerHTML = `
+        <strong>${data.sender}:</strong> ${data.text}
+        ${data.uid === (currentUser?.uid || '') ? `<span class="delete" data-key="${key}">🗑️</span>` : ''}
+        <span class="reaction" title="React">💬</span>
+        <small>${formatTime(data.timestamp)}</small>
+      `;
+
+      const reactionBtn = div.querySelector(".reaction");
+      reactionBtn.onclick = () => {
+        reactionBtn.textContent = "❤️";
+      };
+
+      if (data.uid === (currentUser?.uid || '')) {
+        const deleteBtn = div.querySelector(".delete");
+        deleteBtn.onclick = () => {
+          remove(ref(db, `messages/${key}`));
+        };
+      }
+
+      chatWindow.appendChild(div);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+
+    sendBtn.onclick = () => {
+      const msg = messageInput.value.trim();
+      if (!msg) return;
+      push(ref(db, "messages"), {
+        text: msg,
+        sender: currentUser.displayName,
+        uid: currentUser.uid,
+        timestamp: Date.now()
+      });
+      messageInput.value = "";
+    };
+
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+
+    onChildAdded(ref(db, "messages"), (snapshot) => {
+      const data = snapshot.val();
+      const key = snapshot.key;
+      renderMessage(data, key);
+    });
+  </script>
 </body>
 </html>
