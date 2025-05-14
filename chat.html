@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -275,6 +273,68 @@
     .banButton:nth-child(3):hover { background: #ffe0b2; }
     .banButton:nth-child(4):hover { background: #ffccbc; }
 
+    /* Modal styles for username change */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .modal-button.cancel {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+
+    .modal-button.save {
+      background-color: #0084ff;
+      color: white;
+    }
+
     /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
@@ -351,10 +411,22 @@
     <div id="userList"></div>
   </div>
 
+  <!-- Username Change Modal -->
+  <div id="usernameModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title">Set Your Display Name</div>
+      <input type="text" id="usernameInput" class="modal-input" placeholder="Enter your display name" maxlength="20" />
+      <div class="modal-buttons">
+        <button id="cancelUsernameBtn" class="modal-button cancel">Cancel</button>
+        <button id="saveUsernameBtn" class="modal-button save">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
@@ -374,7 +446,9 @@
     let loginMode = "user"; // default
     let currentUser = null;
     let isAdmin = false;
+    let usernameSet = false;
 
+    // DOM elements
     const loginUserBtn = document.getElementById("loginUserBtn");
     const loginAdminBtn = document.getElementById("loginAdminBtn");
     const logoutBtn = document.getElementById("logoutBtn");
@@ -386,6 +460,12 @@
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
+    
+    // Username modal elements
+    const usernameModal = document.getElementById("usernameModal");
+    const usernameInput = document.getElementById("usernameInput");
+    const cancelUsernameBtn = document.getElementById("cancelUsernameBtn");
+    const saveUsernameBtn = document.getElementById("saveUsernameBtn");
 
     loginUserBtn.onclick = async () => {
       loginMode = "user";
@@ -400,6 +480,34 @@
     logoutBtn.onclick = async () => {
       await signOut(auth);
       location.reload();
+    };
+
+    // Username modal handlers
+    cancelUsernameBtn.onclick = () => {
+      usernameModal.style.display = "none";
+    };
+
+    saveUsernameBtn.onclick = async () => {
+      const username = usernameInput.value.trim();
+      if (username === "") {
+        alert("Please enter a valid username");
+        return;
+      }
+
+      // Save username to Firebase
+      try {
+        await setDoc(doc(db, "usernames", currentUser.email), {
+          username: username,
+          email: currentUser.email,
+          timestamp: serverTimestamp()
+        });
+        usernameSet = true;
+        usernameModal.style.display = "none";
+        loadChatMessages();
+      } catch (error) {
+        console.error("Error saving username:", error);
+        alert("Error saving username. Please try again.");
+      }
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -430,31 +538,57 @@
       inputArea.style.display = "flex";
       if (isAdmin) adminPanel.style.display = "block";
 
-      const q = query(collection(db, "messages"), orderBy("timestamp"));
-      onSnapshot(q, (snapshot) => {
-        messagesDiv.innerHTML = "";
-        snapshot.forEach((doc) => {
-          const msg = doc.data();
-          const msgEl = document.createElement("div");
-          msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
-          
-          const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
-          msgEl.innerHTML = `
-            <div class="sender-name">${msg.sender.split('@')[0]}</div>
-            <div>${msg.text}</div>
-            <div class="message-info">${time}</div>
-          `;
-          messagesDiv.appendChild(msgEl);
-        });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      });
+      // Check if username is already set
+      const usernameDoc = await getDoc(doc(db, "usernames", user.email));
+      if (!usernameDoc.exists()) {
+        // Show username modal if username not set
+        usernameModal.style.display = "flex";
+      } else {
+        usernameSet = true;
+        loadChatMessages();
+      }
 
       if (isAdmin) loadAdminControls();
     });
 
+    async function loadChatMessages() {
+      const q = query(collection(db, "messages"), orderBy("timestamp"));
+      onSnapshot(q, async (snapshot) => {
+        messagesDiv.innerHTML = "";
+        for (const docSnap of snapshot.docs) {
+          const msg = docSnap.data();
+          const msgEl = document.createElement("div");
+          msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
+          
+          // Get display name from usernames collection
+          let displayName = msg.sender.split('@')[0];
+          const usernameDoc = await getDoc(doc(db, "usernames", msg.sender));
+          if (usernameDoc.exists()) {
+            displayName = usernameDoc.data().username;
+          }
+          
+          const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
+          msgEl.innerHTML = `
+            <div class="sender-name">${displayName}</div>
+            <div>${msg.text}</div>
+            <div class="message-info">${time}</div>
+          `;
+          messagesDiv.appendChild(msgEl);
+        }
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
+
     sendBtn.onclick = async () => {
       const text = messageInput.value.trim();
       if (text === "") return;
+
+      // Check if username is set
+      if (!usernameSet) {
+        alert("Please set your display name first");
+        usernameModal.style.display = "flex";
+        return;
+      }
 
       const bansSnapshot = await getDocs(collection(db, "bans"));
       const now = Date.now();
@@ -487,15 +621,22 @@
       snapshot.forEach(doc => users.add(doc.data().sender));
 
       userList.innerHTML = "";
-      users.forEach(email => {
-        if (email === "252-35-007@diu.edu.bd") return;
+      for (const email of users) {
+        if (email === "252-35-007@diu.edu.bd") continue;
+        
+        // Get display name from usernames collection
+        let displayName = email.split('@')[0];
+        const usernameDoc = await getDoc(doc(db, "usernames", email));
+        if (usernameDoc.exists()) {
+          displayName = usernameDoc.data().username;
+        }
         
         const userItem = document.createElement("div");
         userItem.className = "user-item";
         
         const userEmail = document.createElement("span");
         userEmail.className = "user-email";
-        userEmail.textContent = email.split('@')[0];
+        userEmail.textContent = displayName;
         
         const banButtons = document.createElement("div");
         banButtons.className = "ban-buttons";
@@ -511,7 +652,7 @@
         userItem.appendChild(userEmail);
         userItem.appendChild(banButtons);
         userList.appendChild(userItem);
-      });
+      }
     }
 
     async function banUser(email, duration) {
@@ -527,7 +668,14 @@
         until: now + ms
       });
 
-      alert(`${email.split('@')[0]} has been suspended for ${duration}`);
+      // Get display name for alert
+      let displayName = email.split('@')[0];
+      const usernameDoc = await getDoc(doc(db, "usernames", email));
+      if (usernameDoc.exists()) {
+        displayName = usernameDoc.data().username;
+      }
+
+      alert(`${displayName} has been suspended for ${duration}`);
     }
   </script>
 </body>
