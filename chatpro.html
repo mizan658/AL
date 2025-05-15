@@ -273,14 +273,15 @@
     .banButton:nth-child(3):hover { background: #ffe0b2; }
     .banButton:nth-child(4):hover { background: #ffccbc; }
 
-    /* Like/Dislike styles */
+    /* Reaction buttons styles */
     .reaction-buttons {
       display: flex;
       gap: 10px;
       margin-top: 8px;
+      flex-wrap: wrap;
     }
 
-    .like-btn, .dislike-btn {
+    .reaction-btn {
       background: rgba(0, 0, 0, 0.05);
       border: none;
       border-radius: 15px;
@@ -300,6 +301,19 @@
       color: #ff5722;
     }
 
+    .heart-btn {
+      color: #e91e63;
+    }
+    .joy-btn {
+      color: #ffc107;
+    }
+    .fire-btn {
+      color: #ff5722;
+    }
+    .thinking-btn {
+      color: #9c27b0;
+    }
+
     .like-btn:hover {
       background: rgba(0, 132, 255, 0.1);
     }
@@ -308,15 +322,63 @@
       background: rgba(255, 87, 34, 0.1);
     }
 
-    .like-count, .dislike-count {
+    .heart-btn:hover {
+      background: rgba(233, 30, 99, 0.1);
+    }
+    .joy-btn:hover {
+      background: rgba(255, 193, 7, 0.1);
+    }
+    .fire-btn:hover {
+      background: rgba(255, 87, 34, 0.1);
+    }
+    .thinking-btn:hover {
+      background: rgba(156, 39, 176, 0.1);
+    }
+
+    .reaction-count {
       font-weight: bold;
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
       animation: pulse 2s infinite;
     }
 
-    .own-message .like-count, 
-    .own-message .dislike-count {
+    .own-message .reaction-count {
       text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .user-reacted {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    /* Reactors list styles */
+    .reactors-list {
+      display: none;
+      position: absolute;
+      background: white;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+      max-width: 200px;
+      font-size: 0.8rem;
+      border: 1px solid #e1e4e8;
+    }
+
+    .own-message .reactors-list {
+      background: #0066cc;
+      color: white;
+      border: none;
+    }
+
+    .reactors-list.show {
+      display: block;
+    }
+
+    .reactor-item {
+      padding: 4px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     @keyframes pulse {
@@ -369,7 +431,7 @@
       opacity: 1;
     }
 
-    /* Dark mode styles - IMPROVED VISIBILITY */
+    /* Dark mode styles */
     body.dark-mode {
       background-color: #121212;
       color: #e0e0e0;
@@ -382,7 +444,7 @@
 
     body.dark-mode .other-message {
       background-color: #2d2d2d;
-      color: #ffffff; /* Changed from #e0e0e0 to #ffffff for better readability */
+      color: #ffffff;
       border: 1px solid #444;
     }
 
@@ -398,18 +460,30 @@
       color: #ffffff;
     }
 
-    body.dark-mode .like-btn, 
-    body.dark-mode .dislike-btn {
+    body.dark-mode .reaction-btn {
       background: rgba(255, 255, 255, 0.15);
       color: #ffffff;
     }
 
     body.dark-mode .like-btn {
-      color: #64b5f6; /* Brighter blue for likes */
+      color: #64b5f6;
     }
 
     body.dark-mode .dislike-btn {
-      color: #ff8a65; /* Brighter orange for dislikes */
+      color: #ff8a65;
+    }
+
+    body.dark-mode .heart-btn {
+      color: #f48fb1;
+    }
+    body.dark-mode .joy-btn {
+      color: #fff59d;
+    }
+    body.dark-mode .fire-btn {
+      color: #ffab91;
+    }
+    body.dark-mode .thinking-btn {
+      color: #ce93d8;
     }
 
     body.dark-mode .like-btn:hover {
@@ -420,8 +494,20 @@
       background: rgba(255, 138, 101, 0.3);
     }
 
-    body.dark-mode .like-count,
-    body.dark-mode .dislike-count {
+    body.dark-mode .heart-btn:hover {
+      background: rgba(244, 143, 177, 0.3);
+    }
+    body.dark-mode .joy-btn:hover {
+      background: rgba(255, 245, 157, 0.3);
+    }
+    body.dark-mode .fire-btn:hover {
+      background: rgba(255, 171, 145, 0.3);
+    }
+    body.dark-mode .thinking-btn:hover {
+      background: rgba(206, 147, 216, 0.3);
+    }
+
+    body.dark-mode .reaction-count {
       text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
       color: #ffffff;
     }
@@ -641,7 +727,7 @@
       <p style="margin-bottom: 25px; color: #666;">Sign in with your DIU email to join the conversation</p>
       <div class="login-buttons">
         <button id="loginUserBtn">User Login</button>
-        <button id="loginAdminBtn">Admin panal</button>
+        <button id="loginAdminBtn">Admin Panel</button>
       </div>
     </div>
   </div>
@@ -659,28 +745,33 @@
 
   <div id="adminPanel">
     <div class="admin-controls">
-      <h3>Admin Panal</h3>
+      <h3>Admin Panel</h3>
       <button id="resetChatBtn">Reset Chat History</button>
     </div>
     <div id="userList"></div>
   </div>
 
   <script type="module">
+    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, getDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 
+    // Your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
-      authDomain: "voting-app-2b276.firebaseapp.com",
-      projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.appspot.com",
-      messagingSenderId: "699531517654",
-      appId: "1:699531517654:web:785702f843d21a85c17377",
-      measurementId: "G-309D0KG6KL"
+      apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
+      authDomain: "chat-88f0f.firebaseapp.com",
+      projectId: "chat-88f0f",
+      storageBucket: "chat-88f0f.firebasestorage.app",
+      messagingSenderId: "146118641258",
+      appId: "1:146118641258:web:f311645f40c8fbcadbac13",
+      measurementId: "G-H7LPCPMMYM"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
@@ -688,6 +779,7 @@
     let loginMode = "user";
     let currentUser = null;
     let isAdmin = false;
+    let userCache = {}; // Cache for user data
 
     const loginUserBtn = document.getElementById("loginUserBtn");
     const loginAdminBtn = document.getElementById("loginAdminBtn");
@@ -732,7 +824,7 @@
 
     // Reset all chat messages
     resetChatBtn.onclick = async () => {
-      if (confirm("Are you sure you want to delete ALL chat messages?.")) {
+      if (confirm("Are you sure you want to delete ALL chat messages?")) {
         try {
           const messagesSnapshot = await getDocs(collection(db, "messages"));
           const batch = writeBatch(db);
@@ -750,6 +842,52 @@
       }
     };
 
+    // Function to get user display name from email
+    async function getUserDisplayName(email) {
+      if (userCache[email]) return userCache[email];
+      
+      // Try to get from Firestore if you have a users collection
+      // Otherwise just use the email prefix
+      const displayName = email.split('@')[0];
+      userCache[email] = displayName;
+      return displayName;
+    }
+
+    // Function to show reactors list
+    function showReactorsList(messageId, reactionType, users, event) {
+      // Close any open reactors lists
+      document.querySelectorAll('.reactors-list').forEach(el => {
+        el.classList.remove('show');
+      });
+      
+      const button = event.target.closest('.reaction-btn');
+      const list = document.createElement('div');
+      list.className = 'reactors-list show';
+      list.style.left = `${button.offsetLeft}px`;
+      list.style.bottom = `${button.offsetHeight + 5}px`;
+      
+      if (users.length === 0) {
+        list.innerHTML = '<div class="reactor-item">No reactions yet</div>';
+      } else {
+        list.innerHTML = users.map(user => 
+          `<div class="reactor-item">${user}</div>`
+        ).join('');
+      }
+      
+      button.appendChild(list);
+      
+      // Close when clicking elsewhere
+      setTimeout(() => {
+        const clickHandler = (e) => {
+          if (!list.contains(e.target) && !button.contains(e.target)) {
+            list.classList.remove('show');
+            document.removeEventListener('click', clickHandler);
+          }
+        };
+        document.addEventListener('click', clickHandler);
+      }, 0);
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
         alert("Only DIU emails are allowed.");
@@ -759,10 +897,11 @@
 
       const adminEmail = "252-35-007@diu.edu.bd";
       currentUser = user;
+      userCache[user.email] = user.displayName || user.email.split('@')[0];
 
       if (loginMode === "admin") {
         if (user.email !== adminEmail) {
-          alert("Your are not an Admin.");
+          alert("You are not an Admin.");
           signOut(auth);
           return;
         }
@@ -776,14 +915,14 @@
       loadingDiv.style.display = "flex";
       
       const q = query(collection(db, "messages"), orderBy("timestamp"));
-      onSnapshot(q, (snapshot) => {
+      onSnapshot(q, async (snapshot) => {
         loadingDiv.style.display = "none";
         messagesDiv.style.display = "block";
         inputArea.style.display = "flex";
         if (isAdmin) adminPanel.style.display = "block";
         
         messagesDiv.innerHTML = "";
-        snapshot.forEach((doc) => {
+        for (const doc of snapshot.docs) {
           const msg = doc.data();
           const msgEl = document.createElement("div");
           msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
@@ -794,6 +933,58 @@
           // Check if user has already reacted
           const hasLiked = msg.likedBy?.includes(currentUser.uid);
           const hasDisliked = msg.dislikedBy?.includes(currentUser.uid);
+          const hasHearted = msg.heartsBy?.includes(currentUser.uid);
+          const hasJoyed = msg.tearsOfJoyBy?.includes(currentUser.uid);
+          const hasFired = msg.fireBy?.includes(currentUser.uid);
+          const hasThought = msg.thinkingBy?.includes(currentUser.uid);
+          
+          // Get display names for reactors (only if it's the sender's message)
+          let likedByNames = [];
+          let dislikedByNames = [];
+          let heartsByNames = [];
+          let joyByNames = [];
+          let fireByNames = [];
+          let thinkingByNames = [];
+          
+          if (msg.sender === currentUser.email) {
+            if (msg.likedBy?.length) {
+              likedByNames = await Promise.all(msg.likedBy.map(async uid => {
+                // In a real app, you'd look up the user's name from their UID
+                // For this demo, we'll just use "User 1", "User 2" etc.
+                return `User ${msg.likedBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.dislikedBy?.length) {
+              dislikedByNames = await Promise.all(msg.dislikedBy.map(async uid => {
+                return `User ${msg.dislikedBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.heartsBy?.length) {
+              heartsByNames = await Promise.all(msg.heartsBy.map(async uid => {
+                return `User ${msg.heartsBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.tearsOfJoyBy?.length) {
+              joyByNames = await Promise.all(msg.tearsOfJoyBy.map(async uid => {
+                return `User ${msg.tearsOfJoyBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.fireBy?.length) {
+              fireByNames = await Promise.all(msg.fireBy.map(async uid => {
+                return `User ${msg.fireBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.thinkingBy?.length) {
+              thinkingByNames = await Promise.all(msg.thinkingBy.map(async uid => {
+                return `User ${msg.thinkingBy.indexOf(uid) + 1}`;
+              }));
+            }
+          }
           
           msgEl.innerHTML = `
             ${isAdmin ? `<button class="delete-message-btn" onclick="handleDeleteMessage('${doc.id}')">×</button>` : ''}
@@ -804,70 +995,134 @@
             </div>
             <div class="reaction-buttons">
               <button class="like-btn ${hasLiked ? 'user-reacted' : ''}" 
-                      onclick="handleLike('${doc.id}')"
-                      ${hasLiked || hasDisliked ? 'disabled' : ''}>
-                👍 <span class="like-count">${msg.likes || 0}</span>
+                      onclick="${msg.sender === currentUser.email ? 
+                        `showReactorsList('${doc.id}', 'likes', ${JSON.stringify(likedByNames)}, event)` : 
+                        `handleLike('${doc.id}')`}"
+                      ${(hasLiked || hasDisliked || hasHearted || hasJoyed || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                👍 <span class="reaction-count">${msg.likes || 0}</span>
               </button>
               <button class="dislike-btn ${hasDisliked ? 'user-reacted' : ''}" 
-                      onclick="handleDislike('${doc.id}')"
-                      ${hasDisliked || hasLiked ? 'disabled' : ''}>
-                👎 <span class="dislike-count">${msg.dislikes || 0}</span>
+                      onclick="${msg.sender === currentUser.email ? 
+                        `showReactorsList('${doc.id}', 'dislikes', ${JSON.stringify(dislikedByNames)}, event)` : 
+                        `handleDislike('${doc.id}')`}"
+                      ${(hasDisliked || hasLiked || hasHearted || hasJoyed || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                👎 <span class="reaction-count">${msg.dislikes || 0}</span>
+              </button>
+              <button class="heart-btn ${hasHearted ? 'user-reacted' : ''}" 
+                      onclick="${msg.sender === currentUser.email ? 
+                        `showReactorsList('${doc.id}', 'hearts', ${JSON.stringify(heartsByNames)}, event)` : 
+                        `handleHeart('${doc.id}')`}"
+                      ${(hasHearted || hasLiked || hasDisliked || hasJoyed || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                ❤️ <span class="reaction-count">${msg.hearts || 0}</span>
+              </button>
+              <button class="joy-btn ${hasJoyed ? 'user-reacted' : ''}" 
+                      onclick="${msg.sender === currentUser.email ? 
+                        `showReactorsList('${doc.id}', 'joy', ${JSON.stringify(joyByNames)}, event)` : 
+                        `handleTearsOfJoy('${doc.id}')`}"
+                      ${(hasJoyed || hasLiked || hasDisliked || hasHearted || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                😂 <span class="reaction-count">${msg.tearsOfJoy || 0}</span>
+              </button>
+              <button class="fire-btn ${hasFired ? 'user-reacted' : ''}" 
+                      onclick="${msg.sender === currentUser.email ? 
+                        `showReactorsList('${doc.id}', 'fire', ${JSON.stringify(fireByNames)}, event)` : 
+                        `handleFire('${doc.id}')`}"
+                      ${(hasFired || hasLiked || hasDisliked || hasHearted || hasJoyed || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                🔥 <span class="reaction-count">${msg.fire || 0}</span>
+              </button>
+              <button class="thinking-btn ${hasThought ? 'user-reacted' : ''}" 
+                      onclick="${msg.sender === currentUser.email ? 
+                        `showReactorsList('${doc.id}', 'thinking', ${JSON.stringify(thinkingByNames)}, event)` : 
+                        `handleThinking('${doc.id}')`}"
+                      ${(hasThought || hasLiked || hasDisliked || hasHearted || hasJoyed || hasFired) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                🤔 <span class="reaction-count">${msg.thinking || 0}</span>
               </button>
             </div>
           `;
           
           messagesDiv.appendChild(msgEl);
-        });
+        }
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
 
       if (isAdmin) loadAdminControls();
     });
 
-    // Add these functions to the global scope
+    // Add reaction functions to the global scope
     window.handleLike = async (messageId) => {
       try {
         const messageRef = doc(db, "messages", messageId);
-        const messageDoc = await getDoc(messageRef);
-        const messageData = messageDoc.data();
-        
-        // Check if user already reacted (like or dislike)
-        if (messageData.likedBy?.includes(currentUser.uid) || messageData.dislikedBy?.includes(currentUser.uid)) {
-          alert("You've already reacted to this message");
-          return;
-        }
-        
-        // Update the message with the like
         await updateDoc(messageRef, {
           likes: increment(1),
           likedBy: arrayUnion(currentUser.uid)
         });
       } catch (error) {
         console.error("Error adding like:", error);
-        alert("Failed to add like. Please try again.");
       }
     };
 
     window.handleDislike = async (messageId) => {
       try {
         const messageRef = doc(db, "messages", messageId);
-        const messageDoc = await getDoc(messageRef);
-        const messageData = messageDoc.data();
-        
-        // Check if user already reacted (like or dislike)
-        if (messageData.likedBy?.includes(currentUser.uid) || messageData.dislikedBy?.includes(currentUser.uid)) {
-          alert("You've already reacted to this message");
-          return;
-        }
-        
-        // Update the message with the dislike
         await updateDoc(messageRef, {
           dislikes: increment(1),
           dislikedBy: arrayUnion(currentUser.uid)
         });
       } catch (error) {
         console.error("Error adding dislike:", error);
-        alert("Failed to add dislike. Please try again.");
+      }
+    };
+
+    window.handleHeart = async (messageId) => {
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          hearts: increment(1),
+          heartsBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding heart:", error);
+      }
+    };
+
+    window.handleTearsOfJoy = async (messageId) => {
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          tearsOfJoy: increment(1),
+          tearsOfJoyBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding tears of joy:", error);
+      }
+    };
+
+    window.handleFire = async (messageId) => {
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          fire: increment(1),
+          fireBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding fire:", error);
+      }
+    };
+
+    window.handleThinking = async (messageId) => {
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          thinking: increment(1),
+          thinkingBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding thinking:", error);
       }
     };
 
@@ -903,7 +1158,15 @@
         likes: 0,
         dislikes: 0,
         likedBy: [],
-        dislikedBy: []
+        dislikedBy: [],
+        hearts: 0,
+        heartsBy: [],
+        tearsOfJoy: 0,
+        tearsOfJoyBy: [],
+        fire: 0,
+        fireBy: [],
+        thinking: 0,
+        thinkingBy: []
       });
 
       messageInput.value = "";
