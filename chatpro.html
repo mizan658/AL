@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DIU Group Chat</title>
+  <title>Private Group Chat</title>
   <style>
     * {
       box-sizing: border-box;
@@ -626,7 +626,7 @@
 </head>
 <body>
   <header>
-    <div>💬 DIU Group Chat</div>
+    <div>💬 Private Group Chat</div>
     <div style="display: flex; align-items: center;">
       <button id="themeToggle">🌓</button>
       <div id="logout" style="display:none;">
@@ -637,11 +637,11 @@
 
   <div id="login">
     <div class="login-container">
-      <h2>Welcome to DIU Group Chat</h2>
+      <h2>Welcome to Private Group Chat</h2>
       <p style="margin-bottom: 25px; color: #666;">Sign in with your DIU email to join the conversation</p>
       <div class="login-buttons">
-        <button id="loginUserBtn">Login as User</button>
-        <button id="loginAdminBtn">Login as Admin</button>
+        <button id="loginUserBtn">User Login</button>
+        <button id="loginAdminBtn">Admin panal</button>
       </div>
     </div>
   </div>
@@ -659,8 +659,8 @@
 
   <div id="adminPanel">
     <div class="admin-controls">
-      <h3>Admin Controls</h3>
-      <button id="resetChatBtn">Reset All Chat</button>
+      <h3>Admin Panal</h3>
+      <button id="resetChatBtn">Reset Chat History</button>
     </div>
     <div id="userList"></div>
   </div>
@@ -732,7 +732,7 @@
 
     // Reset all chat messages
     resetChatBtn.onclick = async () => {
-      if (confirm("Are you sure you want to delete ALL chat messages? This cannot be undone.")) {
+      if (confirm("Are you sure you want to delete ALL chat messages?.")) {
         try {
           const messagesSnapshot = await getDocs(collection(db, "messages"));
           const batch = writeBatch(db);
@@ -752,7 +752,7 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
-        alert("Only @diu.edu.bd emails are allowed.");
+        alert("Only DIU emails are allowed.");
         signOut(auth);
         return;
       }
@@ -762,7 +762,7 @@
 
       if (loginMode === "admin") {
         if (user.email !== adminEmail) {
-          alert("Only the authorized admin can login this way.");
+          alert("Your are not an Admin.");
           signOut(auth);
           return;
         }
