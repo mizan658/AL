@@ -361,13 +361,15 @@
       cursor: pointer;
       opacity: 0;
       transition: opacity 0.2s;
+      color: #333;
+      font-weight: bold;
     }
 
     .message:hover .delete-message-btn {
       opacity: 1;
     }
 
-    /* Dark mode styles */
+    /* Dark mode styles - IMPROVED VISIBILITY */
     body.dark-mode {
       background-color: #121212;
       color: #e0e0e0;
@@ -380,37 +382,93 @@
 
     body.dark-mode .other-message {
       background-color: #2d2d2d;
-      color: #e0e0e0;
+      color: #ffffff; /* Changed from #e0e0e0 to #ffffff for better readability */
+      border: 1px solid #444;
     }
 
     body.dark-mode #inputArea,
     body.dark-mode #adminPanel {
       background-color: #1e1e1e;
-      border-color: #333;
+      border-color: #444;
     }
 
     body.dark-mode #messageInput {
       background-color: #2d2d2d;
-      border-color: #444;
-      color: #e0e0e0;
+      border-color: #555;
+      color: #ffffff;
     }
 
     body.dark-mode .like-btn, 
     body.dark-mode .dislike-btn {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    body.dark-mode .like-btn {
+      color: #64b5f6; /* Brighter blue for likes */
+    }
+
+    body.dark-mode .dislike-btn {
+      color: #ff8a65; /* Brighter orange for dislikes */
     }
 
     body.dark-mode .like-btn:hover {
-      background: rgba(0, 132, 255, 0.2);
+      background: rgba(100, 181, 246, 0.3);
     }
 
     body.dark-mode .dislike-btn:hover {
-      background: rgba(255, 87, 34, 0.2);
+      background: rgba(255, 138, 101, 0.3);
     }
 
     body.dark-mode .like-count,
     body.dark-mode .dislike-count {
       text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+      color: #ffffff;
+    }
+
+    body.dark-mode #adminPanel h3,
+    body.dark-mode .user-email {
+      color: #ffffff;
+    }
+
+    body.dark-mode .user-item {
+      border-bottom-color: #444;
+    }
+
+    body.dark-mode .banButton {
+      color: #ffffff;
+    }
+
+    body.dark-mode .banButton:nth-child(1) { background: #5d4037; color: #ffab91; }
+    body.dark-mode .banButton:nth-child(2) { background: #4e342e; color: #ff8a65; }
+    body.dark-mode .banButton:nth-child(3) { background: #3e2723; color: #ff7043; }
+    body.dark-mode .banButton:nth-child(4) { background: #2e1b16; color: #ff5722; }
+
+    body.dark-mode .delete-message-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    body.dark-mode #logoutBtn {
+      background-color: #2d2d2d;
+      color: #64b5f6;
+    }
+
+    body.dark-mode #logoutBtn:hover {
+      background-color: #3d3d3d;
+    }
+
+    body.dark-mode .login-container {
+      background-color: #2d2d2d;
+      color: #ffffff;
+    }
+
+    body.dark-mode .login-container h2 {
+      color: #ffffff;
+    }
+
+    body.dark-mode .login-container p {
+      color: #b0b0b0;
     }
 
     /* Theme toggle button */
@@ -429,7 +487,7 @@
     }
 
     body.dark-mode #themeToggle {
-      color: #e0e0e0;
+      color: #ffffff;
     }
 
     /* Scrollbar styling */
@@ -449,6 +507,18 @@
 
     ::-webkit-scrollbar-thumb:hover {
       background: #a8a8a8;
+    }
+
+    body.dark-mode ::-webkit-scrollbar-track {
+      background: #2d2d2d;
+    }
+
+    body.dark-mode ::-webkit-scrollbar-thumb {
+      background: #555;
+    }
+
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+      background: #777;
     }
 
     /* Mobile responsiveness */
@@ -508,7 +578,7 @@
 
       .delete-message-btn {
         opacity: 1;
-        background: rgba(0, 0, 0, 0.3);
+        background: rgba(255, 255, 255, 0.3);
       }
     }
 
@@ -542,6 +612,10 @@
       border-top: 5px solid #0084ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
+    }
+
+    body.dark-mode .loading-spinner {
+      border-top-color: #64b5f6;
     }
 
     @keyframes spin {
