@@ -362,6 +362,9 @@
       max-width: 200px;
       font-size: 0.8rem;
       border: 1px solid #e1e4e8;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 5px;
     }
 
     .own-message .reactors-list {
@@ -763,7 +766,7 @@
       apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
       authDomain: "chat-88f0f.firebaseapp.com",
       projectId: "chat-88f0f",
-      storageBucket: "chat-88f0f.firebasestorage.app",
+      storageBucket: "chat-88f0f.appspot.com",
       messagingSenderId: "146118641258",
       appId: "1:146118641258:web:f311645f40c8fbcadbac13",
       measurementId: "G-H7LPCPMMYM"
@@ -861,10 +864,15 @@
       });
       
       const button = event.target.closest('.reaction-btn');
+      const existingList = button.querySelector('.reactors-list');
+      
+      if (existingList) {
+        existingList.classList.add('show');
+        return;
+      }
+      
       const list = document.createElement('div');
       list.className = 'reactors-list show';
-      list.style.left = `${button.offsetLeft}px`;
-      list.style.bottom = `${button.offsetHeight + 5}px`;
       
       if (users.length === 0) {
         list.innerHTML = '<div class="reactor-item">No reactions yet</div>';
