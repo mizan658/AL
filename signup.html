@@ -325,6 +325,7 @@
 
         .user-name {
             font-weight: 600;
+            margin-right: 10px;
         }
 
         footer {
@@ -365,6 +366,17 @@
             
             .admin-panel {
                 width: 100%;
+            }
+            
+            .user-profile {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 5px;
+            }
+            
+            .user-name {
+                margin-right: 0;
+                font-size: 14px;
             }
         }
 
@@ -558,6 +570,7 @@
                 auth.signInWithPopup(provider)
                     .then((result) => {
                         console.log('User signed in:', result.user);
+                        updateUserProfile(result.user);
                         checkAdminStatus(result.user);
                     })
                     .catch((error) => {
@@ -565,6 +578,19 @@
                         alert('Sign in failed. Please try again.');
                     });
             });
+        }
+
+        // Update user profile display
+        function updateUserProfile(user) {
+            if (user) {
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+                userName.textContent = user.displayName || 'User';
+                authButtons.style.display = 'none';
+                userProfile.style.display = 'flex';
+            } else {
+                authButtons.style.display = 'flex';
+                userProfile.style.display = 'none';
+            }
         }
 
         // Check if user is admin
@@ -644,29 +670,103 @@
             }
         }
 
-        // [Rest of your existing functions remain exactly the same...]
-        // loadPresets(), createPresetCard(), loadAdminPresetList(), 
-        // createAdminPresetItem(), deletePreset(), etc.
+        // Load presets from Firestore
+        function loadPresets() {
+            db.collection('presets').get().then((querySnapshot) => {
+                presetsGrid.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const preset = doc.data();
+                    createPresetCard(preset, doc.id);
+                });
+            }).catch((error) => {
+                console.error('Error loading presets:', error);
+            });
+        }
+
+        // Create preset card for user view
+        function createPresetCard(preset, id) {
+            const presetCard = document.createElement('div');
+            presetCard.className = 'preset-card';
+            presetCard.innerHTML = `
+                <div class="preset-image">
+                    <img src="${preset.imageUrl}" alt="${preset.title}">
+                </div>
+                <div class="preset-info">
+                    <h3>${preset.title}</h3>
+                    <p>${preset.description || 'Professional CV template'}</p>
+                    <button class="btn btn-primary use-preset" data-id="${id}">Use This Template</button>
+                </div>
+            `;
+            presetsGrid.appendChild(presetCard);
+            
+            // Add event listener to the button
+            presetCard.querySelector('.use-preset').addEventListener('click', () => {
+                if (auth.currentUser) {
+                    window.location.href = preset.link;
+                } else {
+                    googleSignInBtn.click();
+                }
+            });
+        }
+
+        // Load admin preset list
+        function loadAdminPresetList() {
+            db.collection('presets').get().then((querySnapshot) => {
+                adminPresetList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const preset = doc.data();
+                    createAdminPresetItem(preset, doc.id);
+                });
+            }).catch((error) => {
+                console.error('Error loading presets for admin:', error);
+            });
+        }
+
+        // Create admin preset list item
+        function createAdminPresetItem(preset, id) {
+            const presetItem = document.createElement('div');
+            presetItem.className = 'admin-preset-item';
+            presetItem.innerHTML = `
+                <div>
+                    <h4>${preset.title}</h4>
+                    <small>${preset.link}</small>
+                </div>
+                <button class="btn btn-danger delete-preset" data-id="${id}">Delete</button>
+            `;
+            adminPresetList.appendChild(presetItem);
+            
+            // Add event listener to delete button
+            presetItem.querySelector('.delete-preset').addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this preset?')) {
+                    deletePreset(id);
+                }
+            });
+        }
+
+        // Delete preset
+        function deletePreset(id) {
+            db.collection('presets').doc(id).delete().then(() => {
+                console.log('Preset deleted successfully');
+                loadPresets();
+                loadAdminPresetList();
+            }).catch((error) => {
+                console.error('Error deleting preset:', error);
+                alert('Error deleting preset. Please try again.');
+            });
+        }
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             initializeGoogleSignIn();
             loadPresets();
             
+            // Auth state listener
             auth.onAuthStateChanged((user) => {
-                if (user) {
-                    authButtons.style.display = 'none';
-                    userProfile.style.display = 'flex';
-                    userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
-                    userName.textContent = user.displayName || 'User';
-                    
-                    if (user.email === ADMIN_EMAIL) {
-                        console.log('Admin user logged in');
-                    }
-                } else {
-                    authButtons.style.display = 'flex';
-                    userProfile.style.display = 'none';
-                    adminPanel.style.display = 'none';
+                updateUserProfile(user);
+                
+                if (user && user.email === ADMIN_EMAIL) {
+                    console.log('Admin user logged in');
+                    loadAdminPresetList();
                 }
             });
             
@@ -687,8 +787,16 @@
             });
         });
 
-        // [Rest of your existing event listeners remain the same...]
-        signOutButton.addEventListener('click', () => auth.signOut());
+        // Sign out button
+        signOutButton.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
+        });
+
+        // Get started button
         getStartedButton.addEventListener('click', () => {
             if (auth.currentUser) {
                 document.querySelector('.presets-container').scrollIntoView({ behavior: 'smooth' });
@@ -697,10 +805,12 @@
             }
         });
         
+        // Add preset button
         addPresetButton.addEventListener('click', () => addPresetModal.style.display = 'flex');
         closeAddPresetModal.addEventListener('click', () => addPresetModal.style.display = 'none');
         addPresetForm.addEventListener('submit', addPreset);
         
+        // Close modal when clicking outside
         window.addEventListener('click', (e) => {
             if (e.target === addPresetModal) addPresetModal.style.display = 'none';
         });
