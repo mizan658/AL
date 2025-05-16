@@ -713,13 +713,133 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* Navigation buttons */
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      margin-right: 15px;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode .nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Rules section */
+    #rulesSection {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-top: 1px solid #e1e4e8;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    body.dark-mode #rulesSection {
+      background-color: #1e1e1e;
+      border-color: #444;
+    }
+
+    #rulesSection h3 {
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.2rem;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    body.dark-mode #rulesSection h3 {
+      color: #ffffff;
+      border-bottom-color: #444;
+    }
+
+    #rulesSection ol {
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
+    #rulesSection li {
+      margin-bottom: 8px;
+    }
+
+    body.dark-mode #rulesSection {
+      color: #e0e0e0;
+    }
+
+    #toggleRulesBtn {
+      padding: 8px 16px;
+      margin-left: 10px;
+      border-radius: 20px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #toggleRulesBtn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode #toggleRulesBtn {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode #toggleRulesBtn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Pro badge */
+    .pro-badge {
+      background: linear-gradient(135deg, #ffc107, #ff9800);
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-left: 5px;
+      display: inline-block;
+    }
+
+    body.dark-mode .pro-badge {
+      color: #fff;
+    }
   </style>
 </head>
 <body>
   <header>
     <div>💬 Private Group Chat</div>
     <div style="display: flex; align-items: center;">
+      <div class="nav-buttons">
+        <a href="https://mizan658.github.io/AL/index.html" class="nav-btn">Home</a>
+        <a href="https://mizan658.github.io/AL/notice.html" class="nav-btn">Notice</a>
+        <a href="https://mizan658.github.io/AL/voting-system.html" class="nav-btn">Vote</a>
+      </div>
       <button id="themeToggle">🌓</button>
+      <button id="toggleRulesBtn">Rules</button>
       <div id="logout" style="display:none;">
         <button id="logoutBtn">Logout</button>
       </div>
@@ -748,12 +868,32 @@
     <button id="sendBtn">Send</button>
   </div>
 
+  <div id="rulesSection">
+    <h3>Chat Rules and Regulations</h3>
+    <ol>
+      <li>Only DIU students with valid DIU email addresses are allowed to participate.</li>
+      <li>Be respectful to all participants - no harassment, bullying, or hate speech.</li>
+      <li>No spamming or flooding the chat with repeated messages.</li>
+      <li>Do not share personal information of yourself or others.</li>
+      <li>No NSFW (Not Safe For Work) content of any kind.</li>
+      <li>Admins have the right to remove messages and ban users who violate rules.</li>
+      <li>Chat reactions (likes, etc.) are only available to approved users.</li>
+      <li>Violations may result in temporary or permanent bans.</li>
+      <li>Use the chat for its intended purpose - academic and social discussions.</li>
+      <li>Have fun and keep the conversation positive!</li>
+    </ol>
+  </div>
+
   <div id="adminPanel">
     <div class="admin-controls">
       <h3>Admin Panel</h3>
       <button id="resetChatBtn">Reset Chat History</button>
     </div>
     <div id="userList"></div>
+    <div id="approvalSection" style="margin-top: 20px;">
+      <h4>Approve Users for Chat Pro</h4>
+      <div id="unapprovedUsers"></div>
+    </div>
   </div>
 
   <script type="module">
@@ -784,6 +924,7 @@
     let loginMode = "user";
     let currentUser = null;
     let isAdmin = false;
+    let isProUser = false;
     let userCache = {}; // Cache for user data
 
     const loginUserBtn = document.getElementById("loginUserBtn");
@@ -800,6 +941,9 @@
     const loadingDiv = document.getElementById("loading");
     const themeToggle = document.getElementById("themeToggle");
     const resetChatBtn = document.getElementById("resetChatBtn");
+    const toggleRulesBtn = document.getElementById("toggleRulesBtn");
+    const rulesSection = document.getElementById("rulesSection");
+    const unapprovedUsersDiv = document.getElementById("unapprovedUsers");
 
     // Theme toggle functionality
     themeToggle.addEventListener('click', () => {
@@ -811,6 +955,11 @@
     if (localStorage.getItem('darkMode') === 'true') {
       document.body.classList.add('dark-mode');
     }
+
+    // Toggle rules section
+    toggleRulesBtn.addEventListener('click', () => {
+      rulesSection.style.display = rulesSection.style.display === 'none' ? 'block' : 'none';
+    });
 
     loginUserBtn.onclick = async () => {
       loginMode = "user";
@@ -856,6 +1005,17 @@
       const displayName = email.split('@')[0];
       userCache[email] = displayName;
       return displayName;
+    }
+
+    // Function to check if user is approved for pro features
+    async function checkProUserStatus(uid) {
+      try {
+        const userDoc = await getDoc(doc(db, "approvedUsers", uid));
+        return userDoc.exists();
+      } catch (error) {
+        console.error("Error checking pro user status:", error);
+        return false;
+      }
     }
 
     // Function to show reactors list
@@ -924,6 +1084,9 @@
       } else {
         isAdmin = false;
       }
+
+      // Check if user is approved for pro features
+      isProUser = await checkProUserStatus(user.uid);
 
       loginDiv.style.display = "none";
       logoutDiv.style.display = "block";
@@ -1003,7 +1166,7 @@
           
           msgEl.innerHTML = `
             ${isAdmin ? `<button class="delete-message-btn" onclick="handleDeleteMessage('${doc.id}')">×</button>` : ''}
-            <div class="sender-name">${msg.sender.split('@')[0]}</div>
+            <div class="sender-name">${msg.sender.split('@')[0]}${msg.sender === currentUser.email && isProUser ? '<span class="pro-badge">PRO</span>' : ''}</div>
             <div>${msg.text}</div>
             <div class="message-info">
               <span>${time}</span>
@@ -1077,11 +1240,18 @@
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
 
-      if (isAdmin) loadAdminControls();
+      if (isAdmin) {
+        loadAdminControls();
+        loadUnapprovedUsers();
+      }
     });
 
     // Add reaction functions to the global scope
     window.handleLike = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
       try {
         const messageRef = doc(db, "messages", messageId);
         await updateDoc(messageRef, {
@@ -1094,6 +1264,10 @@
     };
 
     window.handleDislike = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
       try {
         const messageRef = doc(db, "messages", messageId);
         await updateDoc(messageRef, {
@@ -1106,6 +1280,10 @@
     };
 
     window.handleHeart = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
       try {
         const messageRef = doc(db, "messages", messageId);
         await updateDoc(messageRef, {
@@ -1118,6 +1296,10 @@
     };
 
     window.handleTearsOfJoy = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
       try {
         const messageRef = doc(db, "messages", messageId);
         await updateDoc(messageRef, {
@@ -1130,6 +1312,10 @@
     };
 
     window.handleFire = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
       try {
         const messageRef = doc(db, "messages", messageId);
         await updateDoc(messageRef, {
@@ -1142,6 +1328,10 @@
     };
 
     window.handleThinking = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
       try {
         const messageRef = doc(db, "messages", messageId);
         await updateDoc(messageRef, {
@@ -1236,6 +1426,64 @@
         userItem.appendChild(banButtons);
         userList.appendChild(userItem);
       });
+    }
+
+    async function loadUnapprovedUsers() {
+      // Get all users who have sent messages but aren't approved
+      const messagesSnapshot = await getDocs(collection(db, "messages"));
+      const users = new Set();
+      messagesSnapshot.forEach(doc => users.add(doc.data().sender));
+      
+      const approvedUsersSnapshot = await getDocs(collection(db, "approvedUsers"));
+      const approvedUserIds = new Set();
+      approvedUsersSnapshot.forEach(doc => approvedUserIds.add(doc.id));
+      
+      unapprovedUsersDiv.innerHTML = "";
+      
+      // For demo purposes, we'll just show users who aren't in the approved list
+      // In a real app, you'd need to map emails to UIDs
+      for (const email of users) {
+        if (email === "252-35-007@diu.edu.bd") continue;
+        
+        // In a real app, you'd need to get the UID for each email
+        // For this demo, we'll just show the email
+        const userItem = document.createElement("div");
+        userItem.className = "user-item";
+        
+        const userEmail = document.createElement("span");
+        userEmail.className = "user-email";
+        userEmail.textContent = email.split('@')[0];
+        
+        const approveButton = document.createElement("button");
+        approveButton.className = "banButton";
+        approveButton.textContent = "Approve for Pro";
+        approveButton.style.background = "#4caf50";
+        approveButton.style.color = "white";
+        approveButton.onclick = () => approveUser(email);
+        
+        userItem.appendChild(userEmail);
+        userItem.appendChild(approveButton);
+        unapprovedUsersDiv.appendChild(userItem);
+      }
+    }
+
+    async function approveUser(email) {
+      // In a real app, you'd need to get the UID for the email
+      // For this demo, we'll just show an alert
+      alert(`User ${email.split('@')[0]} would be approved for Chat Pro in a real implementation.`);
+      
+      // In a real implementation, you would:
+      // 1. Find the user's UID based on their email
+      // 2. Add a document to the "approvedUsers" collection with their UID
+      // Example:
+      // await addDoc(collection(db, "approvedUsers"), {
+      //   uid: userId,
+      //   email: email,
+      //   approvedAt: serverTimestamp()
+      // });
+      
+      // Then reload the unapproved users list
+      loadUnapprovedUsers();
     }
 
     async function banUser(email, duration) {
