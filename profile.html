@@ -1,595 +1,814 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DIU Connect - Sign Up</title>
-  <style>
-    :root {
-      --primary-color: #1877f2; /* Facebook-like blue */
-      --secondary-color: #42b72a;
-      --bg-color: #f0f2f5;
-      --card-color: #ffffff;
-      --text-color: #1c1e21;
-      --border-color: #dddfe2;
-    }
-    
-    /* Night mode variables */
-    :root.night-mode {
-      --primary-color: #1877f2;
-      --secondary-color: #42b72a;
-      --bg-color: #18191a;
-      --card-color: #242526;
-      --text-color: #e4e6eb;
-      --border-color: #3e4042;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    
-    .header {
-      background-color: var(--primary-color);
-      color: white;
-      padding: 15px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 100;
-    }
-    
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-    }
-    
-    .logo {
-      font-size: 28px;
-      font-weight: bold;
-    }
-    
-    .main-content {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 100px 20px 40px;
-    }
-    
-    .login-container {
-      background-color: var(--card-color);
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      transition: background-color 0.3s;
-    }
-    
-    .login-title {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: var(--text-color);
-    }
-    
-    .login-subtitle {
-      font-size: 16px;
-      color: #606770;
-      margin-bottom: 25px;
-    }
-    
-    .google-btn {
-      background-color: var(--card-color);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 12px;
-      width: 100%;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.3s;
-      margin-bottom: 15px;
-    }
-    
-    .google-btn:hover {
-      background-color: var(--bg-color);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .google-icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 10px;
-    }
-    
-    .divider {
-      border-top: 1px solid var(--border-color);
-      margin: 20px 0;
-      position: relative;
-    }
-    
-    .divider-text {
-      background-color: var(--card-color);
-      padding: 0 8px;
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #606770;
-      font-size: 14px;
-    }
-    
-    .footer {
-      background-color: var(--card-color);
-      padding: 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #8a8d91;
-      border-top: 1px solid var(--border-color);
-      transition: background-color 0.3s;
-    }
-    
-    .error-message {
-      color: #ff4d4f;
-      margin-top: 15px;
-      font-size: 14px;
-      padding: 10px;
-      background-color: #fff2f0;
-      border-radius: 4px;
-      border: 1px solid #ffccc7;
-    }
-    
-    /* Profile page styles (hidden by default) */
-    .profile-container {
-      display: none;
-      max-width: 1200px;
-      margin: 80px auto 20px;
-      width: 100%;
-      padding: 0 20px;
-    }
-    
-    .nav-bar {
-      background-color: var(--card-color);
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-around;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
-    }
-    
-    .nav-btn {
-      background: none;
-      border: none;
-      color: var(--text-color);
-      font-size: 16px;
-      cursor: pointer;
-      padding: 8px 15px;
-      border-radius: 4px;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
-    .nav-btn:hover, .nav-btn.active {
-      background-color: var(--bg-color);
-    }
-    
-    .profile-header {
-      background-color: var(--card-color);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
-    }
-    
-    .profile-info {
-      display: flex;
-      align-items: center;
-    }
-    
-    .profile-pic {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 20px;
-      border: 4px solid var(--primary-color);
-    }
-    
-    .profile-details h2 {
-      margin: 0 0 5px 0;
-    }
-    
-    .profile-details p {
-      margin: 5px 0;
-      color: #65676b;
-    }
-    
-    .bio-section {
-      margin-top: 20px;
-    }
-    
-    .bio-text {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: var(--bg-color);
-      border-radius: 8px;
-      transition: background-color 0.3s;
-    }
-    
-    .bio-edit {
-      display: none;
-      margin-top: 10px;
-    }
-    
-    .bio-textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      resize: vertical;
-      min-height: 100px;
-      font-family: inherit;
-      margin-bottom: 10px;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-    }
-    
-    .edit-btn, .save-btn, .cancel-btn {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    
-    .edit-btn {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-    }
-    
-    .save-btn {
-      background-color: var(--primary-color);
-      color: white;
-      margin-right: 10px;
-    }
-    
-    .cancel-btn {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-    }
-    
-    .content-section {
-      background-color: var(--card-color);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
-    }
-    
-    .section-title {
-      margin-top: 0;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 10px;
-    }
-    
-    /* Theme toggle button */
-    .theme-toggle {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.3s;
-    }
-    
-    .theme-toggle:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    @media (max-width: 768px) {
-      .profile-info {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .profile-pic {
-        margin-right: 0;
-        margin-bottom: 15px;
-      }
-      
-      .nav-bar {
-        flex-wrap: wrap;
-      }
-      
-      .nav-btn {
-        margin: 5px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <div class="logo">DIU Connect</div>
-      <button class="theme-toggle" id="themeToggle">🌙</button>
-    </div>
-  </header>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional CV Builder</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- CSS -->
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
 
-  <!-- Main Content - Login -->
-  <main class="main-content" id="loginContent">
-    <div class="login-container">
-      <h1 class="login-title">Welcome to DIU Connect</h1>
-      <p class="login-subtitle">Connect with your DIU community. Sign up with your DIU email.</p>
-      
-      <button class="google-btn" id="googleSignInBtn">
-        <img src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google logo" class="google-icon">
-        Continue with Google
-      </button>
-      
-      <div class="divider">
-        <span class="divider-text">or</span>
-      </div>
-      
-      <p>You must use your <strong>@diu.edu.bd</strong> email to access this platform.</p>
-      
-      <div class="error-message" id="errorMsg"></div>
-    </div>
-  </main>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-  <!-- Profile Content (hidden by default) -->
-  <div class="profile-container" id="profileContent">
-    <!-- Navigation Bar -->
-    <div class="nav-bar">
-      <a href="https://mizan658.github.io/AL/index.html" class="nav-btn active" id="homeBtn">Home</a>
-      <a href="https://mizan658.github.io/AL/profile.html" class="nav-btn" id="profileBtn">Profile</a>
-      <a href="https://mizan658.github.io/AL/notice.html" class="nav-btn" id="noticeBtn">Notices</a>
-      <a href="https://mizan658.github.io/AL/chat.html" class="nav-btn" id="chatBtn">Chat Groups</a>
-      <button class="nav-btn" id="logoutBtn">Logout</button>
-    </div>
-    
-    <!-- Profile Header -->
-    <div class="profile-header">
-      <div class="profile-info">
-        <img src="" alt="Profile Picture" class="profile-pic" id="profilePicture">
-        <div class="profile-details">
-          <h2 id="userName">Loading...</h2>
-          <p id="userEmail">user@diu.edu.bd</p>
-          <p>Student at Daffodil International University</p>
-        </div>
-      </div>
-      
-      <div class="bio-section">
-        <h3>About</h3>
-        <div class="bio-text" id="bioText">No bio yet. Click edit to add one.</div>
-        <button class="edit-btn" id="editBioBtn">Edit Bio</button>
-        
-        <div class="bio-edit" id="bioEdit">
-          <textarea class="bio-textarea" id="bioTextarea" placeholder="Tell others about yourself..."></textarea>
-          <button class="save-btn" id="saveBioBtn">Save</button>
-          <button class="cancel-btn" id="cancelBioBtn">Cancel</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Content Sections -->
-    <div class="content-section">
-      <h3 class="section-title">Recent Notices</h3>
-      <p>No new notices at this time.</p>
-    </div>
-    
-    <div class="content-section">
-      <h3 class="section-title">Your Groups</h3>
-      <p>You haven't joined any groups yet.</p>
-    </div>
-  </div>
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p>© 2023 DIU Connect - For Daffodil International University students only</p>
-  </footer>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
-  <script type="module">
-    // Import Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiActU-ePRUSuYNHrbiOZNaIpmzSt5QnM",
-      authDomain: "notice-8edc7.firebaseapp.com",
-      projectId: "notice-8edc7",
-      storageBucket: "notice-8edc7.appspot.com",
-      messagingSenderId: "948590141987",
-      appId: "1:948590141987:web:a9af8252e98f2933f40796",
-      measurementId: "G-DSM883VQPT"
-    };
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
 
-    // DOM elements
-    const googleSignInBtn = document.getElementById("googleSignInBtn");
-    const errorMsg = document.getElementById("errorMsg");
-    const loginContent = document.getElementById("loginContent");
-    const profileContent = document.getElementById("profileContent");
-    const profilePicture = document.getElementById("profilePicture");
-    const userName = document.getElementById("userName");
-    const userEmail = document.getElementById("userEmail");
-    const bioText = document.getElementById("bioText");
-    const bioEdit = document.getElementById("bioEdit");
-    const bioTextarea = document.getElementById("bioTextarea");
-    const editBioBtn = document.getElementById("editBioBtn");
-    const saveBioBtn = document.getElementById("saveBioBtn");
-    const cancelBioBtn = document.getElementById("cancelBioBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const themeToggle = document.getElementById("themeToggle");
+        .logo span {
+            color: var(--secondary-color);
+        }
 
-    // Theme toggle functionality
-    themeToggle.addEventListener("click", () => {
-      document.documentElement.classList.toggle("night-mode");
-      const isNightMode = document.documentElement.classList.contains("night-mode");
-      localStorage.setItem("nightMode", isNightMode);
-      updateThemeIcon(isNightMode);
-    });
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
 
-    function updateThemeIcon(isNightMode) {
-      themeToggle.textContent = isNightMode ? "☀️" : "🌙";
-    }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
 
-    // Check for saved theme preference
-    function checkSavedTheme() {
-      const savedNightMode = localStorage.getItem("nightMode") === "true";
-      if (savedNightMode) {
-        document.documentElement.classList.add("night-mode");
-      }
-      updateThemeIcon(savedNightMode);
-    }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
 
-    // Initialize theme
-    checkSavedTheme();
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
 
-    // Google Sign-In Logic
-    googleSignInBtn.addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then(async (result) => {
-          const user = result.user;
-          if (user.email.endsWith("@diu.edu.bd")) {
-            // Check if user exists in Firestore, if not create a new document
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (!userSnap.exists()) {
-              // Create new user document with default bio
-              await setDoc(userRef, {
-                name: user.displayName,
-                email: user.email,
-                bio: "DIU Student",
-                photoURL: user.photoURL,
-                createdAt: new Date()
-              });
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        main {
+            padding-top: 80px;
+            min-height: calc(100vh - 120px);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .presets-container {
+            padding: 40px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            color: var(--dark-color);
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .preset-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .preset-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .preset-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .preset-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .preset-card:hover .preset-image img {
+            transform: scale(1.05);
+        }
+
+        .preset-info {
+            padding: 20px;
+        }
+
+        .preset-info h3 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .preset-info p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--dark-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1500;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .admin-panel h2 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .admin-preset-list {
+            margin-top: 20px;
+        }
+
+        .admin-preset-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .admin-preset-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .presets-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             }
             
-            // Show profile content
-            loadProfile(user);
-            loginContent.style.display = "none";
-            profileContent.style.display = "block";
-          } else {
-            // Not a DIU email
-            signOut(auth);
-            errorMsg.textContent = "Only @diu.edu.bd emails are allowed. Please use your DIU email.";
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          errorMsg.textContent = "Error signing in. Please try again.";
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .admin-panel {
+                width: 100%;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <a href="#" class="logo">CV<span>Builder</span></a>
+            <div class="auth-buttons" id="authButtons">
+                <button class="btn btn-outline" id="signInButton">Sign In</button>
+                <button class="btn btn-primary" id="signUpButton">Sign Up</button>
+            </div>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <img id="userAvatar" class="user-avatar" src="" alt="User Avatar">
+                <span class="user-name" id="userName"></span>
+                <button class="btn btn-outline" id="signOutButton">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Create Your Professional CV in Minutes</h1>
+                <p>Choose from our professionally designed templates and create a CV that stands out from the crowd.</p>
+                <div id="heroButtons">
+                    <button class="btn btn-primary" id="getStartedButton">Get Started</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="presets-container">
+            <div class="container">
+                <h2 class="section-title">Choose a Template</h2>
+                <div class="presets-grid" id="presetsGrid">
+                    <!-- Presets will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <h2>Admin Panel</h2>
+        <button class="btn btn-success" id="addPresetButton">Add New Preset</button>
+        
+        <div class="admin-preset-list" id="adminPresetList">
+            <!-- Admin preset list will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Add Preset Modal -->
+    <div class="modal" id="addPresetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Preset</h2>
+                <button class="close-modal" id="closeAddPresetModal">&times;</button>
+            </div>
+            <form id="addPresetForm">
+                <div class="form-group">
+                    <label for="presetTitle">Preset Title</label>
+                    <input type="text" id="presetTitle" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="presetDescription">Description</label>
+                    <textarea id="presetDescription" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="presetLink">Link URL</label>
+                    <input type="url" id="presetLink" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="presetImage">Preset Image</label>
+                    <input type="file" id="presetImage" class="form-control" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Preset</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sign In</h2>
+                <button class="close-modal" id="closeLoginModal">&times;</button>
+            </div>
+            <div id="googleSignInButton" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div class="modal" id="signUpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sign Up</h2>
+                <button class="close-modal" id="closeSignUpModal">&times;</button>
+            </div>
+            <div id="googleSignUpButton" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container footer-content">
+            <p>&copy; 2023 CVBuilder. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2nl9y3QZqp8FWErYkU7_jgrkwaRdW7UY",
+            authDomain: "professional-cv-builder-29381.firebaseapp.com",
+            projectId: "professional-cv-builder-29381",
+            storageBucket: "professional-cv-builder-29381.appspot.com",
+            messagingSenderId: "68072092579",
+            appId: "1:68072092579:web:08c5525b501a3cfc8ca016",
+            measurementId: "G-B0CY5QP02P"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // DOM elements
+        const authButtons = document.getElementById('authButtons');
+        const userProfile = document.getElementById('userProfile');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const signOutButton = document.getElementById('signOutButton');
+        const signInButton = document.getElementById('signInButton');
+        const signUpButton = document.getElementById('signUpButton');
+        const getStartedButton = document.getElementById('getStartedButton');
+        const presetsGrid = document.getElementById('presetsGrid');
+        const adminPanel = document.getElementById('adminPanel');
+        const addPresetButton = document.getElementById('addPresetButton');
+        const adminPresetList = document.getElementById('adminPresetList');
+        const addPresetModal = document.getElementById('addPresetModal');
+        const closeAddPresetModal = document.getElementById('closeAddPresetModal');
+        const addPresetForm = document.getElementById('addPresetForm');
+        const loginModal = document.getElementById('loginModal');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const signUpModal = document.getElementById('signUpModal');
+        const closeSignUpModal = document.getElementById('closeSignUpModal');
+
+        // Admin email (replace with your admin email)
+        const ADMIN_EMAIL = 'ahamed.to.tipak@gmail.com';
+
+        // Key combination to show admin panel
+        const ADMIN_KEY_COMBO = 'Control+M';
+
+        // Current key press state
+        let keysPressed = {};
+
+        // Initialize Google Sign-In
+        function initializeGoogleSignIn() {
+            google.accounts.id.initialize({
+                client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+                callback: handleGoogleSignIn
+            });
+            
+            // Render Google Sign-In buttons
+            google.accounts.id.renderButton(
+                document.getElementById('googleSignInButton'),
+                { theme: 'outline', size: 'large', text: 'signin_with' }
+            );
+            
+            google.accounts.id.renderButton(
+                document.getElementById('googleSignUpButton'),
+                { theme: 'outline', size: 'large', text: 'signup_with' }
+            );
+        }
+
+        // Handle Google Sign-In
+        async function handleGoogleSignIn(response) {
+            try {
+                const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+                const userCredential = await auth.signInWithCredential(credential);
+                console.log('User signed in:', userCredential.user);
+                
+                // Close the modal
+                loginModal.style.display = 'none';
+                signUpModal.style.display = 'none';
+                
+                // Check if user is admin
+                checkAdminStatus(userCredential.user);
+            } catch (error) {
+                console.error('Google Sign-In Error:', error);
+                alert('Sign in failed. Please try again.');
+            }
+        }
+
+        // Check if user is admin
+        function checkAdminStatus(user) {
+            if (user.email === ADMIN_EMAIL) {
+                console.log('Admin user detected');
+                // Admin-specific functionality can be added here
+            }
+        }
+
+        // Sign out
+        function signOut() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
+        }
+
+        // Load presets from Firestore
+        function loadPresets() {
+            db.collection('presets').get().then((querySnapshot) => {
+                presetsGrid.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const preset = doc.data();
+                    createPresetCard(preset, doc.id);
+                });
+            }).catch((error) => {
+                console.error('Error loading presets:', error);
+            });
+        }
+
+        // Create preset card for user view
+        function createPresetCard(preset, id) {
+            const presetCard = document.createElement('div');
+            presetCard.className = 'preset-card';
+            presetCard.innerHTML = `
+                <div class="preset-image">
+                    <img src="${preset.imageUrl}" alt="${preset.title}">
+                </div>
+                <div class="preset-info">
+                    <h3>${preset.title}</h3>
+                    <p>${preset.description || 'Professional CV template'}</p>
+                    <button class="btn btn-primary use-preset" data-id="${id}">Use This Template</button>
+                </div>
+            `;
+            presetsGrid.appendChild(presetCard);
+            
+            // Add event listener to the button
+            presetCard.querySelector('.use-preset').addEventListener('click', () => {
+                if (auth.currentUser) {
+                    window.location.href = preset.link;
+                } else {
+                    loginModal.style.display = 'flex';
+                }
+            });
+        }
+
+        // Load admin preset list
+        function loadAdminPresetList() {
+            db.collection('presets').get().then((querySnapshot) => {
+                adminPresetList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const preset = doc.data();
+                    createAdminPresetItem(preset, doc.id);
+                });
+            }).catch((error) => {
+                console.error('Error loading presets for admin:', error);
+            });
+        }
+
+        // Create admin preset list item
+        function createAdminPresetItem(preset, id) {
+            const presetItem = document.createElement('div');
+            presetItem.className = 'admin-preset-item';
+            presetItem.innerHTML = `
+                <div>
+                    <h4>${preset.title}</h4>
+                    <small>${preset.link}</small>
+                </div>
+                <button class="btn btn-danger delete-preset" data-id="${id}">Delete</button>
+            `;
+            adminPresetList.appendChild(presetItem);
+            
+            // Add event listener to delete button
+            presetItem.querySelector('.delete-preset').addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this preset?')) {
+                    deletePreset(id);
+                }
+            });
+        }
+
+        // Add new preset
+        function addPreset(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('presetTitle').value;
+            const description = document.getElementById('presetDescription').value;
+            const link = document.getElementById('presetLink').value;
+            const imageFile = document.getElementById('presetImage').files[0];
+            
+            if (!title || !link || !imageFile) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Upload image to Firebase Storage
+            const storageRef = storage.ref(`preset-images/${imageFile.name}`);
+            const uploadTask = storageRef.put(imageFile);
+            
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Progress monitoring can be added here
+                }, 
+                (error) => {
+                    console.error('Upload error:', error);
+                    alert('Error uploading image. Please try again.');
+                }, 
+                () => {
+                    // Upload completed successfully
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Add preset data to Firestore
+                        db.collection('presets').add({
+                            title: title,
+                            description: description,
+                            link: link,
+                            imageUrl: downloadURL,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }).then(() => {
+                            console.log('Preset added successfully');
+                            addPresetModal.style.display = 'none';
+                            addPresetForm.reset();
+                            loadPresets();
+                            loadAdminPresetList();
+                        }).catch((error) => {
+                            console.error('Error adding preset:', error);
+                            alert('Error adding preset. Please try again.');
+                        });
+                    });
+                }
+            );
+        }
+
+        // Delete preset
+        function deletePreset(id) {
+            db.collection('presets').doc(id).delete().then(() => {
+                console.log('Preset deleted successfully');
+                loadPresets();
+                loadAdminPresetList();
+            }).catch((error) => {
+                console.error('Error deleting preset:', error);
+                alert('Error deleting preset. Please try again.');
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In
+            initializeGoogleSignIn();
+            
+            // Load presets
+            loadPresets();
+            
+            // Auth state listener
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    authButtons.style.display = 'none';
+                    userProfile.style.display = 'flex';
+                    userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+                    userName.textContent = user.displayName || 'User';
+                    
+                    // Check if user is admin
+                    if (user.email === ADMIN_EMAIL) {
+                        console.log('Admin user logged in');
+                    }
+                } else {
+                    // User is signed out
+                    authButtons.style.display = 'flex';
+                    userProfile.style.display = 'none';
+                    adminPanel.style.display = 'none';
+                }
+            });
+            
+            // Keydown event for admin panel
+            document.addEventListener('keydown', (e) => {
+                keysPressed[e.key] = true;
+                
+                // Check for Ctrl+M
+                if (keysPressed['Control'] && keysPressed['m']) {
+                    if (auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+                        adminPanel.style.display = adminPanel.style.display === 'block' ? 'none' : 'block';
+                    }
+                    // Reset keys
+                    keysPressed = {};
+                }
+            });
+            
+            // Keyup event to reset keys
+            document.addEventListener('keyup', (e) => {
+                delete keysPressed[e.key];
+            });
         });
-    });
 
-    // Load profile data
-    function loadProfile(user) {
-      profilePicture.src = user.photoURL || "https://via.placeholder.com/150";
-      userName.textContent = user.displayName;
-      userEmail.textContent = user.email;
-      
-      // Load bio from Firestore
-      const userRef = doc(db, "users", user.uid);
-      getDoc(userRef).then((docSnap) => {
-        if (docSnap.exists() && docSnap.data().bio) {
-          bioText.textContent = docSnap.data().bio;
-        }
-      });
-    }
-
-    // Bio editing functionality
-    editBioBtn.addEventListener("click", () => {
-      bioText.style.display = "none";
-      editBioBtn.style.display = "none";
-      bioEdit.style.display = "block";
-      bioTextarea.value = bioText.textContent;
-    });
-
-    cancelBioBtn.addEventListener("click", () => {
-      bioEdit.style.display = "none";
-      bioText.style.display = "block";
-      editBioBtn.style.display = "inline-block";
-    });
-
-    saveBioBtn.addEventListener("click", async () => {
-      const newBio = bioTextarea.value.trim();
-      if (newBio) {
-        try {
-          const user = auth.currentUser;
-          if (user) {
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, { bio: newBio }, { merge: true });
-            bioText.textContent = newBio;
-            bioEdit.style.display = "none";
-            bioText.style.display = "block";
-            editBioBtn.style.display = "inline-block";
-          }
-        } catch (error) {
-          console.error("Error updating bio:", error);
-          alert("Failed to update bio. Please try again.");
-        }
-      }
-    });
-
-    // Logout functionality
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth).then(() => {
-        profileContent.style.display = "none";
-        loginContent.style.display = "flex";
-        errorMsg.textContent = "";
-      }).catch((error) => {
-        console.error("Logout error:", error);
-      });
-    });
-
-    // Check if user is already logged in
-    auth.onAuthStateChanged((user) => {
-      if (user && user.email.endsWith("@diu.edu.bd")) {
-        loadProfile(user);
-        loginContent.style.display = "none";
-        profileContent.style.display = "block";
-      } else {
-        loginContent.style.display = "flex";
-        profileContent.style.display = "none";
-      }
-    });
-  </script>
+        signOutButton.addEventListener('click', signOut);
+        signInButton.addEventListener('click', () => loginModal.style.display = 'flex');
+        signUpButton.addEventListener('click', () => signUpModal.style.display = 'flex');
+        getStartedButton.addEventListener('click', () => {
+            if (auth.currentUser) {
+                // Scroll to presets
+                document.querySelector('.presets-container').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                signUpModal.style.display = 'flex';
+            }
+        });
+        
+        closeLoginModal.addEventListener('click', () => loginModal.style.display = 'none');
+        closeSignUpModal.addEventListener('click', () => signUpModal.style.display = 'none');
+        closeAddPresetModal.addEventListener('click', () => addPresetModal.style.display = 'none');
+        
+        addPresetButton.addEventListener('click', () => addPresetModal.style.display = 'flex');
+        addPresetForm.addEventListener('submit', addPreset);
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) loginModal.style.display = 'none';
+            if (e.target === signUpModal) signUpModal.style.display = 'none';
+            if (e.target === addPresetModal) addPresetModal.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
