@@ -80,6 +80,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: none;
+            font-size: 14px;
         }
 
         .btn-primary {
@@ -127,40 +128,40 @@
 
         .hero {
             text-align: center;
-            padding: 60px 0;
+            padding: 40px 0;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
             border-radius: 10px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            font-size: 2rem;
+            margin-bottom: 15px;
             color: var(--dark-color);
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #666;
             max-width: 700px;
-            margin: 0 auto 30px;
+            margin: 0 auto 25px;
         }
 
         .presets-container {
-            padding: 40px 0;
+            padding: 30px 0;
         }
 
         .section-title {
             text-align: center;
-            margin-bottom: 40px;
-            font-size: 2rem;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
             color: var(--dark-color);
         }
 
         .presets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
+            gap: 20px;
         }
 
         .preset-card {
@@ -178,7 +179,7 @@
         }
 
         .preset-image {
-            height: 200px;
+            height: 180px;
             overflow: hidden;
         }
 
@@ -194,17 +195,19 @@
         }
 
         .preset-info {
-            padding: 20px;
+            padding: 15px;
         }
 
         .preset-info h3 {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: var(--dark-color);
+            font-size: 1.1rem;
         }
 
         .preset-info p {
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
         }
 
         .modal {
@@ -222,9 +225,9 @@
 
         .modal-content {
             background-color: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 8px;
-            width: 90%;
+            width: 95%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
@@ -234,11 +237,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .modal-header h2 {
             color: var(--dark-color);
+            font-size: 1.5rem;
         }
 
         .close-modal {
@@ -250,22 +254,23 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
             color: var(--dark-color);
+            font-size: 0.9rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px;
+            padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .form-control:focus {
@@ -278,31 +283,32 @@
             position: fixed;
             top: 0;
             right: 0;
-            width: 350px;
+            width: 100%;
             height: 100vh;
             background-color: white;
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
             z-index: 1500;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
         }
 
         .admin-panel h2 {
             color: var(--dark-color);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #eee;
+            font-size: 1.5rem;
         }
 
         .admin-preset-list {
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .admin-preset-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #eee;
         }
 
@@ -310,74 +316,62 @@
             border-bottom: none;
         }
 
+        .admin-preset-item h4 {
+            font-size: 1rem;
+        }
+
+        .admin-preset-item small {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             object-fit: cover;
         }
 
         .user-name {
             font-weight: 600;
-            margin-right: 10px;
+            margin-right: 8px;
+            font-size: 0.9rem;
         }
 
         footer {
             background-color: var(--dark-color);
             color: white;
-            padding: 20px 0;
+            padding: 15px 0;
             text-align: center;
         }
 
         .footer-content {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .footer-links {
             display: flex;
-            gap: 20px;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
             color: white;
             text-decoration: none;
+            font-size: 0.9rem;
         }
 
         .footer-links a:hover {
             text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .presets-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            }
-            
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .admin-panel {
-                width: 100%;
-            }
-            
-            .user-profile {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 5px;
-            }
-            
-            .user-name {
-                margin-right: 0;
-                font-size: 14px;
-            }
         }
 
         /* Loading spinner */
@@ -404,13 +398,13 @@
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 10px 15px;
-            font-size: 16px;
+            padding: 8px 12px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.3s;
             width: 100%;
-            max-width: 240px;
+            max-width: 220px;
             margin: 0 auto;
         }
 
@@ -419,8 +413,8 @@
         }
 
         .google-signin-btn i {
-            font-size: 20px;
-            margin-right: 10px;
+            font-size: 18px;
+            margin-right: 8px;
         }
 
         /* Loading screen */
@@ -439,19 +433,130 @@
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .loading-text {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--dark-color);
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 0;
+            }
+
+            .logo {
+                margin-bottom: 5px;
+            }
+
+            .auth-buttons, .user-profile {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .google-signin-btn {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            main {
+                padding-top: 100px;
+            }
+
+            .hero {
+                padding: 30px 0;
+                margin-bottom: 20px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+                padding: 0 10px;
+            }
+
+            .presets-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .preset-image {
+                height: 160px;
+            }
+
+            .preset-info {
+                padding: 12px;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+
+            .admin-panel {
+                padding: 10px;
+            }
+
+            .admin-preset-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .admin-preset-item button {
+                align-self: flex-end;
+            }
+
+            .user-profile {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .user-name {
+                margin-right: 0;
+            }
+
+            .signOutButton {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero p {
+                font-size: 0.9rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .form-control {
+                padding: 6px 8px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -705,7 +810,7 @@
             presetCard.className = 'preset-card';
             presetCard.innerHTML = `
                 <div class="preset-image">
-                    <img src="${preset.imageUrl}" alt="${preset.title}">
+                    <img src="${preset.imageUrl}" alt="${preset.title}" loading="lazy">
                 </div>
                 <div class="preset-info">
                     <h3>${preset.title}</h3>
