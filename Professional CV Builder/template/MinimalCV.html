@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Builder - Create Your Resume</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        main {
+            padding-top: 80px;
+            min-height: calc(100vh - 120px);
+        }
+
+        .cv-builder-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .cv-form {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .cv-preview {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 90px;
+            max-height: calc(100vh - 110px);
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .add-btn i {
+            font-size: 14px;
+        }
+
+        .remove-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        /* CV Preview Styles */
+        .cv-template {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .cv-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cv-name {
+            font-size: 24px;
+            font-weight: bold;
+            grid-column: 1;
+        }
+
+        .cv-title {
+            font-size: 18px;
+            color: var(--primary-color);
+            grid-column: 1;
+        }
+
+        .cv-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .cv-section {
+            margin-bottom: 20px;
+        }
+
+        .cv-section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .cv-item {
+            margin-bottom: 15px;
+        }
+
+        .cv-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .cv-item-title {
+            font-weight: bold;
+        }
+
+        .cv-item-subtitle {
+            color: #555;
+            font-style: italic;
+        }
+
+        .cv-item-date {
+            color: #666;
+        }
+
+        .cv-skills {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .cv-skill {
+            margin-bottom: 5px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Google Sign-In Button Styling */
+        .google-signin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .google-signin-btn:hover {
+            background-color: #357ABD;
+        }
+
+        .google-signin-btn i {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+        }
+
+        .login-prompt h2 {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .login-prompt p {
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        /* User profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .cv-builder-container {
+                flex-direction: column;
+            }
+
+            .cv-preview {
+                position: static;
+                max-height: none;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .auth-buttons, .user-profile {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .google-signin-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cv-header {
+                grid-template-columns: 1fr;
+            }
+
+            .cv-skills {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <a href="#" class="logo">CV<span>Builder</span></a>
+            <div class="auth-buttons" id="authButtons">
+                <button id="googleSignInBtn" class="google-signin-btn">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+            </div>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <img id="userAvatar" class="user-avatar" src="" alt="User Avatar">
+                <span class="user-name" id="userName"></span>
+                <button class="btn btn-outline" id="signOutButton">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="section-title">Create Your Resume</h1>
+        
+        <div id="cvBuilderContent">
+            <!-- Content will be loaded here based on auth state -->
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <p>&copy; 2025 CVBuilder. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2nl9y3QZqp8FWErYkU7_jgrkwaRdW7UY",
+            authDomain: "professional-cv-builder-29381.firebaseapp.com",
+            projectId: "professional-cv-builder-29381",
+            messagingSenderId: "68072092579",
+            appId: "1:68072092579:web:08c5525b501a3cfc8ca016",
+            measurementId: "G-B0CY5QP02P"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM elements
+        const authButtons = document.getElementById('authButtons');
+        const userProfile = document.getElementById('userProfile');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const signOutButton = document.getElementById('signOutButton');
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const cvBuilderContent = document.getElementById('cvBuilderContent');
+
+        // Initialize Google Sign-In
+        function initializeGoogleSignIn() {
+            googleSignInBtn.addEventListener('click', () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider)
+                    .then((result) => {
+                        console.log('User signed in:', result.user);
+                        updateUserProfile(result.user);
+                        loadCVBuilder();
+                    })
+                    .catch((error) => {
+                        console.error('Google Sign-In Error:', error);
+                        alert('Sign in failed. Please try again.');
+                    });
+            });
+        }
+
+        // Update user profile display
+        function updateUserProfile(user) {
+            if (user) {
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+                userName.textContent = user.displayName || 'User';
+                authButtons.style.display = 'none';
+                userProfile.style.display = 'flex';
+            } else {
+                authButtons.style.display = 'flex';
+                userProfile.style.display = 'none';
+            }
+        }
+
+        // Load CV Builder content based on auth state
+        function loadCVBuilder() {
+            const user = auth.currentUser;
+            
+            if (user) {
+                // User is logged in - show CV builder
+                cvBuilderContent.innerHTML = `
+                    <div class="cv-builder-container">
+                        <div class="cv-form">
+                            <h2 class="section-title">CV Information</h2>
+                            <form id="cvForm">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="jobTitle">Job Title</label>
+                                    <input type="text" id="jobTitle" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="address">Address</label>
+                                        <input type="text" id="address" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">Phone</label>
+                                        <input type="tel" id="phone" class="form-control">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="objective">Professional Objective</label>
+                                    <textarea id="objective" class="form-control" rows="4"></textarea>
+                                </div>
+                                
+                                <div class="section-title">Education</div>
+                                <div id="educationItems">
+                                    <!-- Education items will be added here -->
+                                </div>
+                                <button type="button" id="addEducation" class="add-btn">
+                                    <i class="fas fa-plus"></i> Add Education
+                                </button>
+                                
+                                <div class="section-title">Work Experience</div>
+                                <div id="experienceItems">
+                                    <!-- Experience items will be added here -->
+                                </div>
+                                <button type="button" id="addExperience" class="add-btn">
+                                    <i class="fas fa-plus"></i> Add Experience
+                                </button>
+                                
+                                <div class="section-title">Key Skills</div>
+                                <div id="skillsItems">
+                                    <!-- Skills will be added here -->
+                                </div>
+                                <button type="button" id="addSkill" class="add-btn">
+                                    <i class="fas fa-plus"></i> Add Skill
+                                </button>
+                                
+                                <div class="action-buttons">
+                                    <button type="button" id="saveCV" class="btn btn-primary">Save CV</button>
+                                    <button type="button" id="downloadCV" class="btn btn-success">Download PDF</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="cv-preview">
+                            <h2 class="section-title">CV Preview</h2>
+                            <div class="cv-template" id="cvPreview">
+                                <!-- CV preview will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Initialize form functionality
+                initializeCVForm();
+                // Load user's saved CV data if exists
+                loadUserCV();
+            } else {
+                // User is not logged in - show login prompt
+                cvBuilderContent.innerHTML = `
+                    <div class="login-prompt">
+                        <h2>Create and Save Your Professional CV</h2>
+                        <p>Sign in with Google to access the CV builder and save your resume for future edits.</p>
+                        <button id="promptSignInBtn" class="google-signin-btn">
+                            <i class="fab fa-google"></i> Sign in with Google
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to the prompt sign in button
+                document.getElementById('promptSignInBtn')?.addEventListener('click', () => {
+                    googleSignInBtn.click();
+                });
+            }
+        }
+
+        // Initialize CV form functionality
+        function initializeCVForm() {
+            // Add education item
+            document.getElementById('addEducation')?.addEventListener('click', () => {
+                const educationItems = document.getElementById('educationItems');
+                const itemId = Date.now();
+                
+                const itemHTML = `
+                    <div class="form-group education-item" data-id="${itemId}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="schoolName-${itemId}">School Name</label>
+                                <input type="text" id="schoolName-${itemId}" class="form-control school-name">
+                            </div>
+                            <div class="form-group">
+                                <label for="educationCity-${itemId}">City</label>
+                                <input type="text" id="educationCity-${itemId}" class="form-control education-city">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="educationState-${itemId}">State/Country</label>
+                                <input type="text" id="educationState-${itemId}" class="form-control education-state">
+                            </div>
+                            <div class="form-group">
+                                <label for="educationDate-${itemId}">Date</label>
+                                <input type="text" id="educationDate-${itemId}" class="form-control education-date" placeholder="YYYY - YYYY">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="educationDetails-${itemId}">Details (GPA, Awards, etc.)</label>
+                            <textarea id="educationDetails-${itemId}" class="form-control education-details" rows="3"></textarea>
+                        </div>
+                        <button type="button" class="remove-btn remove-education" data-id="${itemId}">Remove</button>
+                    </div>
+                `;
+                
+                educationItems.insertAdjacentHTML('beforeend', itemHTML);
+                
+                // Add event listener to the remove button
+                document.querySelector(`.remove-education[data-id="${itemId}"]`)?.addEventListener('click', (e) => {
+                    e.target.closest('.education-item').remove();
+                    updateCVPreview();
+                });
+                
+                // Add input event listeners for live preview
+                const inputs = document.querySelectorAll(`.education-item[data-id="${itemId}"] input, .education-item[data-id="${itemId}"] textarea`);
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateCVPreview);
+                });
+                
+                updateCVPreview();
+            });
+            
+            // Add experience item
+            document.getElementById('addExperience')?.addEventListener('click', () => {
+                const experienceItems = document.getElementById('experienceItems');
+                const itemId = Date.now();
+                
+                const itemHTML = `
+                    <div class="form-group experience-item" data-id="${itemId}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="jobTitle-${itemId}">Job Title</label>
+                                <input type="text" id="jobTitle-${itemId}" class="form-control job-title">
+                            </div>
+                            <div class="form-group">
+                                <label for="companyName-${itemId}">Company Name</label>
+                                <input type="text" id="companyName-${itemId}" class="form-control company-name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="experienceDate-${itemId}">Date</label>
+                                <input type="text" id="experienceDate-${itemId}" class="form-control experience-date" placeholder="MM/YYYY - MM/YYYY">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="jobDescription-${itemId}">Job Description</label>
+                            <textarea id="jobDescription-${itemId}" class="form-control job-description" rows="4"></textarea>
+                        </div>
+                        <button type="button" class="remove-btn remove-experience" data-id="${itemId}">Remove</button>
+                    </div>
+                `;
+                
+                experienceItems.insertAdjacentHTML('beforeend', itemHTML);
+                
+                // Add event listener to the remove button
+                document.querySelector(`.remove-experience[data-id="${itemId}"]`)?.addEventListener('click', (e) => {
+                    e.target.closest('.experience-item').remove();
+                    updateCVPreview();
+                });
+                
+                // Add input event listeners for live preview
+                const inputs = document.querySelectorAll(`.experience-item[data-id="${itemId}"] input, .experience-item[data-id="${itemId}"] textarea`);
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateCVPreview);
+                });
+                
+                updateCVPreview();
+            });
+            
+            // Add skill item
+            document.getElementById('addSkill')?.addEventListener('click', () => {
+                const skillsItems = document.getElementById('skillsItems');
+                const itemId = Date.now();
+                
+                const itemHTML = `
+                    <div class="form-group skill-item" data-id="${itemId}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="skillName-${itemId}" class="form-control skill-name" placeholder="Skill name">
+                            </div>
+                        </div>
+                        <button type="button" class="remove-btn remove-skill" data-id="${itemId}">Remove</button>
+                    </div>
+                `;
+                
+                skillsItems.insertAdjacentHTML('beforeend', itemHTML);
+                
+                // Add event listener to the remove button
+                document.querySelector(`.remove-skill[data-id="${itemId}"]`)?.addEventListener('click', (e) => {
+                    e.target.closest('.skill-item').remove();
+                    updateCVPreview();
+                });
+                
+                // Add input event listener for live preview
+                document.getElementById(`skillName-${itemId}`)?.addEventListener('input', updateCVPreview);
+                
+                updateCVPreview();
+            });
+            
+            // Add event listeners to main form inputs for live preview
+            const mainInputs = ['fullName', 'jobTitle', 'address', 'phone', 'email', 'objective'];
+            mainInputs.forEach(id => {
+                document.getElementById(id)?.addEventListener('input', updateCVPreview);
+            });
+            
+            // Save CV button
+            document.getElementById('saveCV')?.addEventListener('click', saveCV);
+            
+            // Download CV button
+            document.getElementById('downloadCV')?.addEventListener('click', downloadCV);
+            
+            // Initial preview update
+            updateCVPreview();
+        }
+
+        // Update CV preview based on form inputs
+        function updateCVPreview() {
+            const cvPreview = document.getElementById('cvPreview');
+            if (!cvPreview) return;
+            
+            // Get basic info
+            const fullName = document.getElementById('fullName')?.value || '[Your Name]';
+            const jobTitle = document.getElementById('jobTitle')?.value || '[Your Job Title]';
+            const address = document.getElementById('address')?.value || '[Your Address]';
+            const phone = document.getElementById('phone')?.value || '[Your Phone]';
+            const email = document.getElementById('email')?.value || '[Your Email]';
+            const objective = document.getElementById('objective')?.value || '[Your professional objective goes here. Replace this sentence with your job objective.]';
+            
+            // Get education items
+            let educationHTML = '';
+            document.querySelectorAll('.education-item').forEach(item => {
+                const schoolName = item.querySelector('.school-name')?.value || '[School Name]';
+                const city = item.querySelector('.education-city')?.value || '[City]';
+                const state = item.querySelector('.education-state')?.value || '[State]';
+                const date = item.querySelector('.education-date')?.value || '[Dates From] -- [To]';
+                const details = item.querySelector('.education-details')?.value || '[You might want to include your GPA here and a brief summary of relevant coursework, awards, and honors.]';
+                
+                educationHTML += `
+                    <div class="cv-item">
+                        <div class="cv-item-header">
+                            <div>
+                                <span class="cv-item-title">${schoolName}</span>,
+                                <span class="cv-item-subtitle">${city}, ${state}</span>
+                            </div>
+                            <div class="cv-item-date">${date}</div>
+                        </div>
+                        <p>${details}</p>
+                    </div>
+                `;
+            });
+            
+            // Get experience items
+            let experienceHTML = '';
+            document.querySelectorAll('.experience-item').forEach(item => {
+                const jobTitle = item.querySelector('.job-title')?.value || '[Job Title]';
+                const companyName = item.querySelector('.company-name')?.value || '[Company Name]';
+                const date = item.querySelector('.experience-date')?.value || '[Dates From] -- [To]';
+                const description = item.querySelector('.job-description')?.value || '[This is the place for a brief summary of your key responsibilities and most stellar accomplishments.]';
+                
+                experienceHTML += `
+                    <div class="cv-item">
+                        <div class="cv-item-header">
+                            <div>
+                                <span class="cv-item-title">${jobTitle}</span> •
+                                <span class="cv-item-subtitle">${companyName}</span>
+                            </div>
+                            <div class="cv-item-date">${date}</div>
+                        </div>
+                        <p>${description}</p>
+                    </div>
+                `;
+            });
+            
+            // Get skills
+            let skillsHTML = '';
+            const skills = [];
+            document.querySelectorAll('.skill-item').forEach(item => {
+                const skillName = item.querySelector('.skill-name')?.value;
+                if (skillName) {
+                    skills.push(skillName);
+                }
+            });
+            
+            if (skills.length > 0) {
+                skillsHTML = '<div class="cv-skills">';
+                skills.forEach(skill => {
+                    skillsHTML += `<div class="cv-skill">• ${skill}</div>`;
+                });
+                skillsHTML += '</div>';
+            }
+            
+            // Render the CV preview
+            cvPreview.innerHTML = `
+                <div class="cv-header">
+                    <div>
+                        <div class="cv-name">${fullName}</div>
+                        <div class="cv-title">${jobTitle}</div>
+                    </div>
+                    <div class="cv-contact">
+                        <div>${address}</div>
+                    </div>
+                    <div class="cv-contact">
+                        <div>${phone}</div>
+                        <div>${email}</div>
+                    </div>
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title">OBJECTIVE</div>
+                    <p>${objective}</p>
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title">EDUCATION</div>
+                    ${educationHTML || '<p>No education information added yet.</p>'}
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title">EXPERIENCE</div>
+                    ${experienceHTML || '<p>No work experience added yet.</p>'}
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title">KEY SKILLS</div>
+                    ${skillsHTML || '<p>No skills added yet.</p>'}
+                </div>
+                
+                <div class="cv-section">
+                    <div class="cv-section-title">REFERENCES</div>
+                    <p>Available upon request.</p>
+                </div>
+            `;
+        }
+
+        // Save CV data to Firestore
+        function saveCV() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Please sign in to save your CV.');
+                return;
+            }
+            
+            // Collect all CV data
+            const cvData = {
+                basicInfo: {
+                    fullName: document.getElementById('fullName')?.value || '',
+                    jobTitle: document.getElementById('jobTitle')?.value || '',
+                    address: document.getElementById('address')?.value || '',
+                    phone: document.getElementById('phone')?.value || '',
+                    email: document.getElementById('email')?.value || '',
+                    objective: document.getElementById('objective')?.value || ''
+                },
+                education: [],
+                experience: [],
+                skills: [],
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            // Collect education items
+            document.querySelectorAll('.education-item').forEach(item => {
+                cvData.education.push({
+                    schoolName: item.querySelector('.school-name')?.value || '',
+                    city: item.querySelector('.education-city')?.value || '',
+                    state: item.querySelector('.education-state')?.value || '',
+                    date: item.querySelector('.education-date')?.value || '',
+                    details: item.querySelector('.education-details')?.value || ''
+                });
+            });
+            
+            // Collect experience items
+            document.querySelectorAll('.experience-item').forEach(item => {
+                cvData.experience.push({
+                    jobTitle: item.querySelector('.job-title')?.value || '',
+                    companyName: item.querySelector('.company-name')?.value || '',
+                    date: item.querySelector('.experience-date')?.value || '',
+                    description: item.querySelector('.job-description')?.value || ''
+                });
+            });
+            
+            // Collect skills
+            document.querySelectorAll('.skill-item').forEach(item => {
+                const skillName = item.querySelector('.skill-name')?.value || '';
+                if (skillName) {
+                    cvData.skills.push(skillName);
+                }
+            });
+            
+            // Save to Firestore
+            db.collection('cvs').doc(user.uid).set(cvData)
+                .then(() => {
+                    alert('CV saved successfully!');
+                })
+                .catch(error => {
+                    console.error('Error saving CV:', error);
+                    alert('Error saving CV. Please try again.');
+                });
+        }
+
+        // Load user's saved CV data from Firestore
+        function loadUserCV() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            db.collection('cvs').doc(user.uid).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const cvData = doc.data();
+                        
+                        // Set basic info
+                        if (cvData.basicInfo) {
+                            document.getElementById('fullName').value = cvData.basicInfo.fullName || '';
+                            document.getElementById('jobTitle').value = cvData.basicInfo.jobTitle || '';
+                            document.getElementById('address').value = cvData.basicInfo.address || '';
+                            document.getElementById('phone').value = cvData.basicInfo.phone || '';
+                            document.getElementById('email').value = cvData.basicInfo.email || '';
+                            document.getElementById('objective').value = cvData.basicInfo.objective || '';
+                        }
+                        
+                        // Add education items
+                        if (cvData.education && cvData.education.length > 0) {
+                            cvData.education.forEach(edu => {
+                                document.getElementById('addEducation').click();
+                                const items = document.querySelectorAll('.education-item');
+                                const lastItem = items[items.length - 1];
+                                
+                                lastItem.querySelector('.school-name').value = edu.schoolName || '';
+                                lastItem.querySelector('.education-city').value = edu.city || '';
+                                lastItem.querySelector('.education-state').value = edu.state || '';
+                                lastItem.querySelector('.education-date').value = edu.date || '';
+                                lastItem.querySelector('.education-details').value = edu.details || '';
+                            });
+                        }
+                        
+                        // Add experience items
+                        if (cvData.experience && cvData.experience.length > 0) {
+                            cvData.experience.forEach(exp => {
+                                document.getElementById('addExperience').click();
+                                const items = document.querySelectorAll('.experience-item');
+                                const lastItem = items[items.length - 1];
+                                
+                                lastItem.querySelector('.job-title').value = exp.jobTitle || '';
+                                lastItem.querySelector('.company-name').value = exp.companyName || '';
+                                lastItem.querySelector('.experience-date').value = exp.date || '';
+                                lastItem.querySelector('.job-description').value = exp.description || '';
+                            });
+                        }
+                        
+                        // Add skills
+                        if (cvData.skills && cvData.skills.length > 0) {
+                            cvData.skills.forEach(skill => {
+                                document.getElementById('addSkill').click();
+                                const items = document.querySelectorAll('.skill-item');
+                                const lastItem = items[items.length - 1];
+                                lastItem.querySelector('.skill-name').value = skill || '';
+                            });
+                        }
+                        
+                        // Update preview
+                        updateCVPreview();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading CV:', error);
+                });
+        }
+
+        // Download CV as PDF
+        function downloadCV() {
+            alert('PDF download functionality would be implemented here. In a real implementation, this would use a library like html2pdf.js to convert the CV preview to a PDF.');
+            // In a real implementation, you would use a library like html2pdf.js
+            // Example:
+            // const element = document.getElementById('cvPreview');
+            // html2pdf().from(element).save('my-cv.pdf');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGoogleSignIn();
+            
+            // Auth state listener
+            auth.onAuthStateChanged((user) => {
+                updateUserProfile(user);
+                loadCVBuilder();
+            });
+        });
+
+        // Sign out button
+        signOutButton.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
