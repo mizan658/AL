@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Private Group Chat</title>
+  <title>DIU Group Chat</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,21 +13,22 @@
     }
 
     body {
-      background-color: #f5f7fb;
+      background-color: #f0f2f5;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      color: #333;
+      color: #050505;
     }
 
     header {
-      background: linear-gradient(135deg, #0084ff, #0066cc);
+      background-color: #0084ff;
       color: white;
       padding: 12px 15px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       z-index: 10;
+      position: relative;
     }
 
     .header-top {
@@ -54,21 +55,21 @@
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 12px 10px;
+      padding: 16px;
       background-color: #f0f2f5;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      display: flex;
+      flex-direction: column;
     }
 
     .message {
-      max-width: 85%;
-      margin-bottom: 12px;
-      padding: 10px 14px;
-      border-radius: 14px;
+      max-width: 75%;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border-radius: 18px;
       position: relative;
       word-wrap: break-word;
       line-height: 1.4;
       animation: fadeIn 0.3s ease-out;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       font-size: 0.95rem;
     }
 
@@ -81,25 +82,31 @@
       background-color: white;
       border-top-left-radius: 5px;
       margin-right: auto;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .own-message {
-      background: linear-gradient(135deg, #0084ff, #0066cc);
+      background-color: #0084ff;
       color: white;
       border-top-right-radius: 5px;
       margin-left: auto;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .message-info {
       display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
+      justify-content: flex-end;
+      margin-top: 4px;
       font-size: 0.7rem;
       opacity: 0.8;
     }
 
     .own-message .message-info {
       color: rgba(255, 255, 255, 0.8);
+    }
+
+    .other-message .message-info {
+      color: rgba(0, 0, 0, 0.6);
     }
 
     .sender-name {
@@ -110,49 +117,51 @@
 
     #inputArea {
       display: flex;
-      padding: 10px;
+      padding: 12px 16px;
       background-color: white;
-      border-top: 1px solid #e1e4e8;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      border-top: 1px solid #dddfe2;
+      align-items: center;
     }
 
     #messageInput {
       flex: 1;
       padding: 10px 15px;
       border-radius: 20px;
-      border: 1px solid #e1e4e8;
+      border: none;
       outline: none;
       font-size: 0.95rem;
-      transition: border 0.3s;
+      background-color: #f0f2f5;
+      transition: background-color 0.3s;
     }
 
     #messageInput:focus {
-      border-color: #0084ff;
-      box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
+      background-color: #e4e6e9;
     }
 
     #sendBtn {
       padding: 10px 16px;
       margin-left: 8px;
       border: none;
-      background: linear-gradient(135deg, #0084ff, #0066cc);
+      background-color: #0084ff;
       color: white;
-      border-radius: 20px;
+      border-radius: 50%;
       cursor: pointer;
       font-weight: 600;
       font-size: 0.9rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 5px rgba(0, 132, 255, 0.3);
-      min-width: 70px;
+      transition: background-color 0.2s;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #sendBtn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0, 132, 255, 0.4);
+      background-color: #0073e6;
     }
 
     #sendBtn:active {
-      transform: translateY(0);
+      transform: scale(0.95);
     }
 
     #login {
@@ -162,22 +171,22 @@
       align-items: center;
       flex: 1;
       padding: 20px;
-      background: linear-gradient(135deg, #f5f7fb, #e4e8f0);
+      background-color: #f0f2f5;
     }
 
     .login-container {
       background: white;
-      padding: 25px 15px;
+      padding: 30px 25px;
       border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       text-align: center;
-      max-width: 100%;
+      max-width: 400px;
       width: 100%;
     }
 
     .login-container h2 {
       margin-bottom: 20px;
-      color: #333;
+      color: #050505;
       font-size: 1.4rem;
     }
 
@@ -189,35 +198,33 @@
 
     .login-buttons button {
       padding: 12px;
-      border-radius: 25px;
+      border-radius: 8px;
       border: none;
       color: white;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     }
 
     .login-buttons button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
     }
 
     #loginUserBtn {
-      background: linear-gradient(135deg, #0084ff, #0066cc);
+      background-color: #0084ff;
     }
 
     #loginAdminBtn {
-      background: linear-gradient(135deg, #ff5722, #e64a19);
+      background-color: #65676b;
     }
 
     #logoutBtn {
       padding: 8px 14px;
       border-radius: 18px;
       border: none;
-      background-color: white;
-      color: #0084ff;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -225,25 +232,24 @@
     }
 
     #logoutBtn:hover {
-      background-color: #f0f7ff;
+      background-color: rgba(255, 255, 255, 0.3);
     }
 
     #adminPanel {
       display: none;
       background: white;
       padding: 15px 10px;
-      border-top: 1px solid #e1e4e8;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      border-top: 1px solid #dddfe2;
       max-height: 250px;
       overflow-y: auto;
     }
 
     #adminPanel h3 {
       margin-bottom: 12px;
-      color: #333;
+      color: #050505;
       font-size: 1.1rem;
       padding-bottom: 8px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #dddfe2;
     }
 
     .user-item {
@@ -257,7 +263,7 @@
 
     .user-email {
       font-weight: 500;
-      color: #333;
+      color: #050505;
     }
 
     .ban-buttons {
@@ -272,8 +278,8 @@
       font-size: 0.7rem;
       border: none;
       border-radius: 12px;
-      background: #ffebee;
-      color: #d32f2f;
+      background: #f0f2f5;
+      color: #050505;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -281,18 +287,8 @@
     }
 
     .banButton:hover {
-      background: #ffcdd2;
+      background: #e4e6e9;
     }
-
-    .banButton:nth-child(1) { background: #fff3e0; color: #ef6c00; }
-    .banButton:nth-child(2) { background: #fff8e1; color: #f57c00; }
-    .banButton:nth-child(3) { background: #fff3e0; color: #e65100; }
-    .banButton:nth-child(4) { background: #fbe9e7; color: #d84315; }
-
-    .banButton:nth-child(1):hover { background: #ffe0b2; }
-    .banButton:nth-child(2):hover { background: #ffecb3; }
-    .banButton:nth-child(3):hover { background: #ffe0b2; }
-    .banButton:nth-child(4):hover { background: #ffccbc; }
 
     /* Reaction buttons styles */
     .reaction-buttons {
@@ -359,12 +355,10 @@
 
     .reaction-count {
       font-weight: bold;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-      animation: pulse 2s infinite;
     }
 
     .own-message .reaction-count {
-      text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .user-reacted {
@@ -383,7 +377,7 @@
       z-index: 1000;
       max-width: 150px;
       font-size: 0.7rem;
-      border: 1px solid #e1e4e8;
+      border: 1px solid #dddfe2;
       bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
@@ -405,12 +399,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
     }
 
     /* Admin controls */
@@ -449,7 +437,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      opacity: 1;
+      opacity: 0;
       transition: opacity 0.2s;
       color: #333;
       font-weight: bold;
@@ -462,36 +450,37 @@
 
     /* Dark mode styles */
     body.dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
+      background-color: #18191a;
+      color: #e4e6eb;
+    }
+
+    body.dark-mode header {
+      background-color: #242526;
     }
 
     body.dark-mode #messages {
-      background-color: #1e1e1e;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23444444' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-color: #18191a;
     }
 
     body.dark-mode .other-message {
-      background-color: #2d2d2d;
-      color: #ffffff;
-      border: 1px solid #444;
+      background-color: #3e4042;
+      color: #e4e6eb;
     }
 
     body.dark-mode #inputArea,
     body.dark-mode #adminPanel {
-      background-color: #1e1e1e;
-      border-color: #444;
+      background-color: #242526;
+      border-color: #3e4042;
     }
 
     body.dark-mode #messageInput {
-      background-color: #2d2d2d;
-      border-color: #555;
-      color: #ffffff;
+      background-color: #3e4042;
+      color: #e4e6eb;
     }
 
     body.dark-mode .reaction-btn {
-      background: rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      color: #e4e6eb;
     }
 
     body.dark-mode .like-btn {
@@ -516,74 +505,69 @@
     }
 
     body.dark-mode .like-btn:hover {
-      background: rgba(100, 181, 246, 0.3);
+      background: rgba(100, 181, 246, 0.2);
     }
 
     body.dark-mode .dislike-btn:hover {
-      background: rgba(255, 138, 101, 0.3);
+      background: rgba(255, 138, 101, 0.2);
     }
 
     body.dark-mode .heart-btn:hover {
-      background: rgba(244, 143, 177, 0.3);
+      background: rgba(244, 143, 177, 0.2);
     }
     body.dark-mode .joy-btn:hover {
-      background: rgba(255, 245, 157, 0.3);
+      background: rgba(255, 245, 157, 0.2);
     }
     body.dark-mode .fire-btn:hover {
-      background: rgba(255, 171, 145, 0.3);
+      background: rgba(255, 171, 145, 0.2);
     }
     body.dark-mode .thinking-btn:hover {
-      background: rgba(206, 147, 216, 0.3);
-    }
-
-    body.dark-mode .reaction-count {
-      text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
-      color: #ffffff;
+      background: rgba(206, 147, 216, 0.2);
     }
 
     body.dark-mode #adminPanel h3,
     body.dark-mode .user-email {
-      color: #ffffff;
+      color: #e4e6eb;
     }
 
     body.dark-mode .user-item {
-      border-bottom-color: #444;
+      border-bottom-color: #3e4042;
     }
 
     body.dark-mode .banButton {
-      color: #ffffff;
+      background: #3e4042;
+      color: #e4e6eb;
     }
 
-    body.dark-mode .banButton:nth-child(1) { background: #5d4037; color: #ffab91; }
-    body.dark-mode .banButton:nth-child(2) { background: #4e342e; color: #ff8a65; }
-    body.dark-mode .banButton:nth-child(3) { background: #3e2723; color: #ff7043; }
-    body.dark-mode .banButton:nth-child(4) { background: #2e1b16; color: #ff5722; }
+    body.dark-mode .banButton:hover {
+      background: #4e5052;
+    }
 
     body.dark-mode .delete-message-btn {
       background: rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      color: #e4e6eb;
     }
 
     body.dark-mode #logoutBtn {
-      background-color: #2d2d2d;
-      color: #64b5f6;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e4e6eb;
     }
 
     body.dark-mode #logoutBtn:hover {
-      background-color: #3d3d3d;
+      background-color: rgba(255, 255, 255, 0.2);
     }
 
     body.dark-mode .login-container {
-      background-color: #2d2d2d;
-      color: #ffffff;
+      background-color: #242526;
+      color: #e4e6eb;
     }
 
     body.dark-mode .login-container h2 {
-      color: #ffffff;
+      color: #e4e6eb;
     }
 
     body.dark-mode .login-container p {
-      color: #b0b0b0;
+      color: #b0b3b8;
     }
 
     /* Theme toggle button */
@@ -603,7 +587,7 @@
     }
 
     body.dark-mode #themeToggle {
-      color: #ffffff;
+      color: #e4e6eb;
     }
 
     /* Scrollbar styling */
@@ -626,15 +610,15 @@
     }
 
     body.dark-mode ::-webkit-scrollbar-track {
-      background: #2d2d2d;
+      background: #3e4042;
     }
 
     body.dark-mode ::-webkit-scrollbar-thumb {
-      background: #555;
+      background: #65676b;
     }
 
     body.dark-mode ::-webkit-scrollbar-thumb:hover {
-      background: #777;
+      background: #8a8d91;
     }
 
     /* Navigation buttons */
@@ -649,7 +633,7 @@
 
     .nav-btn {
       padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 6px;
       border: none;
       background: rgba(255, 255, 255, 0.2);
       color: white;
@@ -677,29 +661,28 @@
       display: none;
       background: white;
       padding: 15px;
-      border-top: 1px solid #e1e4e8;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      border-top: 1px solid #dddfe2;
       max-height: 200px;
       overflow-y: auto;
       font-size: 0.85rem;
     }
 
     body.dark-mode #rulesSection {
-      background-color: #1e1e1e;
-      border-color: #444;
+      background-color: #242526;
+      border-color: #3e4042;
     }
 
     #rulesSection h3 {
       margin-bottom: 12px;
-      color: #333;
+      color: #050505;
       font-size: 1.1rem;
       padding-bottom: 8px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #dddfe2;
     }
 
     body.dark-mode #rulesSection h3 {
-      color: #ffffff;
-      border-bottom-color: #444;
+      color: #e4e6eb;
+      border-bottom-color: #3e4042;
     }
 
     #rulesSection ol {
@@ -712,13 +695,13 @@
     }
 
     body.dark-mode #rulesSection {
-      color: #e0e0e0;
+      color: #e4e6eb;
     }
 
     #toggleRulesBtn {
       padding: 6px 12px;
       margin-left: 8px;
-      border-radius: 16px;
+      border-radius: 6px;
       border: none;
       background: rgba(255, 255, 255, 0.2);
       color: white;
@@ -756,25 +739,49 @@
       color: #fff;
     }
 
-    /* Loading spinner styles */
-    .loading-container {
+    /* Loading screen styles */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.9);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex: 1;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    body.dark-mode .loading-screen {
+      background-color: rgba(0, 0, 0, 0.9);
     }
 
     .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #0084ff;
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #0084ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
+      margin-bottom: 20px;
     }
 
     body.dark-mode .loading-spinner {
       border-top-color: #64b5f6;
+    }
+
+    .loading-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #050505;
+      margin-top: 20px;
+    }
+
+    body.dark-mode .loading-text {
+      color: #e4e6eb;
     }
 
     @keyframes spin {
@@ -786,21 +793,21 @@
     #approvalSection {
       margin-top: 15px;
       padding-top: 15px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #dddfe2;
     }
 
     body.dark-mode #approvalSection {
-      border-top-color: #444;
+      border-top-color: #3e4042;
     }
 
     #approvalSection h4 {
       margin-bottom: 10px;
-      color: #333;
+      color: #050505;
       font-size: 1rem;
     }
 
     body.dark-mode #approvalSection h4 {
-      color: #fff;
+      color: #e4e6eb;
     }
 
     /* For very small screens */
@@ -839,9 +846,15 @@
   </style>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Signing in...</div>
+  </div>
+
   <header>
     <div class="header-top">
-      <div class="chat-title">💬 Private Group Chat</div>
+      <div class="chat-title">💬 DIU Group Chat</div>
       <button id="themeToggle">🌓</button>
     </div>
     <div class="header-bottom">
@@ -861,8 +874,8 @@
 
   <div id="login">
     <div class="login-container">
-      <h2>Welcome to Private Group Chat</h2>
-      <p style="margin-bottom: 20px; color: #666;">Sign in with your DIU email to join the conversation</p>
+      <h2>Welcome to DIU Group Chat</h2>
+      <p style="margin-bottom: 20px; color: #65676b;">Sign in with your DIU email to join the conversation</p>
       <div class="login-buttons">
         <button id="loginUserBtn">User Login</button>
         <button id="loginAdminBtn">Admin Panel</button>
@@ -870,15 +883,11 @@
     </div>
   </div>
 
-  <div id="loading" style="display: none;" class="loading-container">
-    <div class="loading-spinner"></div>
-  </div>
-
   <div id="messages" style="display: none;"></div>
 
   <div id="inputArea" style="display: none;">
     <input type="text" id="messageInput" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
+    <button id="sendBtn">→</button>
   </div>
 
   <div id="rulesSection">
@@ -951,7 +960,7 @@
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
-    const loadingDiv = document.getElementById("loading");
+    const loadingScreen = document.getElementById("loadingScreen");
     const themeToggle = document.getElementById("themeToggle");
     const resetChatBtn = document.getElementById("resetChatBtn");
     const toggleRulesBtn = document.getElementById("toggleRulesBtn");
@@ -975,13 +984,25 @@
     });
 
     loginUserBtn.onclick = async () => {
+      loadingScreen.style.display = 'flex';
       loginMode = "user";
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        loadingScreen.style.display = 'none';
+        alert("Login failed. Please try again.");
+      }
     };
 
     loginAdminBtn.onclick = async () => {
+      loadingScreen.style.display = 'flex';
       loginMode = "admin";
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        loadingScreen.style.display = 'none';
+        alert("Login failed. Please try again.");
+      }
     };
 
     logoutBtn.onclick = async () => {
@@ -1078,8 +1099,11 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
-        alert("Only DIU emails are allowed.");
-        signOut(auth);
+        loadingScreen.style.display = 'none';
+        if (user) {
+          alert("Only DIU emails are allowed.");
+          await signOut(auth);
+        }
         return;
       }
 
@@ -1089,8 +1113,9 @@
 
       if (loginMode === "admin") {
         if (user.email !== adminEmail) {
+          loadingScreen.style.display = 'none';
           alert("You are not an Admin.");
-          signOut(auth);
+          await signOut(auth);
           return;
         }
         isAdmin = true;
@@ -1103,12 +1128,11 @@
 
       loginDiv.style.display = "none";
       logoutDiv.style.display = "block";
-      loadingDiv.style.display = "flex";
       
       const q = query(collection(db, "messages"), orderBy("timestamp"));
       onSnapshot(q, async (snapshot) => {
-        loadingDiv.style.display = "none";
-        messagesDiv.style.display = "block";
+        loadingScreen.style.display = 'none';
+        messagesDiv.style.display = "flex";
         inputArea.style.display = "flex";
         if (isAdmin) adminPanel.style.display = "block";
         
