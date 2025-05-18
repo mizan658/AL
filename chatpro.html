@@ -448,7 +448,7 @@
       opacity: 1;
     }
 
-    /* Dark mode styles */
+    /* Dark mode styles (only for Pro users) */
     body.dark-mode {
       background-color: #18191a;
       color: #e4e6eb;
@@ -570,7 +570,7 @@
       color: #b0b3b8;
     }
 
-    /* Theme toggle button */
+    /* Theme toggle button (only for Pro users) */
     #themeToggle {
       background: none;
       border: none;
@@ -580,6 +580,7 @@
       margin-left: 10px;
       transition: transform 0.3s;
       padding: 5px;
+      display: none; /* Hidden by default */
     }
 
     #themeToggle:hover {
@@ -967,16 +968,12 @@
     const rulesSection = document.getElementById("rulesSection");
     const unapprovedUsersDiv = document.getElementById("unapprovedUsers");
 
-    // Theme toggle functionality
+    // Theme toggle functionality (only for Pro users)
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDarkMode = document.body.classList.contains('dark-mode');
       localStorage.setItem('darkMode', isDarkMode);
     });
-
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark-mode');
-    }
 
     // Toggle rules section
     toggleRulesBtn.addEventListener('click', () => {
@@ -1125,6 +1122,14 @@
 
       // Check if user is approved for pro features
       isProUser = await checkProUserStatus(user.uid);
+      
+      // Show theme toggle only for Pro users
+      themeToggle.style.display = isProUser ? 'block' : 'none';
+      
+      // Apply dark mode if enabled and user is Pro
+      if (isProUser && localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
 
       loginDiv.style.display = "none";
       logoutDiv.style.display = "block";
@@ -1201,6 +1206,9 @@
             }
           }
           
+          // Only show reactions if user is Pro or if it's their own message
+          const showReactions = isProUser || msg.sender === currentUser.email;
+          
           msgEl.innerHTML = `
             ${isAdmin ? `<button class="delete-message-btn" onclick="handleDeleteMessage('${doc.id}')">×</button>` : ''}
             <div class="sender-name">${msg.sender.split('@')[0]}${msg.sender === currentUser.email && isProUser ? '<span class="pro-badge">PRO</span>' : ''}</div>
@@ -1208,6 +1216,7 @@
             <div class="message-info">
               <span>${time}</span>
             </div>
+            ${showReactions ? `
             <div class="reaction-buttons">
               <button class="like-btn ${hasLiked ? 'user-reacted' : ''}" 
                       onclick="if('${msg.sender}' === '${currentUser.email}') {
@@ -1270,6 +1279,7 @@
                 🤔 <span class="reaction-count">${msg.thinking || 0}</span>
               </button>
             </div>
+            ` : ''}
           `;
           
           messagesDiv.appendChild(msgEl);
