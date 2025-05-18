@@ -13,7 +13,6 @@
             --accent-color: #2980b9;
             --light-color: #f8f9fa;
             --dark-color: #343a40;
-            --border-color: #dfe6e9;
         }
 
         * {
@@ -128,6 +127,7 @@
             background-color: #f8fafc;
             border-left: 3px solid var(--secondary-color);
             border-radius: 0 4px 4px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .item-header {
@@ -373,6 +373,7 @@
         @media print {
             body {
                 background-color: white;
+                font-size: 12pt;
             }
             .container {
                 box-shadow: none;
@@ -391,6 +392,10 @@
                 background-color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+            }
+            @page {
+                size: A4;
+                margin: 1cm;
             }
         }
 
@@ -438,8 +443,8 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label for="address">Address</label>
-                <input type="text" id="address" class="form-control" placeholder="123 Main St, City">
+                <label for="profession">Profession</label>
+                <input type="text" id="profession" class="form-control" placeholder="Software Engineer">
             </div>
             <div class="form-group">
                 <label for="mobile">Mobile</label>
@@ -447,9 +452,15 @@
             </div>
         </div>
         
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" class="form-control" placeholder="john.doe@example.com">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" class="form-control" placeholder="123 Main St, City">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="form-control" placeholder="john.doe@example.com">
+            </div>
         </div>
         
         <div class="form-group">
@@ -546,9 +557,15 @@
             </div>
         </div>
         
-        <div class="form-group">
-            <label for="presentAddress">Present Address</label>
-            <textarea id="presentAddress" class="form-control" placeholder="Your current address..."></textarea>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="presentAddress">Present Address</label>
+                <textarea id="presentAddress" class="form-control" placeholder="Your current address..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="permanentAddress">Permanent Address</label>
+                <textarea id="permanentAddress" class="form-control" placeholder="Your permanent address..."></textarea>
+            </div>
         </div>
         
         <div class="form-row">
@@ -584,9 +601,14 @@
             </div>
         </div>
         
-        <div class="form-group">
+        <div class="form-group" id="covidIdGroup">
             <label for="covidId">Covid-19 ID No</label>
-            <input type="text" id="covidId" class="form-control" placeholder="If applicable">
+            <div class="form-row" style="align-items: center;">
+                <div class="form-group" style="flex: 1;">
+                    <input type="text" id="covidId" class="form-control" placeholder="If applicable">
+                </div>
+                <button type="button" class="btn btn-secondary" id="removeCovidId" style="width: auto; padding: 10px;">Remove</button>
+            </div>
         </div>
         
         <div class="action-buttons">
@@ -682,6 +704,11 @@
                             <td id="pdAddress">Your Address</td>
                         </tr>
                         <tr>
+                            <td>Permanent Address</td>
+                            <td>:</td>
+                            <td id="pdPermanentAddress">Your Permanent Address</td>
+                        </tr>
+                        <tr>
                             <td>Date of birth</td>
                             <td>:</td>
                             <td id="pdDob">Your Date of Birth</td>
@@ -711,7 +738,7 @@
                             <td>:</td>
                             <td id="pdLocation">Your Location</td>
                         </tr>
-                        <tr>
+                        <tr id="pdCovidRow">
                             <td>Covid-19 ID No</td>
                             <td>:</td>
                             <td id="pdCovid">Your Covid ID</td>
@@ -752,6 +779,9 @@
         const fileName = document.getElementById('fileName');
         const cvPhoto = document.getElementById('cvPhoto');
         const cvPhotoPlaceholder = document.getElementById('cvPhotoPlaceholder');
+        const removeCovidIdBtn = document.getElementById('removeCovidId');
+        const covidIdGroup = document.getElementById('covidIdGroup');
+        const pdCovidRow = document.getElementById('pdCovidRow');
         
         // Add education item
         document.getElementById('addEducation').addEventListener('click', () => {
@@ -873,10 +903,18 @@
             }
         });
         
+        // Remove Covid ID field
+        removeCovidIdBtn.addEventListener('click', () => {
+            document.getElementById('covidId').value = '';
+            covidIdGroup.style.display = 'none';
+            pdCovidRow.style.display = 'none';
+        });
+        
         // Generate CV
         generateBtn.addEventListener('click', () => {
             // Basic info
             document.getElementById('cvName').textContent = document.getElementById('fullName').value || 'Your Name';
+            document.getElementById('cvTitle').textContent = document.getElementById('profession').value || 'Your Profession';
             document.getElementById('cvMobile').textContent = `Mobile: ${document.getElementById('mobile').value || 'Your Number'}`;
             document.getElementById('cvEmail').textContent = `Email: ${document.getElementById('email').value || 'Your Email'}`;
             document.getElementById('cvAddress').textContent = document.getElementById('address').value || 'Your Address';
@@ -890,13 +928,22 @@
             document.getElementById('pdFather').textContent = document.getElementById('fatherName').value || 'Father\'s Name';
             document.getElementById('pdMother').textContent = document.getElementById('motherName').value || 'Mother\'s Name';
             document.getElementById('pdAddress').textContent = document.getElementById('presentAddress').value || 'Your Address';
+            document.getElementById('pdPermanentAddress').textContent = document.getElementById('permanentAddress').value || 'Your Permanent Address';
             document.getElementById('pdDob').textContent = document.getElementById('dob').value || 'Your Date of Birth';
             document.getElementById('pdNationality').textContent = document.getElementById('nationality').value || 'Your Nationality';
             document.getElementById('pdNid').textContent = document.getElementById('nid').value || 'Your NID Number';
             document.getElementById('pdReligion').textContent = document.getElementById('religion').value || 'Your Religion';
             document.getElementById('pdMarital').textContent = document.getElementById('maritalStatus').value || 'Your Marital Status';
             document.getElementById('pdLocation').textContent = document.getElementById('currentLocation').value || 'Your Location';
-            document.getElementById('pdCovid').textContent = document.getElementById('covidId').value || 'Your Covid ID';
+            
+            // Show/hide Covid ID based on input
+            const covidId = document.getElementById('covidId').value;
+            if (covidId) {
+                document.getElementById('pdCovid').textContent = covidId;
+                pdCovidRow.style.display = '';
+            } else {
+                pdCovidRow.style.display = 'none';
+            }
             
             // Education
             const cvEducation = document.getElementById('cvEducation');
@@ -1002,11 +1049,21 @@
         downloadPdfBtn.addEventListener('click', () => {
             const element = document.getElementById('cvOutput');
             const opt = {
-                margin: 10,
+                margin: [10, 10, 10, 10],
                 filename: 'my_cv.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { 
+                    scale: 2,
+                    letterRendering: true,
+                    useCORS: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
             
             // Show loading indicator
@@ -1014,7 +1071,7 @@
             downloadPdfBtn.disabled = true;
             
             // Generate PDF
-            html2pdf().from(element).set(opt).save().then(() => {
+            html2pdf().set(opt).from(element).save().then(() => {
                 // Reset button text
                 downloadPdfBtn.textContent = 'Download as PDF';
                 downloadPdfBtn.disabled = false;
@@ -1091,6 +1148,11 @@
                 cvPhoto.src = '';
                 cvPhoto.classList.add('hidden');
                 cvPhotoPlaceholder.classList.remove('hidden');
+                
+                // Reset Covid ID field
+                document.getElementById('covidId').value = '';
+                covidIdGroup.style.display = 'block';
+                pdCovidRow.style.display = '';
                 
                 // Add event listeners to new remove buttons
                 document.querySelectorAll('.remove-education').forEach(btn => {
