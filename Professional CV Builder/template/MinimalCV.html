@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional CV Builder</title>
+    <!-- Include html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -13,7 +14,6 @@
             --light-color: #f8f9fa;
             --dark-color: #343a40;
             --border-color: #dfe6e9;
-            --success-color: #28a745;
         }
 
         * {
@@ -42,7 +42,7 @@
             justify-content: space-between;
             padding: 30px;
             border-bottom: 2px solid var(--border-color);
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            background-color: #f8fafc;
         }
 
         .header-content {
@@ -53,7 +53,6 @@
             font-size: 28px;
             color: var(--primary-color);
             margin-bottom: 5px;
-            font-weight: 700;
         }
 
         .header-content h2 {
@@ -73,25 +72,17 @@
             height: 180px;
             border: 3px solid var(--secondary-color);
             overflow: hidden;
-            border-radius: 4px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .photo-container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .photo-placeholder {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            background-color: #eee;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #6c757d;
-            font-weight: 500;
+            color: #999;
         }
 
         .photo-preview {
@@ -102,19 +93,10 @@
 
         .cv-body {
             padding: 30px;
-            background-color: white;
         }
 
         .section {
             margin-bottom: 25px;
-            padding: 15px;
-            border-radius: 4px;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .section:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .section-title {
@@ -124,7 +106,6 @@
             padding-bottom: 5px;
             margin-bottom: 15px;
             position: relative;
-            font-weight: 600;
         }
 
         .section-title::after {
@@ -144,15 +125,9 @@
         .education-item, .experience-item {
             margin-bottom: 20px;
             padding: 15px;
+            background-color: #f8fafc;
             border-left: 3px solid var(--secondary-color);
-            background-color: #f8f9fa;
             border-radius: 0 4px 4px 0;
-            transition: all 0.3s ease;
-        }
-
-        .education-item:hover, .experience-item:hover {
-            background-color: #e9ecef;
-            transform: translateX(5px);
         }
 
         .item-header {
@@ -201,10 +176,6 @@
             border-collapse: collapse;
         }
 
-        .personal-details tr:hover {
-            background-color: #f8f9fa;
-        }
-
         .personal-details td {
             padding: 8px 0;
             vertical-align: top;
@@ -225,9 +196,8 @@
             margin-top: 30px;
             font-style: italic;
             padding: 15px;
-            background-color: #f8f9fa;
+            background-color: #f8fafc;
             border-radius: 4px;
-            border-left: 3px solid var(--secondary-color);
         }
 
         .signature {
@@ -237,9 +207,9 @@
 
         .signature p {
             margin-top: 30px;
-            display: inline-block;
-            padding: 5px 20px;
             border-top: 1px solid var(--primary-color);
+            display: inline-block;
+            padding-top: 5px;
         }
 
         /* Form Styles */
@@ -250,21 +220,6 @@
             background-color: white;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .form-header h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .form-header p {
-            color: #6c757d;
         }
 
         .form-group {
@@ -280,22 +235,21 @@
 
         .form-control {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .form-control:focus {
             border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
             outline: none;
         }
 
         textarea.form-control {
             min-height: 100px;
-            resize: vertical;
         }
 
         .form-row {
@@ -308,7 +262,7 @@
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             background-color: var(--secondary-color);
             color: white;
             border: none;
@@ -316,17 +270,12 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
-            font-size: 16px;
         }
 
         .btn:hover {
             background-color: var(--accent-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .btn:active {
-            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn-secondary {
@@ -337,35 +286,46 @@
             background-color: #5a6268;
         }
 
-        .btn-success {
-            background-color: var(--success-color);
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-        }
-
         .remove-btn {
             background-color: #dc3545;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
             margin-top: 10px;
             font-size: 12px;
-            transition: all 0.3s;
+            transition: background-color 0.3s;
         }
 
         .remove-btn:hover {
             background-color: #c82333;
-            transform: translateY(-1px);
         }
 
         .hidden {
             display: none;
         }
 
+        /* Builder section headers */
+        .builder-section-header {
+            color: var(--primary-color);
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+            position: relative;
+        }
+
+        .builder-section-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+
+        /* Action buttons container */
         .action-buttons {
             display: flex;
             justify-content: center;
@@ -373,37 +333,43 @@
             margin-top: 30px;
         }
 
-        .floating-button {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .progress-bar {
-            height: 4px;
-            background-color: var(--secondary-color);
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            transition: width 0.3s;
-        }
-
-        .section-counter {
+        /* File input styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
             display: inline-block;
-            background-color: var(--secondary-color);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 24px;
-            font-size: 12px;
-            margin-right: 10px;
+            width: 100%;
         }
 
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            display: inline-block;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-button:hover {
+            border-color: var(--secondary-color);
+            background-color: #e9f5ff;
+        }
+
+        /* Print styles */
         @media print {
             body {
                 background-color: white;
@@ -411,13 +377,20 @@
             .container {
                 box-shadow: none;
                 border: none;
+                margin: 0;
+                padding: 0;
+                width: 100%;
             }
             .no-print {
                 display: none;
             }
-            .section {
-                box-shadow: none;
-                page-break-inside: avoid;
+            .cv-header {
+                background-color: white !important;
+            }
+            .education-item, .experience-item, .declaration {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
 
@@ -440,23 +413,13 @@
                 flex-direction: column;
                 gap: 10px;
             }
-            .floating-button {
-                bottom: 20px;
-                right: 20px;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="progress-bar no-print" id="progressBar"></div>
-    
     <div class="builder-container no-print" id="builder">
-        <div class="form-header">
-            <h1>Professional CV Builder</h1>
-            <p>Create an impressive CV in minutes</p>
-        </div>
+        <h1 style="color: var(--primary-color); margin-bottom: 20px; text-align: center;">Professional CV Builder</h1>
         
-        <h2 class="section-title"><span class="section-counter">1</span> Personal Information</h2>
         <div class="form-row">
             <div class="form-group" style="flex: 2;">
                 <label for="fullName">Full Name</label>
@@ -464,7 +427,12 @@
             </div>
             <div class="form-group">
                 <label for="photo">Upload Photo</label>
-                <input type="file" id="photo" class="form-control" accept="image/*">
+                <div class="file-input-wrapper">
+                    <div class="file-input-button" id="fileInputLabel">
+                        <span id="fileName">Choose a photo...</span>
+                    </div>
+                    <input type="file" id="photo" class="form-control" accept="image/*">
+                </div>
             </div>
         </div>
         
@@ -484,13 +452,12 @@
             <input type="email" id="email" class="form-control" placeholder="john.doe@example.com">
         </div>
         
-        <h2 class="section-title"><span class="section-counter">2</span> Career Objective</h2>
         <div class="form-group">
-            <label for="careerObjective">Objective Statement</label>
-            <textarea id="careerObjective" class="form-control" placeholder="Briefly describe your career goals and what you bring to the table"></textarea>
+            <label for="careerObjective">Career Objective</label>
+            <textarea id="careerObjective" class="form-control" placeholder="A brief summary of your career goals and aspirations..."></textarea>
         </div>
         
-        <h2 class="section-title"><span class="section-counter">3</span> Academic Qualifications</h2>
+        <h2 class="builder-section-header">Academic Qualifications</h2>
         <div id="educationItems">
             <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
                 <div class="form-row">
@@ -510,7 +477,7 @@
                     </div>
                     <div class="form-group">
                         <label>Result</label>
-                        <input type="text" class="form-control result" placeholder="GPA: 3.8/4.0">
+                        <input type="text" class="form-control result" placeholder="GPA: 3.5/4.0">
                     </div>
                 </div>
                 <button class="remove-btn remove-education">Remove</button>
@@ -518,7 +485,7 @@
         </div>
         <button class="btn btn-secondary" id="addEducation">Add Education</button>
         
-        <h2 class="section-title"><span class="section-counter">4</span> Experience</h2>
+        <h2 class="builder-section-header">Experience</h2>
         <div id="experienceItems">
             <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
                 <div class="form-row">
@@ -528,7 +495,7 @@
                     </div>
                     <div class="form-group">
                         <label>Company</label>
-                        <input type="text" class="form-control company" placeholder="Tech Corp Inc.">
+                        <input type="text" class="form-control company" placeholder="Tech Company Inc.">
                     </div>
                 </div>
                 <div class="form-group">
@@ -537,104 +504,94 @@
                 </div>
                 <div class="form-group">
                     <label>Responsibilities</label>
-                    <textarea class="form-control responsibilities" placeholder="Describe your key responsibilities and achievements"></textarea>
+                    <textarea class="form-control responsibilities" placeholder="Describe your responsibilities and achievements..."></textarea>
                 </div>
                 <button class="remove-btn remove-experience">Remove</button>
             </div>
         </div>
         <button class="btn btn-secondary" id="addExperience">Add Experience</button>
         
-        <h2 class="section-title"><span class="section-counter">5</span> Skills and Attributes</h2>
+        <h2 class="builder-section-header">Skills and Attributes</h2>
         <div id="skillItems">
             <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
                 <div class="form-group">
                     <label>Skill</label>
-                    <input type="text" class="form-control skill" placeholder="Project Management">
-                </div>
-                <div class="form-group">
-                    <label>Proficiency Level</label>
-                    <select class="form-control proficiency">
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                        <option value="Expert">Expert</option>
-                    </select>
+                    <input type="text" class="form-control skill" placeholder="JavaScript, Python, etc.">
                 </div>
                 <button class="remove-btn remove-skill">Remove</button>
             </div>
         </div>
         <button class="btn btn-secondary" id="addSkill">Add Skill</button>
         
-        <h2 class="section-title"><span class="section-counter">6</span> Additional Information</h2>
         <div class="form-group">
             <label for="languageProficiency">Language Proficiency</label>
-            <textarea id="languageProficiency" class="form-control" placeholder="English (Fluent), Spanish (Intermediate)"></textarea>
+            <textarea id="languageProficiency" class="form-control" placeholder="English (Fluent), Spanish (Intermediate)..."></textarea>
         </div>
         
         <div class="form-group">
             <label for="interests">Interests</label>
-            <textarea id="interests" class="form-control" placeholder="Photography, Hiking, Reading"></textarea>
+            <textarea id="interests" class="form-control" placeholder="Reading, Traveling, Photography..."></textarea>
         </div>
         
-        <h2 class="section-title"><span class="section-counter">7</span> Personal Details</h2>
+        <h2 class="builder-section-header">Personal Details</h2>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="fatherName">Father's Name</label>
-                <input type="text" id="fatherName" class="form-control" placeholder="Robert Doe">
+                <input type="text" id="fatherName" class="form-control" placeholder="Father's Name">
             </div>
             <div class="form-group">
                 <label for="motherName">Mother's Name</label>
-                <input type="text" id="motherName" class="form-control" placeholder="Jane Doe">
+                <input type="text" id="motherName" class="form-control" placeholder="Mother's Name">
             </div>
         </div>
         
         <div class="form-group">
             <label for="presentAddress">Present Address</label>
-            <textarea id="presentAddress" class="form-control" placeholder="Your current address"></textarea>
+            <textarea id="presentAddress" class="form-control" placeholder="Your current address..."></textarea>
         </div>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="dob">Date of Birth</label>
-                <input type="text" id="dob" class="form-control" placeholder="15th March 1990">
+                <input type="text" id="dob" class="form-control" placeholder="DD/MM/YYYY">
             </div>
             <div class="form-group">
                 <label for="nationality">Nationality</label>
-                <input type="text" id="nationality" class="form-control" placeholder="American">
+                <input type="text" id="nationality" class="form-control" placeholder="Your Nationality">
             </div>
         </div>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="nid">NID No</label>
-                <input type="text" id="nid" class="form-control" placeholder="123-456-789">
+                <input type="text" id="nid" class="form-control" placeholder="National ID Number">
             </div>
             <div class="form-group">
                 <label for="religion">Religion</label>
-                <input type="text" id="religion" class="form-control" placeholder="Christian">
+                <input type="text" id="religion" class="form-control" placeholder="Your Religion">
             </div>
         </div>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="maritalStatus">Marital Status</label>
-                <input type="text" id="maritalStatus" class="form-control" placeholder="Single">
+                <input type="text" id="maritalStatus" class="form-control" placeholder="Single/Married">
             </div>
             <div class="form-group">
                 <label for="currentLocation">Current Location</label>
-                <input type="text" id="currentLocation" class="form-control" placeholder="New York, USA">
+                <input type="text" id="currentLocation" class="form-control" placeholder="Your City">
             </div>
         </div>
         
         <div class="form-group">
             <label for="covidId">Covid-19 ID No</label>
-            <input type="text" id="covidId" class="form-control" placeholder="Vaccination ID if applicable">
+            <input type="text" id="covidId" class="form-control" placeholder="If applicable">
         </div>
         
         <div class="action-buttons">
-            <button class="btn btn-success" id="generateCV">Generate CV</button>
-            <button class="btn btn-secondary" id="resetForm">Reset Form</button>
+            <button class="btn" id="generateCV" style="padding: 12px 30px; font-size: 16px;">Generate CV</button>
+            <button class="btn btn-secondary" id="resetForm" style="padding: 12px 30px; font-size: 16px;">Reset Form</button>
         </div>
     </div>
     
@@ -777,11 +734,9 @@
         <div class="no-print" style="text-align: center; padding: 20px; border-top: 1px solid var(--border-color);">
             <button class="btn" id="editCV" style="margin-right: 10px;">Edit CV</button>
             <button class="btn" id="printCV" style="margin-right: 10px;">Print CV</button>
-            <button class="btn btn-success" id="downloadPDF">Download as PDF</button>
+            <button class="btn" id="downloadPDF">Download as PDF</button>
         </div>
     </div>
-
-    <button class="btn floating-button no-print hidden" id="scrollToTop">↑ Top</button>
 
     <script>
         // DOM elements
@@ -790,76 +745,16 @@
         const generateBtn = document.getElementById('generateCV');
         const editBtn = document.getElementById('editCV');
         const printBtn = document.getElementById('printCV');
-        const downloadBtn = document.getElementById('downloadPDF');
+        const downloadPdfBtn = document.getElementById('downloadPDF');
         const resetBtn = document.getElementById('resetForm');
-        const scrollToTopBtn = document.getElementById('scrollToTop');
         const photoInput = document.getElementById('photo');
+        const fileInputLabel = document.getElementById('fileInputLabel');
+        const fileName = document.getElementById('fileName');
         const cvPhoto = document.getElementById('cvPhoto');
         const cvPhotoPlaceholder = document.getElementById('cvPhotoPlaceholder');
-        const progressBar = document.getElementById('progressBar');
         
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add event listeners
-            setupEventListeners();
-            
-            // Set up scroll progress bar
-            window.addEventListener('scroll', updateProgressBar);
-            
-            // Set up scroll to top button
-            window.addEventListener('scroll', toggleScrollToTopButton);
-            scrollToTopBtn.addEventListener('click', scrollToTop);
-        });
-        
-        function setupEventListeners() {
-            // Add education item
-            document.getElementById('addEducation').addEventListener('click', addEducationItem);
-            
-            // Add experience item
-            document.getElementById('addExperience').addEventListener('click', addExperienceItem);
-            
-            // Add skill item
-            document.getElementById('addSkill').addEventListener('click', addSkillItem);
-            
-            // Photo upload
-            photoInput.addEventListener('change', handlePhotoUpload);
-            
-            // Generate CV
-            generateBtn.addEventListener('click', generateCV);
-            
-            // Edit CV
-            editBtn.addEventListener('click', editCV);
-            
-            // Print CV
-            printBtn.addEventListener('click', printCV);
-            
-            // Download PDF
-            downloadBtn.addEventListener('click', downloadPDF);
-            
-            // Reset form
-            resetBtn.addEventListener('click', resetForm);
-            
-            // Add event listeners to initial remove buttons
-            document.querySelectorAll('.remove-education').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.parentElement.remove();
-                });
-            });
-            
-            document.querySelectorAll('.remove-experience').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.parentElement.remove();
-                });
-            });
-            
-            document.querySelectorAll('.remove-skill').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.parentElement.remove();
-                });
-            });
-        }
-        
-        function addEducationItem() {
+        // Add education item
+        document.getElementById('addEducation').addEventListener('click', () => {
             const educationItems = document.getElementById('educationItems');
             const newItem = document.createElement('div');
             newItem.className = 'form-group';
@@ -886,7 +781,7 @@
                     </div>
                     <div class="form-group">
                         <label>Result</label>
-                        <input type="text" class="form-control result" placeholder="GPA: 3.8/4.0">
+                        <input type="text" class="form-control result" placeholder="GPA: 3.5/4.0">
                     </div>
                 </div>
                 <button class="remove-btn remove-education">Remove</button>
@@ -894,12 +789,13 @@
             educationItems.appendChild(newItem);
             
             // Add event listener to the new remove button
-            newItem.querySelector('.remove-education').addEventListener('click', function() {
+            newItem.querySelector('.remove-education').addEventListener('click', () => {
                 newItem.remove();
             });
-        }
+        });
         
-        function addExperienceItem() {
+        // Add experience item
+        document.getElementById('addExperience').addEventListener('click', () => {
             const experienceItems = document.getElementById('experienceItems');
             const newItem = document.createElement('div');
             newItem.className = 'form-group';
@@ -916,7 +812,7 @@
                     </div>
                     <div class="form-group">
                         <label>Company</label>
-                        <input type="text" class="form-control company" placeholder="Tech Corp Inc.">
+                        <input type="text" class="form-control company" placeholder="Tech Company Inc.">
                     </div>
                 </div>
                 <div class="form-group">
@@ -925,19 +821,20 @@
                 </div>
                 <div class="form-group">
                     <label>Responsibilities</label>
-                    <textarea class="form-control responsibilities" placeholder="Describe your key responsibilities and achievements"></textarea>
+                    <textarea class="form-control responsibilities" placeholder="Describe your responsibilities and achievements..."></textarea>
                 </div>
                 <button class="remove-btn remove-experience">Remove</button>
             `;
             experienceItems.appendChild(newItem);
             
             // Add event listener to the new remove button
-            newItem.querySelector('.remove-experience').addEventListener('click', function() {
+            newItem.querySelector('.remove-experience').addEventListener('click', () => {
                 newItem.remove();
             });
-        }
+        });
         
-        function addSkillItem() {
+        // Add skill item
+        document.getElementById('addSkill').addEventListener('click', () => {
             const skillItems = document.getElementById('skillItems');
             const newItem = document.createElement('div');
             newItem.className = 'form-group';
@@ -949,30 +846,23 @@
             newItem.innerHTML = `
                 <div class="form-group">
                     <label>Skill</label>
-                    <input type="text" class="form-control skill" placeholder="Project Management">
-                </div>
-                <div class="form-group">
-                    <label>Proficiency Level</label>
-                    <select class="form-control proficiency">
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                        <option value="Expert">Expert</option>
-                    </select>
+                    <input type="text" class="form-control skill" placeholder="JavaScript, Python, etc.">
                 </div>
                 <button class="remove-btn remove-skill">Remove</button>
             `;
             skillItems.appendChild(newItem);
             
             // Add event listener to the new remove button
-            newItem.querySelector('.remove-skill').addEventListener('click', function() {
+            newItem.querySelector('.remove-skill').addEventListener('click', () => {
                 newItem.remove();
             });
-        }
+        });
         
-        function handlePhotoUpload(e) {
+        // Photo upload
+        photoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                fileName.textContent = file.name;
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     cvPhoto.src = event.target.result;
@@ -981,9 +871,10 @@
                 };
                 reader.readAsDataURL(file);
             }
-        }
+        });
         
-        function generateCV() {
+        // Generate CV
+        generateBtn.addEventListener('click', () => {
             // Basic info
             document.getElementById('cvName').textContent = document.getElementById('fullName').value || 'Your Name';
             document.getElementById('cvMobile').textContent = `Mobile: ${document.getElementById('mobile').value || 'Your Number'}`;
@@ -1058,7 +949,7 @@
                                 </div>
                                 <div class="item-date">${duration || 'Duration'}</div>
                             </div>
-                            ${responsibilities ? `<p>${responsibilities.replace(/\n/g, '<br>')}</p>` : ''}
+                            ${responsibilities ? `<p>${responsibilities}</p>` : ''}
                         </div>
                     `;
                     cvExperience.innerHTML += experienceHTML;
@@ -1075,12 +966,10 @@
             
             document.querySelectorAll('#skillItems .skill-item, #skillItems .form-group').forEach(item => {
                 const skill = item.querySelector('.skill')?.value;
-                const proficiency = item.querySelector('.proficiency')?.value;
-                
                 if (skill) {
                     const skillItem = document.createElement('li');
                     skillItem.className = 'skill-item';
-                    skillItem.textContent = proficiency ? `${skill} (${proficiency})` : skill;
+                    skillItem.textContent = skill;
                     cvSkills.appendChild(skillItem);
                 }
             });
@@ -1092,20 +981,25 @@
             // Show CV and hide builder
             builder.classList.add('hidden');
             cvOutput.classList.remove('hidden');
-            scrollToTop();
-        }
+            
+            // Scroll to the top of the CV
+            window.scrollTo(0, 0);
+        });
         
-        function editCV() {
+        // Edit CV
+        editBtn.addEventListener('click', () => {
             builder.classList.remove('hidden');
             cvOutput.classList.add('hidden');
-            scrollToTop();
-        }
+            window.scrollTo(0, 0);
+        });
         
-        function printCV() {
+        // Print CV
+        printBtn.addEventListener('click', () => {
             window.print();
-        }
+        });
         
-        function downloadPDF() {
+        // Download as PDF
+        downloadPdfBtn.addEventListener('click', () => {
             const element = document.getElementById('cvOutput');
             const opt = {
                 margin: 10,
@@ -1115,19 +1009,20 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            // Show loading state
-            downloadBtn.innerHTML = 'Generating PDF...';
-            downloadBtn.disabled = true;
+            // Show loading indicator
+            downloadPdfBtn.textContent = 'Generating PDF...';
+            downloadPdfBtn.disabled = true;
             
             // Generate PDF
             html2pdf().from(element).set(opt).save().then(() => {
-                // Restore button state
-                downloadBtn.innerHTML = 'Download as PDF';
-                downloadBtn.disabled = false;
+                // Reset button text
+                downloadPdfBtn.textContent = 'Download as PDF';
+                downloadPdfBtn.disabled = false;
             });
-        }
+        });
         
-        function resetForm() {
+        // Reset form
+        resetBtn.addEventListener('click', () => {
             if (confirm('Are you sure you want to reset the form? All your data will be lost.')) {
                 document.getElementById('builder').reset();
                 document.getElementById('educationItems').innerHTML = `
@@ -1135,21 +1030,21 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Degree</label>
-                                <input type="text" class="form-control degree">
+                                <input type="text" class="form-control degree" placeholder="Bachelor of Science">
                             </div>
                             <div class="form-group">
                                 <label>Institution</label>
-                                <input type="text" class="form-control institution">
+                                <input type="text" class="form-control institution" placeholder="University Name">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>University</label>
-                                <input type="text" class="form-control university">
+                                <input type="text" class="form-control university" placeholder="University Name">
                             </div>
                             <div class="form-group">
                                 <label>Result</label>
-                                <input type="text" class="form-control result">
+                                <input type="text" class="form-control result" placeholder="GPA: 3.5/4.0">
                             </div>
                         </div>
                         <button class="remove-btn remove-education">Remove</button>
@@ -1161,20 +1056,20 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Position</label>
-                                <input type="text" class="form-control position">
+                                <input type="text" class="form-control position" placeholder="Software Engineer">
                             </div>
                             <div class="form-group">
                                 <label>Company</label>
-                                <input type="text" class="form-control company">
+                                <input type="text" class="form-control company" placeholder="Tech Company Inc.">
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Duration</label>
-                            <input type="text" class="form-control duration">
+                            <input type="text" class="form-control duration" placeholder="Jan 2020 - Present">
                         </div>
                         <div class="form-group">
                             <label>Responsibilities</label>
-                            <textarea class="form-control responsibilities"></textarea>
+                            <textarea class="form-control responsibilities" placeholder="Describe your responsibilities and achievements..."></textarea>
                         </div>
                         <button class="remove-btn remove-experience">Remove</button>
                     </div>
@@ -1184,16 +1079,7 @@
                     <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
                         <div class="form-group">
                             <label>Skill</label>
-                            <input type="text" class="form-control skill">
-                        </div>
-                        <div class="form-group">
-                            <label>Proficiency Level</label>
-                            <select class="form-control proficiency">
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
-                                <option value="Expert">Expert</option>
-                            </select>
+                            <input type="text" class="form-control skill" placeholder="JavaScript, Python, etc.">
                         </div>
                         <button class="remove-btn remove-skill">Remove</button>
                     </div>
@@ -1201,36 +1087,50 @@
                 
                 // Reset photo
                 photoInput.value = '';
+                fileName.textContent = 'Choose a photo...';
                 cvPhoto.src = '';
                 cvPhoto.classList.add('hidden');
                 cvPhotoPlaceholder.classList.remove('hidden');
                 
-                // Reattach event listeners
-                setupEventListeners();
+                // Add event listeners to new remove buttons
+                document.querySelectorAll('.remove-education').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        this.parentElement.remove();
+                    });
+                });
+                
+                document.querySelectorAll('.remove-experience').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        this.parentElement.remove();
+                    });
+                });
+                
+                document.querySelectorAll('.remove-skill').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        this.parentElement.remove();
+                    });
+                });
             }
-        }
+        });
         
-        function updateProgressBar() {
-            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrollProgress = (scrollTop / scrollHeight) * 100;
-            progressBar.style.width = scrollProgress + '%';
-        }
-        
-        function toggleScrollToTopButton() {
-            if (window.pageYOffset > 300) {
-                scrollToTopBtn.classList.remove('hidden');
-            } else {
-                scrollToTopBtn.classList.add('hidden');
-            }
-        }
-        
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+        // Initialize remove buttons in the default form items
+        document.querySelectorAll('.remove-education').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.remove();
             });
-        }
+        });
+        
+        document.querySelectorAll('.remove-experience').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        });
+        
+        document.querySelectorAll('.remove-skill').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        });
     </script>
 </body>
 </html>
