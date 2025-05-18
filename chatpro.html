@@ -923,7 +923,7 @@
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, getDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, getDoc, deleteDoc, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 
     // Your web app's Firebase configuration
@@ -1038,14 +1038,37 @@
       return displayName;
     }
 
-    // Function to check if user is approved for pro features
-    async function checkProUserStatus(uid) {
+    // Function to check if user is admin or approved for pro features
+    async function checkUserStatus(uid, email) {
+      const adminEmail = "252-35-007@diu.edu.bd";
+      
+      // Check if user is admin
+      if (email === adminEmail) {
+        isAdmin = true;
+        isProUser = true;
+        
+        // Ensure admin is in approvedUsers collection
+        try {
+          const adminRef = doc(db, "approvedUsers", uid);
+          await setDoc(adminRef, {
+            email: adminEmail,
+            approvedAt: serverTimestamp(),
+            isAdmin: true
+          }, { merge: true });
+        } catch (error) {
+          console.error("Error ensuring admin is approved:", error);
+        }
+        
+        return { isAdmin: true, isProUser: true };
+      }
+      
+      // Check if regular user is approved
       try {
         const userDoc = await getDoc(doc(db, "approvedUsers", uid));
-        return userDoc.exists();
+        return { isAdmin: false, isProUser: userDoc.exists() };
       } catch (error) {
-        console.error("Error checking pro user status:", error);
-        return false;
+        console.error("Error checking user status:", error);
+        return { isAdmin: false, isProUser: false };
       }
     }
 
@@ -1104,24 +1127,13 @@
         return;
       }
 
-      const adminEmail = "252-35-007@diu.edu.bd";
       currentUser = user;
       userCache[user.email] = user.displayName || user.email.split('@')[0];
 
-      if (loginMode === "admin") {
-        if (user.email !== adminEmail) {
-          loadingScreen.style.display = 'none';
-          alert("You are not an Admin.");
-          await signOut(auth);
-          return;
-        }
-        isAdmin = true;
-      } else {
-        isAdmin = false;
-      }
-
-      // Check if user is approved for pro features
-      isProUser = await checkProUserStatus(user.uid);
+      // Check user status (admin or pro user)
+      const { isAdmin: adminStatus, isProUser: proStatus } = await checkUserStatus(user.uid, user.email);
+      isAdmin = adminStatus;
+      isProUser = proStatus;
       
       // Show theme toggle only for Pro users
       themeToggle.style.display = isProUser ? 'block' : 'none';
