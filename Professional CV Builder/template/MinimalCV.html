@@ -3,143 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Builder</title>
+    <title>Professional CV Builder</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #2980b9;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dfe6e9;
+        }
+
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
             color: #333;
+            line-height: 1.6;
         }
-        .builder-container, .cv-container {
+
+        .container {
             max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 30px auto;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--secondary-color);
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+
+        .cv-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px;
+            border-bottom: 2px solid var(--border-color);
         }
-        .header h1 {
-            margin: 5px 0;
-            font-size: 24px;
+
+        .header-content {
+            flex: 1;
         }
-        .header p {
+
+        .header-content h1 {
+            font-size: 28px;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .header-content h2 {
+            font-size: 18px;
+            color: var(--secondary-color);
+            font-weight: normal;
+            margin-bottom: 15px;
+        }
+
+        .contact-info p {
             margin: 3px 0;
+            font-size: 14px;
         }
+
         .photo-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .photo-preview {
             width: 150px;
             height: 180px;
-            border: 1px solid #ddd;
-            display: inline-block;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            border: 3px solid var(--secondary-color);
+            overflow: hidden;
         }
+
+        .photo-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cv-body {
+            padding: 30px;
+        }
+
         .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+
+        .section-content p {
+            margin: 8px 0;
+        }
+
+        .education-item, .experience-item {
             margin-bottom: 20px;
         }
-        .section h2 {
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            font-size: 18px;
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
         }
-        .section h3 {
-            margin: 10px 0 5px 0;
-            font-size: 16px;
+
+        .item-title {
+            font-weight: bold;
+            color: var(--primary-color);
         }
-        .section p, .section ul {
-            margin: 5px 0;
+
+        .item-subtitle {
+            color: #555;
+            font-style: italic;
         }
+
+        .item-date {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        .skills-list {
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .skill-item {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+            break-inside: avoid;
+        }
+
+        .skill-item::before {
+            content: "•";
+            color: var(--secondary-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
         .personal-details {
             width: 100%;
             border-collapse: collapse;
         }
+
         .personal-details td {
-            padding: 5px 0;
+            padding: 8px 0;
             vertical-align: top;
+            border-bottom: 1px solid var(--border-color);
         }
+
         .personal-details td:first-child {
             width: 30%;
             font-weight: bold;
+            color: var(--primary-color);
         }
+
         .personal-details td:nth-child(2) {
             width: 5%;
         }
+
         .declaration {
             margin-top: 30px;
+            font-style: italic;
         }
+
         .signature {
             margin-top: 50px;
             text-align: right;
         }
-        .education-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+
+        .signature p {
+            margin-top: 30px;
         }
-        .education-table th, .education-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+
+        /* Form Styles */
+        .builder-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
-        .education-table th {
-            background-color: #f2f2f2;
-        }
-        ul.attributes {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        ul.attributes li:before {
-            content: ">";
-            margin-right: 5px;
-        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
         }
+
         .form-control {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 10px;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
+            font-size: 14px;
         }
+
         textarea.form-control {
             min-height: 100px;
         }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
         .btn {
-            padding: 10px 15px;
-            background-color: #4CAF50;
+            padding: 10px 20px;
+            background-color: var(--secondary-color);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 10px;
+            font-weight: 600;
+            transition: background-color 0.3s;
         }
+
+        .btn:hover {
+            background-color: var(--accent-color);
+        }
+
         .btn-secondary {
             background-color: #6c757d;
         }
-        .hidden {
-            display: none;
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
         }
-        .education-item, .experience-item, .skill-item {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
+
         .remove-btn {
             background-color: #dc3545;
             color: white;
@@ -148,93 +270,136 @@
             border-radius: 4px;
             cursor: pointer;
             margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cv-header {
+                flex-direction: column;
+            }
+            .photo-container {
+                margin: 20px auto;
+                order: -1;
+            }
+            .skills-list {
+                columns: 1;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="builder-container" id="builder">
-        <h1>CV Builder</h1>
+    <div class="builder-container no-print" id="builder">
+        <h1 style="color: var(--primary-color); margin-bottom: 20px;">CV Builder</h1>
         
-        <div class="form-group">
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" class="form-control" placeholder="Mita Chowdhury">
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="photo">Upload Photo</label>
+                <input type="file" id="photo" class="form-control" accept="image/*">
+            </div>
         </div>
         
-        <div class="form-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" class="form-control" placeholder="Pagar, Munrunagar, Tongi, Gazipur- 1710">
-        </div>
-        
-        <div class="form-group">
-            <label for="mobile">Mobile</label>
-            <input type="text" id="mobile" class="form-control" placeholder="+8801715-208998">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile</label>
+                <input type="text" id="mobile" class="form-control">
+            </div>
         </div>
         
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" class="form-control" placeholder="Chowdhurymc74@gmail.com">
-        </div>
-        
-        <div class="form-group">
-            <label for="photo">Upload Photo</label>
-            <input type="file" id="photo" class="form-control" accept="image/*">
+            <input type="email" id="email" class="form-control">
         </div>
         
         <div class="form-group">
             <label for="careerObjective">Career Objective</label>
-            <textarea id="careerObjective" class="form-control">Want to build up my career as a keen official for public or private sectors, where punctuality, sincerity, and creativity are always appreciated.</textarea>
+            <textarea id="careerObjective" class="form-control"></textarea>
         </div>
         
-        <h2>Academic Qualifications</h2>
+        <h2 style="color: var(--primary-color); margin: 25px 0 15px 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px;">Academic Qualifications</h2>
         <div id="educationItems">
-            <div class="education-item">
-                <div class="form-group">
-                    <label>Degree</label>
-                    <input type="text" class="form-control degree" placeholder="Masters of Social Science (MSS)">
+            <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input type="text" class="form-control degree">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" class="form-control institution">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input type="text" class="form-control institution" placeholder="Bhawal Bodre Alam College, Gazipur.">
-                </div>
-                <div class="form-group">
-                    <label>University</label>
-                    <input type="text" class="form-control university" placeholder="National University">
-                </div>
-                <div class="form-group">
-                    <label>Result</label>
-                    <input type="text" class="form-control result" placeholder="Running (2nd Year)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>University</label>
+                        <input type="text" class="form-control university">
+                    </div>
+                    <div class="form-group">
+                        <label>Result</label>
+                        <input type="text" class="form-control result">
+                    </div>
                 </div>
                 <button class="remove-btn remove-education">Remove</button>
             </div>
         </div>
         <button class="btn btn-secondary" id="addEducation">Add Education</button>
         
-        <h2>Experience</h2>
+        <h2 style="color: var(--primary-color); margin: 25px 0 15px 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px;">Experience</h2>
         <div id="experienceItems">
-            <div class="experience-item">
-                <div class="form-group">
-                    <label>Position</label>
-                    <input type="text" class="form-control position" placeholder="Assistant Teacher">
-                </div>
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input type="text" class="form-control company" placeholder="BB Moriyam School">
+            <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="text" class="form-control position">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" class="form-control company">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Duration</label>
-                    <input type="text" class="form-control duration" placeholder="From January 2016 to June 2018">
+                    <input type="text" class="form-control duration">
                 </div>
                 <button class="remove-btn remove-experience">Remove</button>
             </div>
         </div>
         <button class="btn btn-secondary" id="addExperience">Add Experience</button>
         
-        <h2>Skills and Attributes</h2>
+        <h2 style="color: var(--primary-color); margin: 25px 0 15px 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px;">Skills and Attributes</h2>
         <div id="skillItems">
-            <div class="skill-item">
+            <div class="form-group" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 4px; margin-bottom: 15px;">
                 <div class="form-group">
                     <label>Skill</label>
-                    <input type="text" class="form-control skill" placeholder="Absolutely positive hard working with a positive attitude.">
+                    <input type="text" class="form-control skill">
                 </div>
                 <button class="remove-btn remove-skill">Remove</button>
             </div>
@@ -243,187 +408,215 @@
         
         <div class="form-group">
             <label for="languageProficiency">Language Proficiency</label>
-            <textarea id="languageProficiency" class="form-control">Have a good listening, writing and speaking command in Bangla and English.</textarea>
+            <textarea id="languageProficiency" class="form-control"></textarea>
         </div>
         
         <div class="form-group">
             <label for="interests">Interests</label>
-            <textarea id="interests" class="form-control">Reading, Tour, Drawing, Praying, Gardening and build up nurturing relationship of people, keen interest in music and watching movies.</textarea>
+            <textarea id="interests" class="form-control"></textarea>
         </div>
         
-        <h2>Personal Details</h2>
-        <div class="form-group">
-            <label for="fatherName">Father's Name</label>
-            <input type="text" id="fatherName" class="form-control" placeholder="Chowdhury Motiur Rahman">
-        </div>
+        <h2 style="color: var(--primary-color); margin: 25px 0 15px 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px;">Personal Details</h2>
         
-        <div class="form-group">
-            <label for="motherName">Mother's Name</label>
-            <input type="text" id="motherName" class="form-control" placeholder="Late Sujata Rahman">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fatherName">Father's Name</label>
+                <input type="text" id="fatherName" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="motherName">Mother's Name</label>
+                <input type="text" id="motherName" class="form-control">
+            </div>
         </div>
         
         <div class="form-group">
             <label for="presentAddress">Present Address</label>
-            <textarea id="presentAddress" class="form-control">House # 56, Road # 06/C Block, Sector # 12, Khalpar, Uttara, Dhaka-1230.</textarea>
+            <textarea id="presentAddress" class="form-control"></textarea>
         </div>
         
-        <div class="form-group">
-            <label for="dob">Date of Birth</label>
-            <input type="text" id="dob" class="form-control" placeholder="15th December 1987">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="text" id="dob" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="nationality">Nationality</label>
+                <input type="text" id="nationality" class="form-control">
+            </div>
         </div>
         
-        <div class="form-group">
-            <label for="nationality">Nationality</label>
-            <input type="text" id="nationality" class="form-control" placeholder="Bangladesh by birth">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="nid">NID No</label>
+                <input type="text" id="nid" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="religion">Religion</label>
+                <input type="text" id="religion" class="form-control">
+            </div>
         </div>
         
-        <div class="form-group">
-            <label for="nid">NID No</label>
-            <input type="text" id="nid" class="form-control" placeholder="642 510 3386">
-        </div>
-        
-        <div class="form-group">
-            <label for="religion">Religion</label>
-            <input type="text" id="religion" class="form-control" placeholder="Islam">
-        </div>
-        
-        <div class="form-group">
-            <label for="maritalStatus">Marital Status</label>
-            <input type="text" id="maritalStatus" class="form-control" placeholder="Married">
-        </div>
-        
-        <div class="form-group">
-            <label for="currentLocation">Current Location</label>
-            <input type="text" id="currentLocation" class="form-control" placeholder="Dhaka">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="maritalStatus">Marital Status</label>
+                <input type="text" id="maritalStatus" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="currentLocation">Current Location</label>
+                <input type="text" id="currentLocation" class="form-control">
+            </div>
         </div>
         
         <div class="form-group">
             <label for="covidId">Covid-19 ID No</label>
-            <input type="text" id="covidId" class="form-control" placeholder="BD334265093107">
+            <input type="text" id="covidId" class="form-control">
         </div>
         
-        <button class="btn" id="generateCV">Generate CV</button>
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="btn" id="generateCV" style="padding: 12px 30px; font-size: 16px;">Generate CV</button>
+        </div>
     </div>
     
-    <div class="cv-container hidden" id="cvOutput">
-        <div class="header">
-            <h1>RESUME OF</h1>
-            <h1 id="cvName">Mita Chowdhury</h1>
-            <p id="cvAddress">Pagar, Munrunagar</p>
-            <p id="cvCity">Tongi, Gazipur- 1710</p>
-            <p id="cvMobile">Mobile: +8801715-208998</p>
-            <p id="cvEmail">Email: Chowdhurymc74@gmail.com</p>
+    <div class="container hidden" id="cvOutput">
+        <div class="cv-header">
+            <div class="header-content">
+                <h1 id="cvName">Your Name</h1>
+                <h2 id="cvTitle">Your Profession</h2>
+                <div class="contact-info">
+                    <p id="cvAddress">Your Address</p>
+                    <p id="cvMobile">Mobile: Your Number</p>
+                    <p id="cvEmail">Email: Your Email</p>
+                </div>
+            </div>
+            <div class="photo-container">
+                <div class="photo-placeholder" id="cvPhotoPlaceholder">Photo</div>
+                <img id="cvPhoto" class="photo-preview hidden">
+            </div>
         </div>
 
-        <div class="photo-container">
-            <div class="photo-preview" id="cvPhoto"></div>
-        </div>
+        <div class="cv-body">
+            <div class="section">
+                <h2 class="section-title">CAREER OBJECTIVE</h2>
+                <div class="section-content">
+                    <p id="cvObjective">Your career objective goes here.</p>
+                </div>
+            </div>
 
-        <div class="section">
-            <h2>Career Objective</h2>
-            <p id="cvObjective">Want to build up my career as a keen official for public or private sectors, where punctuality, sincerity, and creativity are always appreciated.</p>
-        </div>
+            <div class="section" id="cvEducationSection">
+                <h2 class="section-title">ACADEMIC QUALIFICATION</h2>
+                <div class="section-content" id="cvEducation">
+                    <!-- Education items will be inserted here -->
+                </div>
+            </div>
 
-        <div class="section" id="cvEducation">
-            <h2>Academic Qualification</h2>
-            <!-- Education items will be inserted here -->
-        </div>
+            <div class="section" id="cvExperienceSection">
+                <h2 class="section-title">EXPERIENCE</h2>
+                <div class="section-content" id="cvExperience">
+                    <!-- Experience items will be inserted here -->
+                </div>
+            </div>
 
-        <div class="section" id="cvExperience">
-            <h2>Experience</h2>
-            <!-- Experience items will be inserted here -->
-        </div>
+            <div class="section" id="cvSkillsSection">
+                <h2 class="section-title">SKILLS AND ATTRIBUTES</h2>
+                <div class="section-content">
+                    <ul class="skills-list" id="cvSkills">
+                        <!-- Skills will be inserted here -->
+                    </ul>
+                </div>
+            </div>
 
-        <div class="section" id="cvSkills">
-            <h2>Skill and attributes</h2>
-            <ul class="attributes">
-                <!-- Skills will be inserted here -->
-            </ul>
-        </div>
+            <div class="section">
+                <h2 class="section-title">LANGUAGE PROFICIENCY</h2>
+                <div class="section-content">
+                    <p id="cvLanguage">Your language proficiency details.</p>
+                </div>
+            </div>
 
-        <div class="section">
-            <h2>Language Proficiency</h2>
-            <p id="cvLanguage">Have a good listening, writing and speaking command in Bangla and English.</p>
-        </div>
+            <div class="section">
+                <h2 class="section-title">INTERESTS</h2>
+                <div class="section-content">
+                    <p id="cvInterests">Your interests and hobbies.</p>
+                </div>
+            </div>
 
-        <div class="section">
-            <h2>Interests</h2>
-            <p id="cvInterests">Reading, Tour, Drawing, Praying, Gardening and build up nurturing relationship of people, keen interest in music and watching movies.</p>
-        </div>
+            <div class="section">
+                <h2 class="section-title">PERSONAL DETAILS</h2>
+                <div class="section-content">
+                    <table class="personal-details">
+                        <tr>
+                            <td>Name</td>
+                            <td>:</td>
+                            <td id="pdName">Your Name</td>
+                        </tr>
+                        <tr>
+                            <td>Father's name</td>
+                            <td>:</td>
+                            <td id="pdFather">Father's Name</td>
+                        </tr>
+                        <tr>
+                            <td>Mother's name</td>
+                            <td>:</td>
+                            <td id="pdMother">Mother's Name</td>
+                        </tr>
+                        <tr>
+                            <td>Present Address</td>
+                            <td>:</td>
+                            <td id="pdAddress">Your Address</td>
+                        </tr>
+                        <tr>
+                            <td>Date of birth</td>
+                            <td>:</td>
+                            <td id="pdDob">Your Date of Birth</td>
+                        </tr>
+                        <tr>
+                            <td>Nationality</td>
+                            <td>:</td>
+                            <td id="pdNationality">Your Nationality</td>
+                        </tr>
+                        <tr>
+                            <td>NID No</td>
+                            <td>:</td>
+                            <td id="pdNid">Your NID Number</td>
+                        </tr>
+                        <tr>
+                            <td>Religion</td>
+                            <td>:</td>
+                            <td id="pdReligion">Your Religion</td>
+                        </tr>
+                        <tr>
+                            <td>Marital Status</td>
+                            <td>:</td>
+                            <td id="pdMarital">Your Marital Status</td>
+                        </tr>
+                        <tr>
+                            <td>Current Location</td>
+                            <td>:</td>
+                            <td id="pdLocation">Your Location</td>
+                        </tr>
+                        <tr>
+                            <td>Covid-19 ID No</td>
+                            <td>:</td>
+                            <td id="pdCovid">Your Covid ID</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-        <div class="section">
-            <h2>Personal Details</h2>
-            <table class="personal-details">
-                <tr>
-                    <td>Name</td>
-                    <td>:</td>
-                    <td id="pdName">Mita Chowdhury</td>
-                </tr>
-                <tr>
-                    <td>Father's name</td>
-                    <td>:</td>
-                    <td id="pdFather">Chowdhury Motiur Rahman</td>
-                </tr>
-                <tr>
-                    <td>Mother's name</td>
-                    <td>:</td>
-                    <td id="pdMother">Late Sujata Rahman</td>
-                </tr>
-                <tr>
-                    <td>Present Address</td>
-                    <td>:</td>
-                    <td id="pdAddress">House # 56, Road # 06/C Block, Sector # 12, Khalpar, Uttara, Dhaka-1230.</td>
-                </tr>
-                <tr>
-                    <td>Date of birth</td>
-                    <td>:</td>
-                    <td id="pdDob">15th December 1987</td>
-                </tr>
-                <tr>
-                    <td>Nationality</td>
-                    <td>:</td>
-                    <td id="pdNationality">Bangladesh by birth</td>
-                </tr>
-                <tr>
-                    <td>NID No</td>
-                    <td>:</td>
-                    <td id="pdNid">642 510 3386</td>
-                </tr>
-                <tr>
-                    <td>Religion</td>
-                    <td>:</td>
-                    <td id="pdReligion">Islam</td>
-                </tr>
-                <tr>
-                    <td>Marital Status</td>
-                    <td>:</td>
-                    <td id="pdMarital">Married</td>
-                </tr>
-                <tr>
-                    <td>Current Location</td>
-                    <td>:</td>
-                    <td id="pdLocation">Dhaka</td>
-                </tr>
-                <tr>
-                    <td>Covid-19 ID No</td>
-                    <td>:</td>
-                    <td id="pdCovid">BD334265093107</td>
-                </tr>
-            </table>
-        </div>
+            <div class="declaration">
+                <h2 class="section-title">DECLARATION</h2>
+                <p>I declare hereby that all information I have presented so far are true to my knowledge. If required and where applicable, this document can be supported by authentic certificates\papers.</p>
+            </div>
 
-        <div class="section declaration">
-            <h2>Declaration of Authenticity</h2>
-            <p>I declare hereby that all information I have presented so far are true to my knowledge. If required and where applicable, this document can be supported by authentic certificates\papers.</p>
-        </div>
-
-        <div class="signature">
-            <p><em id="cvSignature">(Mita Chowdhury)</em></p>
-            <p>Date: ___________________</p>
+            <div class="signature">
+                <p id="cvSignature">(Your Name)</p>
+                <p>Date: ___________________</p>
+            </div>
         </div>
         
-        <button class="btn" id="editCV">Edit CV</button>
-        <button class="btn" id="printCV">Print CV</button>
+        <div class="no-print" style="text-align: center; padding: 20px; border-top: 1px solid var(--border-color);">
+            <button class="btn" id="editCV" style="margin-right: 10px;">Edit CV</button>
+            <button class="btn" id="printCV">Print CV</button>
+        </div>
     </div>
 
     <script>
@@ -435,28 +628,38 @@
         const printBtn = document.getElementById('printCV');
         const photoInput = document.getElementById('photo');
         const cvPhoto = document.getElementById('cvPhoto');
+        const cvPhotoPlaceholder = document.getElementById('cvPhotoPlaceholder');
         
         // Add education item
         document.getElementById('addEducation').addEventListener('click', () => {
             const educationItems = document.getElementById('educationItems');
             const newItem = document.createElement('div');
-            newItem.className = 'education-item';
+            newItem.className = 'form-group';
+            newItem.style.border = '1px solid var(--border-color)';
+            newItem.style.padding = '15px';
+            newItem.style.borderRadius = '4px';
+            newItem.style.marginBottom = '15px';
+            
             newItem.innerHTML = `
-                <div class="form-group">
-                    <label>Degree</label>
-                    <input type="text" class="form-control degree" placeholder="Masters of Social Science (MSS)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input type="text" class="form-control degree">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" class="form-control institution">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input type="text" class="form-control institution" placeholder="Bhawal Bodre Alam College, Gazipur.">
-                </div>
-                <div class="form-group">
-                    <label>University</label>
-                    <input type="text" class="form-control university" placeholder="National University">
-                </div>
-                <div class="form-group">
-                    <label>Result</label>
-                    <input type="text" class="form-control result" placeholder="Running (2nd Year)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>University</label>
+                        <input type="text" class="form-control university">
+                    </div>
+                    <div class="form-group">
+                        <label>Result</label>
+                        <input type="text" class="form-control result">
+                    </div>
                 </div>
                 <button class="remove-btn remove-education">Remove</button>
             `;
@@ -472,19 +675,26 @@
         document.getElementById('addExperience').addEventListener('click', () => {
             const experienceItems = document.getElementById('experienceItems');
             const newItem = document.createElement('div');
-            newItem.className = 'experience-item';
+            newItem.className = 'form-group';
+            newItem.style.border = '1px solid var(--border-color)';
+            newItem.style.padding = '15px';
+            newItem.style.borderRadius = '4px';
+            newItem.style.marginBottom = '15px';
+            
             newItem.innerHTML = `
-                <div class="form-group">
-                    <label>Position</label>
-                    <input type="text" class="form-control position" placeholder="Assistant Teacher">
-                </div>
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input type="text" class="form-control company" placeholder="BB Moriyam School">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="text" class="form-control position">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" class="form-control company">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Duration</label>
-                    <input type="text" class="form-control duration" placeholder="From January 2016 to June 2018">
+                    <input type="text" class="form-control duration">
                 </div>
                 <button class="remove-btn remove-experience">Remove</button>
             `;
@@ -500,11 +710,16 @@
         document.getElementById('addSkill').addEventListener('click', () => {
             const skillItems = document.getElementById('skillItems');
             const newItem = document.createElement('div');
-            newItem.className = 'skill-item';
+            newItem.className = 'form-group';
+            newItem.style.border = '1px solid var(--border-color)';
+            newItem.style.padding = '15px';
+            newItem.style.borderRadius = '4px';
+            newItem.style.marginBottom = '15px';
+            
             newItem.innerHTML = `
                 <div class="form-group">
                     <label>Skill</label>
-                    <input type="text" class="form-control skill" placeholder="Absolutely positive hard working with a positive attitude.">
+                    <input type="text" class="form-control skill">
                 </div>
                 <button class="remove-btn remove-skill">Remove</button>
             `;
@@ -522,8 +737,9 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    cvPhoto.style.backgroundImage = `url(${event.target.result})`;
-                    cvPhoto.textContent = '';
+                    cvPhoto.src = event.target.result;
+                    cvPhoto.classList.remove('hidden');
+                    cvPhotoPlaceholder.classList.add('hidden');
                 };
                 reader.readAsDataURL(file);
             }
@@ -532,96 +748,105 @@
         // Generate CV
         generateBtn.addEventListener('click', () => {
             // Basic info
-            document.getElementById('cvName').textContent = document.getElementById('fullName').value;
-            document.getElementById('cvAddress').textContent = document.getElementById('address').value.split(',')[0] || '';
-            document.getElementById('cvCity').textContent = document.getElementById('address').value.split(',').slice(1).join(',').trim() || '';
-            document.getElementById('cvMobile').textContent = `Mobile: ${document.getElementById('mobile').value}`;
-            document.getElementById('cvEmail').textContent = `Email: ${document.getElementById('email').value}`;
-            document.getElementById('cvObjective').textContent = document.getElementById('careerObjective').value;
-            document.getElementById('cvLanguage').textContent = document.getElementById('languageProficiency').value;
-            document.getElementById('cvInterests').textContent = document.getElementById('interests').value;
-            document.getElementById('cvSignature').textContent = `(${document.getElementById('fullName').value})`;
+            document.getElementById('cvName').textContent = document.getElementById('fullName').value || 'Your Name';
+            document.getElementById('cvMobile').textContent = `Mobile: ${document.getElementById('mobile').value || 'Your Number'}`;
+            document.getElementById('cvEmail').textContent = `Email: ${document.getElementById('email').value || 'Your Email'}`;
+            document.getElementById('cvAddress').textContent = document.getElementById('address').value || 'Your Address';
+            document.getElementById('cvObjective').textContent = document.getElementById('careerObjective').value || 'Your career objective goes here.';
+            document.getElementById('cvLanguage').textContent = document.getElementById('languageProficiency').value || 'Your language proficiency details.';
+            document.getElementById('cvInterests').textContent = document.getElementById('interests').value || 'Your interests and hobbies.';
+            document.getElementById('cvSignature').textContent = `(${document.getElementById('fullName').value || 'Your Name'})`;
             
             // Personal details
-            document.getElementById('pdName').textContent = document.getElementById('fullName').value;
-            document.getElementById('pdFather').textContent = document.getElementById('fatherName').value;
-            document.getElementById('pdMother').textContent = document.getElementById('motherName').value;
-            document.getElementById('pdAddress').textContent = document.getElementById('presentAddress').value;
-            document.getElementById('pdDob').textContent = document.getElementById('dob').value;
-            document.getElementById('pdNationality').textContent = document.getElementById('nationality').value;
-            document.getElementById('pdNid').textContent = document.getElementById('nid').value;
-            document.getElementById('pdReligion').textContent = document.getElementById('religion').value;
-            document.getElementById('pdMarital').textContent = document.getElementById('maritalStatus').value;
-            document.getElementById('pdLocation').textContent = document.getElementById('currentLocation').value;
-            document.getElementById('pdCovid').textContent = document.getElementById('covidId').value;
+            document.getElementById('pdName').textContent = document.getElementById('fullName').value || 'Your Name';
+            document.getElementById('pdFather').textContent = document.getElementById('fatherName').value || 'Father\'s Name';
+            document.getElementById('pdMother').textContent = document.getElementById('motherName').value || 'Mother\'s Name';
+            document.getElementById('pdAddress').textContent = document.getElementById('presentAddress').value || 'Your Address';
+            document.getElementById('pdDob').textContent = document.getElementById('dob').value || 'Your Date of Birth';
+            document.getElementById('pdNationality').textContent = document.getElementById('nationality').value || 'Your Nationality';
+            document.getElementById('pdNid').textContent = document.getElementById('nid').value || 'Your NID Number';
+            document.getElementById('pdReligion').textContent = document.getElementById('religion').value || 'Your Religion';
+            document.getElementById('pdMarital').textContent = document.getElementById('maritalStatus').value || 'Your Marital Status';
+            document.getElementById('pdLocation').textContent = document.getElementById('currentLocation').value || 'Your Location';
+            document.getElementById('pdCovid').textContent = document.getElementById('covidId').value || 'Your Covid ID';
             
             // Education
             const cvEducation = document.getElementById('cvEducation');
-            cvEducation.innerHTML = '<h2>Academic Qualification</h2>';
+            cvEducation.innerHTML = '';
             
-            document.querySelectorAll('.education-item').forEach(item => {
-                const degree = item.querySelector('.degree').value;
-                const institution = item.querySelector('.institution').value;
-                const university = item.querySelector('.university').value;
-                const result = item.querySelector('.result').value;
+            document.querySelectorAll('#educationItems .education-item, #educationItems .form-group').forEach(item => {
+                const degree = item.querySelector('.degree')?.value;
+                const institution = item.querySelector('.institution')?.value;
+                const university = item.querySelector('.university')?.value;
+                const result = item.querySelector('.result')?.value;
                 
                 if (degree || institution || university || result) {
                     const educationHTML = `
-                        <table class="education-table">
-                            <tr>
-                                <th>Name of Degree</th>
-                                <td>${degree}</td>
-                            </tr>
-                            <tr>
-                                <th>Institution</th>
-                                <td>${institution}</td>
-                            </tr>
-                            <tr>
-                                <th>University</th>
-                                <td>${university}</td>
-                            </tr>
-                            <tr>
-                                <th>Result</th>
-                                <td>${result}</td>
-                            </tr>
-                        </table>
+                        <div class="education-item">
+                            <div class="item-header">
+                                <div>
+                                    <span class="item-title">${degree || 'Degree'}</span>
+                                    <span class="item-subtitle">${institution ? ', ' + institution : ''}</span>
+                                </div>
+                            </div>
+                            <p>${university || 'University'}</p>
+                            <p>${result || 'Result'}</p>
+                        </div>
                     `;
                     cvEducation.innerHTML += educationHTML;
                 }
             });
             
+            // Show/hide education section based on content
+            document.getElementById('cvEducationSection').style.display = 
+                cvEducation.innerHTML.trim() === '' ? 'none' : 'block';
+            
             // Experience
             const cvExperience = document.getElementById('cvExperience');
-            cvExperience.innerHTML = '<h2>Experience</h2>';
+            cvExperience.innerHTML = '';
             
-            document.querySelectorAll('.experience-item').forEach(item => {
-                const position = item.querySelector('.position').value;
-                const company = item.querySelector('.company').value;
-                const duration = item.querySelector('.duration').value;
+            document.querySelectorAll('#experienceItems .experience-item, #experienceItems .form-group').forEach(item => {
+                const position = item.querySelector('.position')?.value;
+                const company = item.querySelector('.company')?.value;
+                const duration = item.querySelector('.duration')?.value;
                 
                 if (position || company || duration) {
                     const experienceHTML = `
-                        <h3>${position}</h3>
-                        <p>${company}</p>
-                        <p>${duration}</p>
+                        <div class="experience-item">
+                            <div class="item-header">
+                                <div>
+                                    <span class="item-title">${position || 'Position'}</span>
+                                    <span class="item-subtitle">${company ? ' • ' + company : ''}</span>
+                                </div>
+                                <div class="item-date">${duration || 'Duration'}</div>
+                            </div>
+                        </div>
                     `;
                     cvExperience.innerHTML += experienceHTML;
                 }
             });
             
+            // Show/hide experience section based on content
+            document.getElementById('cvExperienceSection').style.display = 
+                cvExperience.innerHTML.trim() === '' ? 'none' : 'block';
+            
             // Skills
             const cvSkills = document.getElementById('cvSkills');
-            cvSkills.innerHTML = '<h2>Skill and attributes</h2><ul class="attributes"></ul>';
-            const skillsList = cvSkills.querySelector('ul');
+            cvSkills.innerHTML = '';
             
-            document.querySelectorAll('.skill-item').forEach(item => {
-                const skill = item.querySelector('.skill').value;
+            document.querySelectorAll('#skillItems .skill-item, #skillItems .form-group').forEach(item => {
+                const skill = item.querySelector('.skill')?.value;
                 if (skill) {
                     const skillItem = document.createElement('li');
+                    skillItem.className = 'skill-item';
                     skillItem.textContent = skill;
-                    skillsList.appendChild(skillItem);
+                    cvSkills.appendChild(skillItem);
                 }
             });
+            
+            // Show/hide skills section based on content
+            document.getElementById('cvSkillsSection').style.display = 
+                cvSkills.innerHTML.trim() === '' ? 'none' : 'block';
             
             // Show CV and hide builder
             builder.classList.add('hidden');
