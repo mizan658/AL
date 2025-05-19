@@ -113,6 +113,8 @@
       font-weight: 600;
       margin-bottom: 4px;
       font-size: 0.85rem;
+      display: flex;
+      align-items: center;
     }
 
     #inputArea {
@@ -734,6 +736,7 @@
       font-weight: bold;
       margin-left: 4px;
       display: inline-block;
+      text-transform: uppercase;
     }
 
     body.dark-mode .pro-badge {
@@ -949,6 +952,7 @@
     let isAdmin = false;
     let isProUser = false;
     let userCache = {}; // Cache for user data
+    let approvedUsers = new Set(); // Track approved users for pro badges
 
     const loginUserBtn = document.getElementById("loginUserBtn");
     const loginAdminBtn = document.getElementById("loginAdminBtn");
@@ -1073,6 +1077,19 @@
       }
     }
 
+    // Function to load all approved users
+    async function loadApprovedUsers() {
+      try {
+        const approvedSnapshot = await getDocs(collection(db, "approvedUsers"));
+        approvedUsers.clear();
+        approvedSnapshot.forEach(doc => {
+          approvedUsers.add(doc.id); // Store user UIDs of approved users
+        });
+      } catch (error) {
+        console.error("Error loading approved users:", error);
+      }
+    }
+
     // Function to show reactors list
     function showReactorsList(messageId, reactionType, users, event) {
       // Close any open reactors lists
@@ -1118,7 +1135,7 @@
       }, 0);
     }
 
-    // Enhanced send message function with better error handling
+    // Enhanced send message function
     window.sendMessage = async () => {
       const text = messageInput.value.trim();
       if (!text) {
@@ -1144,6 +1161,7 @@
         await addDoc(collection(db, "messages"), {
           text,
           sender: currentUser.email,
+          senderUid: currentUser.uid, // Include sender UID for pro badge checking
           timestamp: serverTimestamp(),
           likes: 0,
           dislikes: 0,
@@ -1183,6 +1201,9 @@
       const { isAdmin: adminStatus, isProUser: proStatus } = await checkUserStatus(user.uid, user.email);
       isAdmin = adminStatus;
       isProUser = proStatus;
+      
+      // Load approved users list for pro badges
+      await loadApprovedUsers();
       
       // If user tried to login as admin but isn't the admin, show error and logout
       if (loginMode === "admin" && !isAdmin) {
@@ -1225,6 +1246,9 @@
           const hasJoyed = msg.tearsOfJoyBy?.includes(currentUser.uid);
           const hasFired = msg.fireBy?.includes(currentUser.uid);
           const hasThought = msg.thinkingBy?.includes(currentUser.uid);
+          
+          // Check if this message sender is a pro user
+          const isSenderPro = approvedUsers.has(msg.senderUid) || msg.sender === "252-35-007@diu.edu.bd";
           
           // Get display names for reactors (only if it's the sender's message)
           let likedByNames = [];
@@ -1277,7 +1301,7 @@
           
           msgEl.innerHTML = `
             ${isAdmin ? `<button class="delete-message-btn" onclick="handleDeleteMessage('${doc.id}')">×</button>` : ''}
-            <div class="sender-name">${msg.sender.split('@')[0]}${msg.sender === currentUser.email && isProUser ? '<span class="pro-badge">PRO</span>' : ''}</div>
+            <div class="sender-name">${msg.sender.split('@')[0]}${isSenderPro ? '<span class="pro-badge">PRO</span>' : ''}</div>
             <div>${msg.text}</div>
             <div class="message-info">
               <span>${time}</span>
