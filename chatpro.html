@@ -1569,11 +1569,6 @@
     }
 
     async function loadUnapprovedUsers() {
-      // Get all users who have sent messages but aren't approved
-      const messagesSnapshot = await getDocs(collection(db, "messages"));
-      const users = new Set();
-      messagesSnapshot.forEach(doc => users.add(doc.data().sender));
-      
       // Get all users from users collection
       const usersSnapshot = await getDocs(collection(db, "users"));
       const approvedUsersSnapshot = await getDocs(collection(db, "approvedUsers"));
@@ -1584,7 +1579,7 @@
       
       usersSnapshot.forEach(userDoc => {
         const userData = userDoc.data();
-        if (approvedUserIds.has(userDoc.id) return; // Skip approved users
+        if (approvedUserIds.has(userDoc.id)) return; // Skip approved users
         if (userData.email === "252-35-007@diu.edu.bd") return; // Skip admin
         
         const userItem = document.createElement("div");
