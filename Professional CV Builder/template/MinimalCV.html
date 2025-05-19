@@ -13,6 +13,7 @@
             --accent-color: #2980b9;
             --light-color: #f8f9fa;
             --dark-color: #343a40;
+            --border-color: #e0e0e0;
         }
 
         * {
@@ -154,6 +155,8 @@
         .skills-list {
             columns: 2;
             column-gap: 30px;
+            list-style-type: none;
+            padding-left: 0;
         }
 
         .skill-item {
@@ -374,28 +377,57 @@
             body {
                 background-color: white;
                 font-size: 12pt;
+                line-height: 1.5;
             }
-            .container {
-                box-shadow: none;
-                border: none;
+            
+            body * {
+                visibility: hidden;
+            }
+            
+            #cvOutput, #cvOutput * {
+                visibility: visible;
+            }
+            
+            #cvOutput {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
                 margin: 0;
                 padding: 0;
-                width: 100%;
+                box-shadow: none;
+                border: none;
             }
+            
             .no-print {
-                display: none;
+                display: none !important;
             }
+            
             .cv-header {
                 background-color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
+            
             .education-item, .experience-item, .declaration {
                 background-color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+            
+            .photo-container {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .section-title::after {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
             @page {
                 size: A4;
-                margin: 1cm;
+                margin: 15mm 10mm;
             }
         }
 
@@ -1055,7 +1087,10 @@
                 html2canvas: { 
                     scale: 2,
                     letterRendering: true,
-                    useCORS: true
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: true,
+                    dpi: 192
                 },
                 jsPDF: { 
                     unit: 'mm', 
