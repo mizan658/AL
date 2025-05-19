@@ -879,7 +879,7 @@
       <p style="margin-bottom: 20px; color: #65676b;">Sign in with your DIU email to join the conversation</p>
       <div class="login-buttons">
         <button id="loginUserBtn">User Login</button>
-        <button id="loginAdminBtn">Admin Panel</button>
+        <button id="loginAdminBtn">Admin Login</button>
       </div>
     </div>
   </div>
@@ -1040,10 +1040,10 @@
 
     // Function to check if user is admin or approved for pro features
     async function checkUserStatus(uid, email) {
-      const adminEmail = "252-35-007@diu.edu.bd";
+      const adminEmail = "252-35-007@diu.edu.bd"; // Only this email can be admin
       
-      // Check if user is admin
-      if (email === adminEmail) {
+      // Check if user is admin (only if they logged in via admin login)
+      if (loginMode === "admin" && email === adminEmail) {
         isAdmin = true;
         isProUser = true;
         
@@ -1062,10 +1062,13 @@
         return { isAdmin: true, isProUser: true };
       }
       
-      // Check if regular user is approved
+      // For all other users (including admin email if they logged in as regular user)
       try {
         const userDoc = await getDoc(doc(db, "approvedUsers", uid));
-        return { isAdmin: false, isProUser: userDoc.exists() };
+        return { 
+          isAdmin: false, 
+          isProUser: userDoc.exists() && (userDoc.data().isAdmin || userDoc.data().approvedAt)
+        };
       } catch (error) {
         console.error("Error checking user status:", error);
         return { isAdmin: false, isProUser: false };
@@ -1134,6 +1137,13 @@
       const { isAdmin: adminStatus, isProUser: proStatus } = await checkUserStatus(user.uid, user.email);
       isAdmin = adminStatus;
       isProUser = proStatus;
+      
+      // If user tried to login as admin but isn't the admin, show error and logout
+      if (loginMode === "admin" && !isAdmin) {
+        alert("You are not authorized to access the admin panel.");
+        await signOut(auth);
+        return;
+      }
       
       // Show theme toggle only for Pro users
       themeToggle.style.display = isProUser ? 'block' : 'none';
