@@ -925,8 +925,33 @@
   <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, getDoc, deleteDoc, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { 
+      getAuth, 
+      GoogleAuthProvider, 
+      signInWithPopup, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      query, 
+      orderBy, 
+      onSnapshot, 
+      serverTimestamp, 
+      getDocs, 
+      doc, 
+      updateDoc, 
+      increment, 
+      arrayUnion, 
+      arrayRemove, 
+      getDoc, 
+      deleteDoc, 
+      writeBatch, 
+      setDoc,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 
     // Your web app's Firebase configuration
@@ -1261,37 +1286,43 @@
           if (msg.sender === currentUser.email) {
             if (msg.likedBy?.length) {
               likedByNames = await Promise.all(msg.likedBy.map(async uid => {
-                return `User ${msg.likedBy.indexOf(uid) + 1}`;
+                const userDoc = await getDoc(doc(db, "users", uid));
+                return userDoc.exists() ? userDoc.data().displayName : `User ${msg.likedBy.indexOf(uid) + 1}`;
               }));
             }
             
             if (msg.dislikedBy?.length) {
               dislikedByNames = await Promise.all(msg.dislikedBy.map(async uid => {
-                return `User ${msg.dislikedBy.indexOf(uid) + 1}`;
+                const userDoc = await getDoc(doc(db, "users", uid));
+                return userDoc.exists() ? userDoc.data().displayName : `User ${msg.dislikedBy.indexOf(uid) + 1}`;
               }));
             }
             
             if (msg.heartsBy?.length) {
               heartsByNames = await Promise.all(msg.heartsBy.map(async uid => {
-                return `User ${msg.heartsBy.indexOf(uid) + 1}`;
+                const userDoc = await getDoc(doc(db, "users", uid));
+                return userDoc.exists() ? userDoc.data().displayName : `User ${msg.heartsBy.indexOf(uid) + 1}`;
               }));
             }
             
             if (msg.tearsOfJoyBy?.length) {
               joyByNames = await Promise.all(msg.tearsOfJoyBy.map(async uid => {
-                return `User ${msg.tearsOfJoyBy.indexOf(uid) + 1}`;
+                const userDoc = await getDoc(doc(db, "users", uid));
+                return userDoc.exists() ? userDoc.data().displayName : `User ${msg.tearsOfJoyBy.indexOf(uid) + 1}`;
               }));
             }
             
             if (msg.fireBy?.length) {
               fireByNames = await Promise.all(msg.fireBy.map(async uid => {
-                return `User ${msg.fireBy.indexOf(uid) + 1}`;
+                const userDoc = await getDoc(doc(db, "users", uid));
+                return userDoc.exists() ? userDoc.data().displayName : `User ${msg.fireBy.indexOf(uid) + 1}`;
               }));
             }
             
             if (msg.thinkingBy?.length) {
               thinkingByNames = await Promise.all(msg.thinkingBy.map(async uid => {
-                return `User ${msg.thinkingBy.indexOf(uid) + 1}`;
+                const userDoc = await getDoc(doc(db, "users", uid));
+                return userDoc.exists() ? userDoc.data().displayName : `User ${msg.thinkingBy.indexOf(uid) + 1}`;
               }));
             }
           }
@@ -1376,6 +1407,13 @@
         }
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
+
+      // Create/update user document in users collection
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        displayName: user.displayName || user.email.split('@')[0],
+        lastActive: serverTimestamp()
+      }, { merge: true });
 
       if (isAdmin) {
         loadAdminControls();
@@ -1536,57 +1574,51 @@
       const users = new Set();
       messagesSnapshot.forEach(doc => users.add(doc.data().sender));
       
+      // Get all users from users collection
+      const usersSnapshot = await getDocs(collection(db, "users"));
       const approvedUsersSnapshot = await getDocs(collection(db, "approvedUsers"));
       const approvedUserIds = new Set();
       approvedUsersSnapshot.forEach(doc => approvedUserIds.add(doc.id));
       
       unapprovedUsersDiv.innerHTML = "";
       
-      // For demo purposes, we'll just show users who aren't in the approved list
-      // In a real app, you'd need to map emails to UIDs
-      for (const email of users) {
-        if (email === "252-35-007@diu.edu.bd") continue;
+      usersSnapshot.forEach(userDoc => {
+        const userData = userDoc.data();
+        if (approvedUserIds.has(userDoc.id) return; // Skip approved users
+        if (userData.email === "252-35-007@diu.edu.bd") return; // Skip admin
         
-        // In a real app, you'd need to get the UID for each email
-        // For this demo, we'll just show the email
         const userItem = document.createElement("div");
         userItem.className = "user-item";
         
-        const userEmail = document.createElement("span");
-        userEmail.className = "user-email";
-        userEmail.textContent = email.split('@')[0];
+        userItem.innerHTML = `
+          <span class="user-email">${userData.displayName} (${userData.email})</span>
+          <button class="banButton" style="background:#4caf50;color:white" 
+                  onclick="approveUser('${userDoc.id}', '${userData.email}')">
+            Approve Pro
+          </button>
+        `;
         
-        const approveButton = document.createElement("button");
-        approveButton.className = "banButton";
-        approveButton.textContent = "Approve for Pro";
-        approveButton.style.background = "#4caf50";
-        approveButton.style.color = "white";
-        approveButton.onclick = () => approveUser(email);
-        
-        userItem.appendChild(userEmail);
-        userItem.appendChild(approveButton);
         unapprovedUsersDiv.appendChild(userItem);
-      }
+      });
     }
 
-    async function approveUser(email) {
-      // In a real app, you'd need to get the UID for the email
-      // For this demo, we'll just show an alert
-      alert(`User ${email.split('@')[0]} would be approved for Chat Pro in a real implementation.`);
-      
-      // In a real implementation, you would:
-      // 1. Find the user's UID based on their email
-      // 2. Add a document to the "approvedUsers" collection with their UID
-      // Example:
-      // await addDoc(collection(db, "approvedUsers"), {
-      //   uid: userId,
-      //   email: email,
-      //   approvedAt: serverTimestamp()
-      // });
-      
-      // Then reload the unapproved users list
-      loadUnapprovedUsers();
-    }
+    window.approveUser = async (userId, email) => {
+      try {
+        // Add to approvedUsers collection
+        await setDoc(doc(db, "approvedUsers", userId), {
+          email: email,
+          approvedAt: serverTimestamp(),
+          isPro: true
+        });
+        
+        alert(`${email.split('@')[0]} has been approved for Chat Pro`);
+        loadUnapprovedUsers();
+        loadApprovedUsers(); // Refresh the approved users list
+      } catch (error) {
+        console.error("Error approving user:", error);
+        alert("Failed to approve user. Please try again.");
+      }
+    };
 
     async function banUser(email, duration) {
       const now = Date.now();
