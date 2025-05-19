@@ -1031,8 +1031,6 @@
     async function getUserDisplayName(email) {
       if (userCache[email]) return userCache[email];
       
-      // Try to get from Firestore if you have a users collection
-      // Otherwise just use the email prefix
       const displayName = email.split('@')[0];
       userCache[email] = displayName;
       return displayName;
@@ -1120,6 +1118,54 @@
       }, 0);
     }
 
+    // Enhanced send message function with better error handling
+    window.sendMessage = async () => {
+      const text = messageInput.value.trim();
+      if (!text) {
+        alert("Message cannot be empty");
+        return;
+      }
+
+      try {
+        // Check if user is banned
+        const bansQuery = query(collection(db, "bans"), where("email", "==", currentUser.email));
+        const bansSnapshot = await getDocs(bansQuery);
+        
+        let isBanned = false;
+        bansSnapshot.forEach(doc => {
+          const ban = doc.data();
+          if (ban.until > Date.now()) {
+            isBanned = true;
+            throw new Error(`You are banned until ${new Date(ban.until).toLocaleString()}`);
+          }
+        });
+
+        // Add message to Firestore
+        await addDoc(collection(db, "messages"), {
+          text,
+          sender: currentUser.email,
+          timestamp: serverTimestamp(),
+          likes: 0,
+          dislikes: 0,
+          likedBy: [],
+          dislikedBy: [],
+          hearts: 0,
+          heartsBy: [],
+          tearsOfJoy: 0,
+          tearsOfJoyBy: [],
+          fire: 0,
+          fireBy: [],
+          thinking: 0,
+          thinkingBy: []
+        });
+        
+        messageInput.value = "";
+      } catch (error) {
+        console.error("Message send error:", error);
+        alert(error.message || "Failed to send message. Please try again.");
+      }
+    };
+
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
         loadingScreen.style.display = 'none';
@@ -1191,8 +1237,6 @@
           if (msg.sender === currentUser.email) {
             if (msg.likedBy?.length) {
               likedByNames = await Promise.all(msg.likedBy.map(async uid => {
-                // In a real app, you'd look up the user's name from their UID
-                // For this demo, we'll just use "User 1", "User 2" etc.
                 return `User ${msg.likedBy.indexOf(uid) + 1}`;
               }));
             }
@@ -1423,45 +1467,10 @@
       }
     };
 
-    sendBtn.onclick = async () => {
-      const text = messageInput.value.trim();
-      if (text === "") return;
-
-      const bansSnapshot = await getDocs(collection(db, "bans"));
-      const now = Date.now();
-      for (const docSnap of bansSnapshot.docs) {
-        const data = docSnap.data();
-        if (data.email === currentUser.email && data.until > now) {
-          alert("You're suspended until " + new Date(data.until).toLocaleString());
-          return;
-        }
-      }
-
-      await addDoc(collection(db, "messages"), {
-        text,
-        sender: currentUser.email,
-        timestamp: serverTimestamp(),
-        likes: 0,
-        dislikes: 0,
-        likedBy: [],
-        dislikedBy: [],
-        hearts: 0,
-        heartsBy: [],
-        tearsOfJoy: 0,
-        tearsOfJoyBy: [],
-        fire: 0,
-        fireBy: [],
-        thinking: 0,
-        thinkingBy: []
-      });
-
-      messageInput.value = "";
-    };
-
+    // Update event listeners for sending messages
+    sendBtn.onclick = window.sendMessage;
     messageInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        sendBtn.click();
-      }
+      if (e.key === "Enter") window.sendMessage();
     });
 
     async function loadAdminControls() {
