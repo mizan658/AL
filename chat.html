@@ -1,6 +1,4 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -14,393 +12,943 @@
       font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
 
-body {
-background-color: #f5f7fb;
-height: 100vh;
-display: flex;
-flex-direction: column;
-color: #333;
-}
+    body {
+      background-color: #f0f2f5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #050505;
+    }
 
-header {
-background: linear-gradient(135deg, #0084ff, #0066cc);
-color: white;
-padding: 15px 25px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-z-index: 10;
-}
+    header {
+      background-color: #0084ff;
+      color: white;
+      padding: 12px 15px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      position: relative;
+    }
 
-header div {
-font-size: 1.4rem;
-font-weight: 600;
-display: flex;
-align-items: center;
-gap: 10px;
-}
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
 
-#messages {
-flex: 1;
-overflow-y: auto;
-padding: 20px;
-background-color: #f0f2f5;
-background-image: url("data\:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
+    .header-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.message {
-max-width: 70%;
-margin-bottom: 15px;
-padding: 12px 16px;
-border-radius: 18px;
-position: relative;
-word-wrap: break-word;
-line-height: 1.4;
-animation: fadeIn 0.3s ease-out;
-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
+    .chat-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-@keyframes fadeIn {
-from { opacity: 0; transform: translateY(5px); }
-to { opacity: 1; transform: translateY(0); }
-}
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background-color: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+    }
 
-.other-message {
-background-color: white;
-border-top-left-radius: 5px;
-margin-right: auto;
-}
+    .message {
+      max-width: 75%;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border-radius: 18px;
+      position: relative;
+      word-wrap: break-word;
+      line-height: 1.4;
+      animation: fadeIn 0.3s ease-out;
+      font-size: 0.95rem;
+    }
 
-.own-message {
-background: linear-gradient(135deg, #0084ff, #0066cc);
-color: white;
-border-top-right-radius: 5px;
-margin-left: auto;
-}
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-.message-info {
-display: flex;
-justify-content: space-between;
-margin-top: 8px;
-font-size: 0.75rem;
-opacity: 0.8;
-}
+    .other-message {
+      background-color: white;
+      border-top-left-radius: 5px;
+      margin-right: auto;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
 
-.own-message .message-info {
-color: rgba(255, 255, 255, 0.8);
-}
+    .own-message {
+      background-color: #0084ff;
+      color: white;
+      border-top-right-radius: 5px;
+      margin-left: auto;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
 
-.sender-name {
-font-weight: 600;
-margin-bottom: 4px;
-}
+    .message-info {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
 
-#inputArea {
-display: flex;
-padding: 15px;
-background-color: white;
-border-top: 1px solid #e1e4e8;
-box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-}
+    .own-message .message-info {
+      color: rgba(255, 255, 255, 0.8);
+    }
 
-#messageInput {
-flex: 1;
-padding: 12px 18px;
-border-radius: 25px;
-border: 1px solid #e1e4e8;
-outline: none;
-font-size: 1rem;
-transition: border 0.3s;
-}
+    .other-message .message-info {
+      color: rgba(0, 0, 0, 0.6);
+    }
 
-#messageInput\:focus {
-border-color: #0084ff;
-box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
-}
+    .sender-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
 
-#sendBtn {
-padding: 12px 24px;
-margin-left: 12px;
-border: none;
-background: linear-gradient(135deg, #0084ff, #0066cc);
-color: white;
-border-radius: 25px;
-cursor: pointer;
-font-weight: 600;
-transition: transform 0.2s, box-shadow 0.2s;
-box-shadow: 0 2px 5px rgba(0, 132, 255, 0.3);
-}
+    #inputArea {
+      display: flex;
+      padding: 12px 16px;
+      background-color: white;
+      border-top: 1px solid #dddfe2;
+      align-items: center;
+    }
 
-#sendBtn\:hover {
-transform: translateY(-1px);
-box-shadow: 0 3px 8px rgba(0, 132, 255, 0.4);
-}
+    #messageInput {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 20px;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      background-color: #f0f2f5;
+      transition: background-color 0.3s;
+    }
 
-#sendBtn\:active {
-transform: translateY(0);
-}
+    #messageInput:focus {
+      background-color: #e4e6e9;
+    }
 
-#login {
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-flex: 1;
-padding: 20px;
-background: linear-gradient(135deg, #f5f7fb, #e4e8f0);
-}
+    #sendBtn {
+      padding: 10px 16px;
+      margin-left: 8px;
+      border: none;
+      background-color: #0084ff;
+      color: white;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-.login-container {
-background: white;
-padding: 40px;
-border-radius: 15px;
-box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-text-align: center;
-max-width: 500px;
-width: 100%;
-}
+    #sendBtn:hover {
+      background-color: #0073e6;
+    }
 
-.login-container h2 {
-margin-bottom: 25px;
-color: #333;
-font-size: 1.8rem;
-}
+    #sendBtn:active {
+      transform: scale(0.95);
+    }
 
-.login-buttons {
-display: flex;
-flex-direction: column;
-gap: 15px;
-}
+    #login {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      padding: 20px;
+      background-color: #f0f2f5;
+    }
 
-.login-buttons button {
-padding: 14px;
-border-radius: 30px;
-border: none;
-color: white;
-font-size: 1rem;
-font-weight: 600;
-cursor: pointer;
-transition: transform 0.2s, box-shadow 0.2s;
-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-}
+    .login-container {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
 
-.login-buttons button\:hover {
-transform: translateY(-2px);
-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-}
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: #050505;
+      font-size: 1.4rem;
+    }
 
-#loginUserBtn {
-background: linear-gradient(135deg, #0084ff, #0066cc);
-}
+    .login-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-#loginAdminBtn {
-background: linear-gradient(135deg, #ff5722, #e64a19);
-}
+    .login-buttons button {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-#logoutBtn {
-padding: 8px 16px;
-border-radius: 20px;
-border: none;
-background-color: white;
-color: #0084ff;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.2s;
-}
+    .login-buttons button:hover {
+      transform: translateY(-2px);
+    }
 
-#logoutBtn\:hover {
-background-color: #f0f7ff;
-}
+    #loginUserBtn {
+      background-color: #0084ff;
+    }
 
-#adminPanel {
-display: none;
-background: white;
-padding: 20px;
-border-top: 1px solid #e1e4e8;
-box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-max-height: 250px;
-overflow-y: auto;
-}
+    #loginAdminBtn {
+      background-color: #65676b;
+    }
 
-#adminPanel h3 {
-margin-bottom: 15px;
-color: #333;
-font-size: 1.2rem;
-padding-bottom: 10px;
-border-bottom: 1px solid #eee;
-}
+    #logoutBtn {
+      padding: 8px 14px;
+      border-radius: 18px;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
 
-.user-item {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 10px 0;
-border-bottom: 1px solid #f0f2f5;
-}
+    #logoutBtn:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
 
-.user-email {
-font-weight: 500;
-color: #333;
-}
+    #adminPanel {
+      display: none;
+      background: white;
+      padding: 15px 10px;
+      border-top: 1px solid #dddfe2;
+      max-height: 250px;
+      overflow-y: auto;
+    }
 
-.ban-buttons {
-display: flex;
-gap: 8px;
-}
+    #adminPanel h3 {
+      margin-bottom: 12px;
+      color: #050505;
+      font-size: 1.1rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #dddfe2;
+    }
 
-.banButton {
-padding: 5px 12px;
-font-size: 0.75rem;
-border: none;
-border-radius: 15px;
-background: #ffebee;
-color: #d32f2f;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.2s;
-}
+    .user-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f2f5;
+      font-size: 0.9rem;
+    }
 
-.banButton\:hover {
-background: #ffcdd2;
-}
+    .user-email {
+      font-weight: 500;
+      color: #050505;
+    }
 
-.banButton\:nth-child(1) { background: #fff3e0; color: #ef6c00; }
-.banButton\:nth-child(2) { background: #fff8e1; color: #f57c00; }
-.banButton\:nth-child(3) { background: #fff3e0; color: #e65100; }
-.banButton\:nth-child(4) { background: #fbe9e7; color: #d84315; }
+    .ban-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
 
-.banButton\:nth-child(1)\:hover { background: #ffe0b2; }
-.banButton\:nth-child(2)\:hover { background: #ffecb3; }
-.banButton\:nth-child(3)\:hover { background: #ffe0b2; }
-.banButton\:nth-child(4)\:hover { background: #ffccbc; }
+    .banButton {
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      border: none;
+      border-radius: 12px;
+      background: #f0f2f5;
+      color: #050505;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 50px;
+    }
 
-/* Scrollbar styling */
-\::-webkit-scrollbar {
-width: 8px;
-}
+    .banButton:hover {
+      background: #e4e6e9;
+    }
 
-\::-webkit-scrollbar-track {
-background: #f1f1f1;
-border-radius: 10px;
-}
+    /* Reaction buttons styles */
+    .reaction-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
 
-\::-webkit-scrollbar-thumb {
-background: #c1c1c1;
-border-radius: 10px;
-}
+    .reaction-btn {
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+      border-radius: 12px;
+      padding: 3px 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.75rem;
+      position: relative;
+    }
 
-\::-webkit-scrollbar-thumb\:hover {
-background: #a8a8a8;
-}
+    .like-btn {
+      color: #0084ff;
+    }
 
-@media (max-width: 600px) {
-.message {
-max-width: 85%;
-}
+    .dislike-btn {
+      color: #ff5722;
+    }
 
-.login-container {
-padding: 30px 20px;
-}
+    .heart-btn {
+      color: #e91e63;
+    }
+    .joy-btn {
+      color: #ffc107;
+    }
+    .fire-btn {
+      color: #ff5722;
+    }
+    .thinking-btn {
+      color: #9c27b0;
+    }
 
-.login-buttons {
-gap: 10px;
-}
+    .like-btn:hover {
+      background: rgba(0, 132, 255, 0.1);
+    }
 
-#inputArea {
-flex-direction: row;
-padding: 12px;
-}
+    .dislike-btn:hover {
+      background: rgba(255, 87, 34, 0.1);
+    }
 
-#sendBtn {
-margin-left: 10px;
-margin-top: 0;
-width: auto;
-}
-}
+    .heart-btn:hover {
+      background: rgba(233, 30, 99, 0.1);
+    }
+    .joy-btn:hover {
+      background: rgba(255, 193, 7, 0.1);
+    }
+    .fire-btn:hover {
+      background: rgba(255, 87, 34, 0.1);
+    }
+    .thinking-btn:hover {
+      background: rgba(156, 39, 176, 0.1);
+    }
 
-/* Loading spinner styles */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
+    .reaction-count {
+      font-weight: bold;
+    }
 
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #0084ff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+    .own-message .reaction-count {
+      color: rgba(255, 255, 255, 0.9);
+    }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+    .user-reacted {
+      opacity: 0.7;
+      cursor: default;
+    }
 
+    /* Reactors list styles */
+    .reactors-list {
+      display: none;
+      position: absolute;
+      background: white;
+      border-radius: 6px;
+      padding: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+      max-width: 150px;
+      font-size: 0.7rem;
+      border: 1px solid #dddfe2;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 4px;
+    }
+
+    .own-message .reactors-list {
+      background: #0066cc;
+      color: white;
+      border: none;
+    }
+
+    .reactors-list.show {
+      display: block;
+    }
+
+    .reactor-item {
+      padding: 3px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Admin controls */
+    .admin-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    #resetChatBtn {
+      padding: 6px 12px;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    #resetChatBtn:hover {
+      background: #b71c1c;
+    }
+
+    .delete-message-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0, 0, 0, 0.1);
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+      color: #333;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    .message:hover .delete-message-btn {
+      opacity: 1;
+    }
+
+    /* Dark mode styles (only for Pro users) */
+    body.dark-mode {
+      background-color: #18191a;
+      color: #e4e6eb;
+    }
+
+    body.dark-mode header {
+      background-color: #242526;
+    }
+
+    body.dark-mode #messages {
+      background-color: #18191a;
+    }
+
+    body.dark-mode .other-message {
+      background-color: #3e4042;
+      color: #e4e6eb;
+    }
+
+    body.dark-mode #inputArea,
+    body.dark-mode #adminPanel {
+      background-color: #242526;
+      border-color: #3e4042;
+    }
+
+    body.dark-mode #messageInput {
+      background-color: #3e4042;
+      color: #e4e6eb;
+    }
+
+    body.dark-mode .reaction-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e4e6eb;
+    }
+
+    body.dark-mode .like-btn {
+      color: #64b5f6;
+    }
+
+    body.dark-mode .dislike-btn {
+      color: #ff8a65;
+    }
+
+    body.dark-mode .heart-btn {
+      color: #f48fb1;
+    }
+    body.dark-mode .joy-btn {
+      color: #fff59d;
+    }
+    body.dark-mode .fire-btn {
+      color: #ffab91;
+    }
+    body.dark-mode .thinking-btn {
+      color: #ce93d8;
+    }
+
+    body.dark-mode .like-btn:hover {
+      background: rgba(100, 181, 246, 0.2);
+    }
+
+    body.dark-mode .dislike-btn:hover {
+      background: rgba(255, 138, 101, 0.2);
+    }
+
+    body.dark-mode .heart-btn:hover {
+      background: rgba(244, 143, 177, 0.2);
+    }
+    body.dark-mode .joy-btn:hover {
+      background: rgba(255, 245, 157, 0.2);
+    }
+    body.dark-mode .fire-btn:hover {
+      background: rgba(255, 171, 145, 0.2);
+    }
+    body.dark-mode .thinking-btn:hover {
+      background: rgba(206, 147, 216, 0.2);
+    }
+
+    body.dark-mode #adminPanel h3,
+    body.dark-mode .user-email {
+      color: #e4e6eb;
+    }
+
+    body.dark-mode .user-item {
+      border-bottom-color: #3e4042;
+    }
+
+    body.dark-mode .banButton {
+      background: #3e4042;
+      color: #e4e6eb;
+    }
+
+    body.dark-mode .banButton:hover {
+      background: #4e5052;
+    }
+
+    body.dark-mode .delete-message-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #e4e6eb;
+    }
+
+    body.dark-mode #logoutBtn {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e4e6eb;
+    }
+
+    body.dark-mode #logoutBtn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-mode .login-container {
+      background-color: #242526;
+      color: #e4e6eb;
+    }
+
+    body.dark-mode .login-container h2 {
+      color: #e4e6eb;
+    }
+
+    body.dark-mode .login-container p {
+      color: #b0b3b8;
+    }
+
+    /* Theme toggle button (only for Pro users) */
+    #themeToggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.3rem;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: transform 0.3s;
+      padding: 5px;
+      display: none; /* Hidden by default */
+    }
+
+    #themeToggle:hover {
+      transform: rotate(30deg);
+    }
+
+    body.dark-mode #themeToggle {
+      color: #e4e6eb;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    body.dark-mode ::-webkit-scrollbar-track {
+      background: #3e4042;
+    }
+
+    body.dark-mode ::-webkit-scrollbar-thumb {
+      background: #65676b;
+    }
+
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+      background: #8a8d91;
+    }
+
+    /* Navigation buttons */
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+      margin-right: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode .nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Rules section */
+    #rulesSection {
+      display: none;
+      background: white;
+      padding: 15px;
+      border-top: 1px solid #dddfe2;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    body.dark-mode #rulesSection {
+      background-color: #242526;
+      border-color: #3e4042;
+    }
+
+    #rulesSection h3 {
+      margin-bottom: 12px;
+      color: #050505;
+      font-size: 1.1rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #dddfe2;
+    }
+
+    body.dark-mode #rulesSection h3 {
+      color: #e4e6eb;
+      border-bottom-color: #3e4042;
+    }
+
+    #rulesSection ol {
+      padding-left: 20px;
+      line-height: 1.5;
+    }
+
+    #rulesSection li {
+      margin-bottom: 6px;
+    }
+
+    body.dark-mode #rulesSection {
+      color: #e4e6eb;
+    }
+
+    #toggleRulesBtn {
+      padding: 6px 12px;
+      margin-left: 8px;
+      border-radius: 6px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.8rem;
+    }
+
+    #toggleRulesBtn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    body.dark-mode #toggleRulesBtn {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode #toggleRulesBtn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Pro badge */
+    .pro-badge {
+      background: linear-gradient(135deg, #ffc107, #ff9800);
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 0.6rem;
+      font-weight: bold;
+      margin-left: 4px;
+      display: inline-block;
+    }
+
+    body.dark-mode .pro-badge {
+      color: #fff;
+    }
+
+    /* Loading screen styles */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    body.dark-mode .loading-screen {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #0084ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    body.dark-mode .loading-spinner {
+      border-top-color: #64b5f6;
+    }
+
+    .loading-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #050505;
+      margin-top: 20px;
+    }
+
+    body.dark-mode .loading-text {
+      color: #e4e6eb;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Approval section */
+    #approvalSection {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #dddfe2;
+    }
+
+    body.dark-mode #approvalSection {
+      border-top-color: #3e4042;
+    }
+
+    #approvalSection h4 {
+      margin-bottom: 10px;
+      color: #050505;
+      font-size: 1rem;
+    }
+
+    body.dark-mode #approvalSection h4 {
+      color: #e4e6eb;
+    }
+
+    /* For very small screens */
+    @media (max-width: 360px) {
+      .header-top, .header-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .nav-buttons {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .nav-btn {
+        flex: 1;
+        text-align: center;
+        padding: 6px;
+      }
+      
+      .message {
+        max-width: 90%;
+        padding: 8px 12px;
+      }
+      
+      #messageInput {
+        padding: 8px 12px;
+      }
+      
+      #sendBtn {
+        padding: 8px 12px;
+        min-width: 60px;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Signing in...</div>
+  </div>
+
   <header>
-    <div>💬 DIU Group Chat</div>
-    <div id="logout" style="display:none;">
-      <button id="logoutBtn">Logout</button>
+    <div class="header-top">
+      <div class="chat-title">💬 DIU Group Chat</div>
+      <button id="themeToggle">🌓</button>
+    </div>
+    <div class="header-bottom">
+      <div class="nav-buttons">
+        <a href="https://mizan658.github.io/AL/index.html" class="nav-btn">Home</a>
+        <a href="https://mizan658.github.io/AL/notice.html" class="nav-btn">Notice</a>
+        <a href="https://mizan658.github.io/AL/voting-system.html" class="nav-btn">Vote</a>
+      </div>
+      <div style="display: flex;">
+        <button id="toggleRulesBtn">Rules</button>
+        <div id="logout" style="display:none;">
+          <button id="logoutBtn">Logout</button>
+        </div>
+      </div>
     </div>
   </header>
 
   <div id="login">
     <div class="login-container">
       <h2>Welcome to DIU Group Chat</h2>
-      <p style="margin-bottom: 25px; color: #666;">Sign in with your DIU email to join the conversation</p>
+      <p style="margin-bottom: 20px; color: #65676b;">Sign in with your DIU email to join the conversation</p>
       <div class="login-buttons">
-        <button id="loginUserBtn">Login as User</button>
-        <button id="loginAdminBtn">Login as Admin</button>
+        <button id="loginUserBtn">User Login</button>
+        <button id="loginAdminBtn">Admin Login</button>
       </div>
     </div>
-  </div>
-
-  <div id="loading" style="display: none;" class="loading-container">
-    <div class="loading-spinner"></div>
   </div>
 
   <div id="messages" style="display: none;"></div>
 
   <div id="inputArea" style="display: none;">
     <input type="text" id="messageInput" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
+    <button id="sendBtn">→</button>
+  </div>
+
+  <div id="rulesSection">
+    <h3>Chat Rules and Regulations</h3>
+    <ol>
+      <li>Only DIU students with valid DIU email addresses are allowed to participate.</li>
+      <li>Be respectful to all participants - no harassment, bullying, or hate speech.</li>
+      <li>No spamming or flooding the chat with repeated messages.</li>
+      <li>Do not share personal information of yourself or others.</li>
+      <li>No NSFW (Not Safe For Work) content of any kind.</li>
+      <li>Admins have the right to remove messages and ban users who violate rules.</li>
+      <li>Chat reactions (likes, etc.) are only available to approved users.</li>
+      <li>Violations may result in temporary or permanent bans.</li>
+      <li>Use the chat for its intended purpose - academic and social discussions.</li>
+      <li>Have fun and keep the conversation positive!</li>
+    </ol>
   </div>
 
   <div id="adminPanel">
-    <h3>Admin Controls</h3>
+    <div class="admin-controls">
+      <h3>Admin Panel</h3>
+      <button id="resetChatBtn">Reset Chat</button>
+    </div>
     <div id="userList"></div>
+    <div id="approvalSection">
+      <h4>Approve Users for Chat Pro</h4>
+      <div id="unapprovedUsers"></div>
+    </div>
   </div>
 
   <script type="module">
+    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, doc, updateDoc, increment, arrayUnion, arrayRemove, getDoc, deleteDoc, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 
+    // Your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyCQaeFbaXbeJkw08N3of2Xiu3hMfiW8wTk",
-      authDomain: "voting-app-2b276.firebaseapp.com",
-      projectId: "voting-app-2b276",
-      storageBucket: "voting-app-2b276.appspot.com",
-      messagingSenderId: "699531517654",
-      appId: "1:699531517654:web:785702f843d21a85c17377",
-      measurementId: "G-309D0KG6KL"
+      apiKey: "AIzaSyCiEVpLPaJ5AtFAaV7boxne-d-tVR1d3K0",
+      authDomain: "chat-88f0f.firebaseapp.com",
+      projectId: "chat-88f0f",
+      storageBucket: "chat-88f0f.appspot.com",
+      messagingSenderId: "146118641258",
+      appId: "1:146118641258:web:f311645f40c8fbcadbac13",
+      measurementId: "G-H7LPCPMMYM"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
-    let loginMode = "user"; // default
+    let loginMode = "user";
     let currentUser = null;
     let isAdmin = false;
+    let isProUser = false;
+    let userCache = {}; // Cache for user data
 
     const loginUserBtn = document.getElementById("loginUserBtn");
     const loginAdminBtn = document.getElementById("loginAdminBtn");
@@ -413,16 +961,45 @@ width: auto;
     const sendBtn = document.getElementById("sendBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userList = document.getElementById("userList");
-    const loadingDiv = document.getElementById("loading");
+    const loadingScreen = document.getElementById("loadingScreen");
+    const themeToggle = document.getElementById("themeToggle");
+    const resetChatBtn = document.getElementById("resetChatBtn");
+    const toggleRulesBtn = document.getElementById("toggleRulesBtn");
+    const rulesSection = document.getElementById("rulesSection");
+    const unapprovedUsersDiv = document.getElementById("unapprovedUsers");
+
+    // Theme toggle functionality (only for Pro users)
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDarkMode);
+    });
+
+    // Toggle rules section
+    toggleRulesBtn.addEventListener('click', () => {
+      rulesSection.style.display = rulesSection.style.display === 'none' ? 'block' : 'none';
+    });
 
     loginUserBtn.onclick = async () => {
+      loadingScreen.style.display = 'flex';
       loginMode = "user";
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        loadingScreen.style.display = 'none';
+        alert("Login failed. Please try again.");
+      }
     };
 
     loginAdminBtn.onclick = async () => {
+      loadingScreen.style.display = 'flex';
       loginMode = "admin";
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        loadingScreen.style.display = 'none';
+        alert("Login failed. Please try again.");
+      }
     };
 
     logoutBtn.onclick = async () => {
@@ -430,58 +1007,421 @@ width: auto;
       location.reload();
     };
 
+    // Reset all chat messages
+    resetChatBtn.onclick = async () => {
+      if (confirm("Are you sure you want to delete ALL chat messages?")) {
+        try {
+          const messagesSnapshot = await getDocs(collection(db, "messages"));
+          const batch = writeBatch(db);
+          
+          messagesSnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          
+          await batch.commit();
+          alert("All chat messages have been deleted.");
+        } catch (error) {
+          console.error("Error deleting messages:", error);
+          alert("Failed to delete messages. Please try again.");
+        }
+      }
+    };
+
+    // Function to get user display name from email
+    async function getUserDisplayName(email) {
+      if (userCache[email]) return userCache[email];
+      
+      // Try to get from Firestore if you have a users collection
+      // Otherwise just use the email prefix
+      const displayName = email.split('@')[0];
+      userCache[email] = displayName;
+      return displayName;
+    }
+
+    // Function to check if user is admin or approved for pro features
+    async function checkUserStatus(uid, email) {
+      const adminEmail = "252-35-007@diu.edu.bd"; // Only this email can be admin
+      
+      // Check if user is admin (only if they logged in via admin login)
+      if (loginMode === "admin" && email === adminEmail) {
+        isAdmin = true;
+        isProUser = true;
+        
+        // Ensure admin is in approvedUsers collection
+        try {
+          const adminRef = doc(db, "approvedUsers", uid);
+          await setDoc(adminRef, {
+            email: adminEmail,
+            approvedAt: serverTimestamp(),
+            isAdmin: true
+          }, { merge: true });
+        } catch (error) {
+          console.error("Error ensuring admin is approved:", error);
+        }
+        
+        return { isAdmin: true, isProUser: true };
+      }
+      
+      // For all other users (including admin email if they logged in as regular user)
+      try {
+        const userDoc = await getDoc(doc(db, "approvedUsers", uid));
+        return { 
+          isAdmin: false, 
+          isProUser: userDoc.exists() && (userDoc.data().isAdmin || userDoc.data().approvedAt)
+        };
+      } catch (error) {
+        console.error("Error checking user status:", error);
+        return { isAdmin: false, isProUser: false };
+      }
+    }
+
+    // Function to show reactors list
+    function showReactorsList(messageId, reactionType, users, event) {
+      // Close any open reactors lists
+      document.querySelectorAll('.reactors-list').forEach(el => {
+        el.remove();
+      });
+      
+      const button = event.target.closest('.reaction-btn');
+      const existingList = button.querySelector('.reactors-list');
+      
+      if (existingList) {
+        existingList.classList.add('show');
+        return;
+      }
+      
+      const list = document.createElement('div');
+      list.className = 'reactors-list show';
+      
+      if (users.length === 0) {
+        list.innerHTML = '<div class="reactor-item">No reactions yet</div>';
+      } else {
+        list.innerHTML = users.map(user => 
+          `<div class="reactor-item">${user}</div>`
+        ).join('');
+      }
+      
+      button.appendChild(list);
+      
+      // Position the list
+      const buttonRect = button.getBoundingClientRect();
+      list.style.left = `${buttonRect.left}px`;
+      list.style.bottom = `${window.innerHeight - buttonRect.top + 5}px`;
+      
+      // Close when clicking elsewhere
+      setTimeout(() => {
+        const clickHandler = (e) => {
+          if (!list.contains(e.target) && !button.contains(e.target)) {
+            list.remove();
+            document.removeEventListener('click', clickHandler);
+          }
+        };
+        document.addEventListener('click', clickHandler);
+      }, 0);
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (!user || !user.email.endsWith("@diu.edu.bd")) {
-        alert("Only @diu.edu.bd emails are allowed.");
-        signOut(auth);
+        loadingScreen.style.display = 'none';
+        if (user) {
+          alert("Only DIU emails are allowed.");
+          await signOut(auth);
+        }
         return;
       }
 
-      const adminEmail = "252-35-007@diu.edu.bd";
       currentUser = user;
+      userCache[user.email] = user.displayName || user.email.split('@')[0];
 
-      // Determine admin rights based on login method
-      if (loginMode === "admin") {
-        if (user.email !== adminEmail) {
-          alert("Only the authorized admin can login this way.");
-          signOut(auth);
-          return;
-        }
-        isAdmin = true;
-      } else {
-        isAdmin = false;
+      // Check user status (admin or pro user)
+      const { isAdmin: adminStatus, isProUser: proStatus } = await checkUserStatus(user.uid, user.email);
+      isAdmin = adminStatus;
+      isProUser = proStatus;
+      
+      // If user tried to login as admin but isn't the admin, show error and logout
+      if (loginMode === "admin" && !isAdmin) {
+        alert("You are not authorized to access the admin panel.");
+        await signOut(auth);
+        return;
+      }
+      
+      // Show theme toggle only for Pro users
+      themeToggle.style.display = isProUser ? 'block' : 'none';
+      
+      // Apply dark mode if enabled and user is Pro
+      if (isProUser && localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
       }
 
       loginDiv.style.display = "none";
       logoutDiv.style.display = "block";
-      loadingDiv.style.display = "flex";
       
       const q = query(collection(db, "messages"), orderBy("timestamp"));
-      onSnapshot(q, (snapshot) => {
-        loadingDiv.style.display = "none";
-        messagesDiv.style.display = "block";
+      onSnapshot(q, async (snapshot) => {
+        loadingScreen.style.display = 'none';
+        messagesDiv.style.display = "flex";
         inputArea.style.display = "flex";
         if (isAdmin) adminPanel.style.display = "block";
         
         messagesDiv.innerHTML = "";
-        snapshot.forEach((doc) => {
+        for (const doc of snapshot.docs) {
           const msg = doc.data();
           const msgEl = document.createElement("div");
           msgEl.className = msg.sender === currentUser.email ? "message own-message" : "message other-message";
+          msgEl.dataset.id = doc.id;
           
           const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "sending...";
+          
+          // Check if user has already reacted
+          const hasLiked = msg.likedBy?.includes(currentUser.uid);
+          const hasDisliked = msg.dislikedBy?.includes(currentUser.uid);
+          const hasHearted = msg.heartsBy?.includes(currentUser.uid);
+          const hasJoyed = msg.tearsOfJoyBy?.includes(currentUser.uid);
+          const hasFired = msg.fireBy?.includes(currentUser.uid);
+          const hasThought = msg.thinkingBy?.includes(currentUser.uid);
+          
+          // Get display names for reactors (only if it's the sender's message)
+          let likedByNames = [];
+          let dislikedByNames = [];
+          let heartsByNames = [];
+          let joyByNames = [];
+          let fireByNames = [];
+          let thinkingByNames = [];
+          
+          if (msg.sender === currentUser.email) {
+            if (msg.likedBy?.length) {
+              likedByNames = await Promise.all(msg.likedBy.map(async uid => {
+                // In a real app, you'd look up the user's name from their UID
+                // For this demo, we'll just use "User 1", "User 2" etc.
+                return `User ${msg.likedBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.dislikedBy?.length) {
+              dislikedByNames = await Promise.all(msg.dislikedBy.map(async uid => {
+                return `User ${msg.dislikedBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.heartsBy?.length) {
+              heartsByNames = await Promise.all(msg.heartsBy.map(async uid => {
+                return `User ${msg.heartsBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.tearsOfJoyBy?.length) {
+              joyByNames = await Promise.all(msg.tearsOfJoyBy.map(async uid => {
+                return `User ${msg.tearsOfJoyBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.fireBy?.length) {
+              fireByNames = await Promise.all(msg.fireBy.map(async uid => {
+                return `User ${msg.fireBy.indexOf(uid) + 1}`;
+              }));
+            }
+            
+            if (msg.thinkingBy?.length) {
+              thinkingByNames = await Promise.all(msg.thinkingBy.map(async uid => {
+                return `User ${msg.thinkingBy.indexOf(uid) + 1}`;
+              }));
+            }
+          }
+          
+          // Only show reactions if user is Pro or if it's their own message
+          const showReactions = isProUser || msg.sender === currentUser.email;
+          
           msgEl.innerHTML = `
-            <div class="sender-name">${msg.sender.split('@')[0]}</div>
+            ${isAdmin ? `<button class="delete-message-btn" onclick="handleDeleteMessage('${doc.id}')">×</button>` : ''}
+            <div class="sender-name">${msg.sender.split('@')[0]}${msg.sender === currentUser.email && isProUser ? '<span class="pro-badge">PRO</span>' : ''}</div>
             <div>${msg.text}</div>
-            <div class="message-info">${time}</div>
+            <div class="message-info">
+              <span>${time}</span>
+            </div>
+            ${showReactions ? `
+            <div class="reaction-buttons">
+              <button class="like-btn ${hasLiked ? 'user-reacted' : ''}" 
+                      onclick="if('${msg.sender}' === '${currentUser.email}') {
+                        showReactorsList('${doc.id}', 'likes', ${JSON.stringify(likedByNames)}, event)
+                      } else {
+                        handleLike('${doc.id}')
+                      }"
+                      ${(hasLiked || hasDisliked || hasHearted || hasJoyed || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                👍 <span class="reaction-count">${msg.likes || 0}</span>
+              </button>
+              <button class="dislike-btn ${hasDisliked ? 'user-reacted' : ''}" 
+                      onclick="if('${msg.sender}' === '${currentUser.email}') {
+                        showReactorsList('${doc.id}', 'dislikes', ${JSON.stringify(dislikedByNames)}, event)
+                      } else {
+                        handleDislike('${doc.id}')
+                      }"
+                      ${(hasDisliked || hasLiked || hasHearted || hasJoyed || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                👎 <span class="reaction-count">${msg.dislikes || 0}</span>
+              </button>
+              <button class="heart-btn ${hasHearted ? 'user-reacted' : ''}" 
+                      onclick="if('${msg.sender}' === '${currentUser.email}') {
+                        showReactorsList('${doc.id}', 'hearts', ${JSON.stringify(heartsByNames)}, event)
+                      } else {
+                        handleHeart('${doc.id}')
+                      }"
+                      ${(hasHearted || hasLiked || hasDisliked || hasJoyed || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                ❤️ <span class="reaction-count">${msg.hearts || 0}</span>
+              </button>
+              <button class="joy-btn ${hasJoyed ? 'user-reacted' : ''}" 
+                      onclick="if('${msg.sender}' === '${currentUser.email}') {
+                        showReactorsList('${doc.id}', 'joy', ${JSON.stringify(joyByNames)}, event)
+                      } else {
+                        handleTearsOfJoy('${doc.id}')
+                      }"
+                      ${(hasJoyed || hasLiked || hasDisliked || hasHearted || hasFired || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                😂 <span class="reaction-count">${msg.tearsOfJoy || 0}</span>
+              </button>
+              <button class="fire-btn ${hasFired ? 'user-reacted' : ''}" 
+                      onclick="if('${msg.sender}' === '${currentUser.email}') {
+                        showReactorsList('${doc.id}', 'fire', ${JSON.stringify(fireByNames)}, event)
+                      } else {
+                        handleFire('${doc.id}')
+                      }"
+                      ${(hasFired || hasLiked || hasDisliked || hasHearted || hasJoyed || hasThought) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                🔥 <span class="reaction-count">${msg.fire || 0}</span>
+              </button>
+              <button class="thinking-btn ${hasThought ? 'user-reacted' : ''}" 
+                      onclick="if('${msg.sender}' === '${currentUser.email}') {
+                        showReactorsList('${doc.id}', 'thinking', ${JSON.stringify(thinkingByNames)}, event)
+                      } else {
+                        handleThinking('${doc.id}')
+                      }"
+                      ${(hasThought || hasLiked || hasDisliked || hasHearted || hasJoyed || hasFired) && 
+                        msg.sender !== currentUser.email ? 'disabled' : ''}>
+                🤔 <span class="reaction-count">${msg.thinking || 0}</span>
+              </button>
+            </div>
+            ` : ''}
           `;
+          
           messagesDiv.appendChild(msgEl);
-        });
+        }
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
 
-      if (isAdmin) loadAdminControls();
+      if (isAdmin) {
+        loadAdminControls();
+        loadUnapprovedUsers();
+      }
     });
+
+    // Add reaction functions to the global scope
+    window.handleLike = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          likes: increment(1),
+          likedBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding like:", error);
+      }
+    };
+
+    window.handleDislike = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          dislikes: increment(1),
+          dislikedBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding dislike:", error);
+      }
+    };
+
+    window.handleHeart = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          hearts: increment(1),
+          heartsBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding heart:", error);
+      }
+    };
+
+    window.handleTearsOfJoy = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          tearsOfJoy: increment(1),
+          tearsOfJoyBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding tears of joy:", error);
+      }
+    };
+
+    window.handleFire = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          fire: increment(1),
+          fireBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding fire:", error);
+      }
+    };
+
+    window.handleThinking = async (messageId) => {
+      if (!isProUser) {
+        alert("You need Chat Pro to react to messages. Only approved users can use this feature.");
+        return;
+      }
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          thinking: increment(1),
+          thinkingBy: arrayUnion(currentUser.uid)
+        });
+      } catch (error) {
+        console.error("Error adding thinking:", error);
+      }
+    };
+
+    window.handleDeleteMessage = async (messageId) => {
+      if (confirm("Are you sure you want to delete this message?")) {
+        try {
+          await deleteDoc(doc(db, "messages", messageId));
+        } catch (error) {
+          console.error("Error deleting message:", error);
+          alert("Failed to delete message. Please try again.");
+        }
+      }
+    };
 
     sendBtn.onclick = async () => {
       const text = messageInput.value.trim();
@@ -500,7 +1440,19 @@ width: auto;
       await addDoc(collection(db, "messages"), {
         text,
         sender: currentUser.email,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        likes: 0,
+        dislikes: 0,
+        likedBy: [],
+        dislikedBy: [],
+        hearts: 0,
+        heartsBy: [],
+        tearsOfJoy: 0,
+        tearsOfJoyBy: [],
+        fire: 0,
+        fireBy: [],
+        thinking: 0,
+        thinkingBy: []
       });
 
       messageInput.value = "";
@@ -545,6 +1497,64 @@ width: auto;
       });
     }
 
+    async function loadUnapprovedUsers() {
+      // Get all users who have sent messages but aren't approved
+      const messagesSnapshot = await getDocs(collection(db, "messages"));
+      const users = new Set();
+      messagesSnapshot.forEach(doc => users.add(doc.data().sender));
+      
+      const approvedUsersSnapshot = await getDocs(collection(db, "approvedUsers"));
+      const approvedUserIds = new Set();
+      approvedUsersSnapshot.forEach(doc => approvedUserIds.add(doc.id));
+      
+      unapprovedUsersDiv.innerHTML = "";
+      
+      // For demo purposes, we'll just show users who aren't in the approved list
+      // In a real app, you'd need to map emails to UIDs
+      for (const email of users) {
+        if (email === "252-35-007@diu.edu.bd") continue;
+        
+        // In a real app, you'd need to get the UID for each email
+        // For this demo, we'll just show the email
+        const userItem = document.createElement("div");
+        userItem.className = "user-item";
+        
+        const userEmail = document.createElement("span");
+        userEmail.className = "user-email";
+        userEmail.textContent = email.split('@')[0];
+        
+        const approveButton = document.createElement("button");
+        approveButton.className = "banButton";
+        approveButton.textContent = "Approve for Pro";
+        approveButton.style.background = "#4caf50";
+        approveButton.style.color = "white";
+        approveButton.onclick = () => approveUser(email);
+        
+        userItem.appendChild(userEmail);
+        userItem.appendChild(approveButton);
+        unapprovedUsersDiv.appendChild(userItem);
+      }
+    }
+
+    async function approveUser(email) {
+      // In a real app, you'd need to get the UID for the email
+      // For this demo, we'll just show an alert
+      alert(`User ${email.split('@')[0]} would be approved for Chat Pro in a real implementation.`);
+      
+      // In a real implementation, you would:
+      // 1. Find the user's UID based on their email
+      // 2. Add a document to the "approvedUsers" collection with their UID
+      // Example:
+      // await addDoc(collection(db, "approvedUsers"), {
+      //   uid: userId,
+      //   email: email,
+      //   approvedAt: serverTimestamp()
+      // });
+      
+      // Then reload the unapproved users list
+      loadUnapprovedUsers();
+    }
+
     async function banUser(email, duration) {
       const now = Date.now();
       let ms = 0;
@@ -561,6 +1571,5 @@ width: auto;
       alert(`${email.split('@')[0]} has been suspended for ${duration}`);
     }
   </script>
-
 </body>
 </html>
